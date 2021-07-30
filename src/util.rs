@@ -359,14 +359,14 @@ impl Config {
 
   pub fn get_notes(&self, avatar: &GodotString) -> Option<GodotString> {
     if !avatar.is_empty() {
-      return self.get_value(&avatar, &self.notes_key);
+      return self.get_value(avatar, &self.notes_key);
     }
     None
   }
 
   pub fn set_notes(&self, avatar: &GodotString, notes: Option<&GodotString>) {
     if !avatar.is_empty() {
-      self.set_value(&avatar, &self.notes_key, notes);
+      self.set_value(avatar, &self.notes_key, notes);
     }
   }
 
@@ -411,7 +411,7 @@ impl Config {
   fn set_value(&self, section: &GodotString, key: &GodotString, value: Option<&GodotString>) {
     let config = self.load();
     if let Some(value) = value {
-      let var = Variant::from_godot_string(&value);
+      let var = Variant::from_godot_string(value);
       config.set_value(section.clone(), key.clone(), var);
     } else if config.has_section_key(section.clone(), key.clone()) {
       config.erase_section_key(section.clone(), key.clone());

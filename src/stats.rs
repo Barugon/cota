@@ -702,7 +702,7 @@ impl<'a> Iterator for StatsIter<'a> {
   type Item = (&'a str, &'a str);
 
   fn next(&mut self) -> Option<Self::Item> {
-    while let Some(name) = self.iter.next() {
+    for name in &mut self.iter {
       if let Some(name) = name.strip_suffix(':') {
         if let Some(value) = self.iter.next() {
           return Some((name, value));
