@@ -370,7 +370,8 @@ impl Config {
     }
   }
 
-  pub fn _get_items(&self) -> Vec<(GodotString, i64)> {
+  #[allow(unused)]
+  pub fn get_items(&self) -> Vec<(GodotString, i64)> {
     let mut items = Vec::new();
     let config = self.load();
     if config.has_section(self._items.clone()) {
@@ -391,7 +392,8 @@ impl Config {
     items
   }
 
-  pub fn _add_item(&self, name: GodotString, id: i64) {
+  #[allow(unused)]
+  pub fn add_item(&self, name: GodotString, id: i64) {
     let config = self.load();
     config.set_value(self._items.clone(), name, Variant::from_i64(id));
     self.save(config);
