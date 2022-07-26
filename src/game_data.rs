@@ -116,7 +116,7 @@ impl GameData {
   }
 
   pub fn set_skill_lvl(&mut self, id: u64, lvl: i32) {
-    if lvl == 0 {
+    if lvl <= 0 {
       self.remove_skill(id)
     } else {
       assert!(util::LVL_RANGE.contains(&lvl));
@@ -139,7 +139,6 @@ impl GameData {
   }
 
   fn set_skill_exp(&mut self, id: u64, exp: i64) {
-    assert!(exp > 0);
     let key = format!("{}", id);
     let skills = self.character.get_mut(SK2).unwrap();
     if let Some(skill) = skills.get_mut(&key) {
