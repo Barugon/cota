@@ -116,7 +116,8 @@ impl GameData {
   }
 
   pub fn set_skill_lvl(&mut self, id: u64, lvl: i32) {
-    if lvl <= 0 {
+    assert!((0..=200).contains(&lvl));
+    if lvl == 0 {
       self.remove_skill(id)
     } else {
       assert!(util::LVL_RANGE.contains(&lvl));
