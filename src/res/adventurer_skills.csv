@@ -1,0 +1,277 @@
+Air,Air Magic Specialization,20,2501
+Air,Air's Embrace,1,5
+Air,Blink,1,7
+Air,Chain Lightning,2,3
+Air,Dash,1,6
+Air,Discharge,1,221
+Air,Earth Warding,20,3758
+Air,Gust,0.5,1
+Air,Lightning,1,2
+Air,Lightning Storm,2,13310
+Air,Rapid Discharge,2,8
+Air,Shield of Air,1,515
+Air,Summon Air Elemental,2,4
+Air,Well Grounded,2,9
+Bard,Anthem of Alacrity,1,4305
+Bard,Atonal Aria,1,4303
+Bard,Bard Specialization,20,4301
+Bard,Concussive Canticle,1,4306
+Bard,Melody of Mending,1,4302
+Bard,Mesmerizing Melody,1,4304
+Bard,Musical Fortitude,5,4311
+Bard,Psalm of Stagnation,1,4307
+Bard,Refrain of Resistance,1,4326
+Bard,Resounding Reach,5,4314
+Bard,Rhapsody of Recovery,1,4325
+Bard,Rhythmic Readiness,5,4312
+Bard,Savage Sonata,1,4309
+Blades,Blade Mastery,4,17
+Blades,Blade Specialization,20,2502
+Blades,Blade Speed,4,16
+Blades,Bladed Combat,1,470
+Blades,Coup de Grace,2,19
+Blades,Double Slash,1,12
+Blades,Rend,1,15
+Blades,Riposte,1,14
+Blades,Thrust,1,10
+Blades,Vital Points,1,13
+Blades,Whirling Blades,2,18
+Bludgeon,Berserk,1,28
+Bludgeon,Bludgeon Combat,1,471
+Bludgeon,Bludgeon Specialization,20,2503
+Bludgeon,Break Armor,1,24
+Bludgeon,Break Weapon,1,21
+Bludgeon,Breaker,4,27
+Bludgeon,Crusher,4,26
+Bludgeon,Crushing Blow,1,20
+Bludgeon,Ground Pound,1,29
+Bludgeon,Knockback,2,22
+Bludgeon,Knockdown,2,25
+Bludgeon,Stunner,4,23
+Chaos,Chaos Bolt,1,30
+Chaos,Chaos Magic Specialization,20,2504
+Chaos,Chaotic Clone,2,35
+Chaos,Chaotic Feedback,1,523
+Chaos,Chaotic Shield,1,3303
+Chaos,Chaotic Step,1,497
+Chaos,Confusion,2,34
+Chaos,Juxtapose,4,420
+Chaos,Summon Daemon,6,37
+Chaos,Tabula Rasa,2,31
+Chaos,Torpid Torment,1,524
+Death,Corpse Explosion,1,41
+Death,Death Field,2,45
+Death,Death Magic Specialization,20,2505
+Death,Death Mastery,4,48
+Death,Death Ray,2,42
+Death,Death Shield,2,44
+Death,Death Touch,1,43
+Death,Life Warding,20,3757
+Death,Mummified Undead,4,50
+Death,Summon Lich,6,47
+Death,Summon Skeleton,4,46
+Death,Tap Soul,2,450
+Death,Undead Mastery,4,49
+Earth,Air Warding,20,3756
+Earth,Bulwark of Earth,4,59
+Earth,Earth Magic Specialization,20,2506
+Earth,Earth's Embrace,2,58
+Earth,Earthquake,3,55
+Earth,Root,2,51
+Earth,Shield of Crystal,2,314
+Earth,Stone Arrow,2,53
+Earth,Stone Fist,1,52
+Earth,Strength of Earth,1,57
+Earth,Summon Earth Elemental,4,56
+Earth,Sympathy of Stone,4,60
+Earth,Torpor,2,1353
+Fire,Fire Arrow,2,63
+Fire,Fire Magic Specialization,20,2507
+Fire,Fire Proof,4,70
+Fire,Fire Speed,4,69
+Fire,Fireball,3,61
+Fire,Flame Fist,1,62
+Fire,Highly Flammable,4,68
+Fire,Ignite Weapon,1,65
+Fire,Immolation,1,64
+Fire,Ring of Fire,2,66
+Fire,Summon Fire Elemental,4,67
+Fire,Water Warding,20,3755
+Focus,Aetheric Feedback,1,1360
+Focus,Elixir Receptive,4,3553
+Focus,Focus Specialization,20,2519
+Focus,Follow Through,4,183
+Focus,Heightened Awareness,5,181
+Focus,Inner Calm,4,182
+Focus,Mind Lock,1,177
+Focus,Mind Wipe,1,172
+Focus,Quick Swapping,4,180
+Focus,Spellbinder Stance,1,1357
+Focus,Train Intelligence,10,173
+Focus,Train Summoned Pet Damage,4,3552
+Focus,Train Summoned Pet Health,4,3550
+Focus,Train Summoned Pet Resistance,4,3551
+Focus,Tranquility,4,175
+Heavy Armor,Absorb Impacts,1,74
+Heavy Armor,Body Slam,2,75
+Heavy Armor,Deflection,1,76
+Heavy Armor,Endurance,4,78
+Heavy Armor,Glancing Blow,1,72
+Heavy Armor,Hard Headed,4,77
+Heavy Armor,Heavy Armor Specialization,20,2508
+Heavy Armor,Inner Strength,2,73
+Heavy Armor,Knight's Grace,3,79
+Heavy Armor,Provoking Shout,1,3541
+Heavy Armor,Taunt,1,80
+Heavy Armor,Valiant Warden,3,2541
+Life,Banish Undead,2,86
+Life,Beneficent Blessing,4,777
+Life,Death Warding,20,3754
+Life,Healing Blast,2,3155
+Life,Healing Burst,3,84
+Life,Healing Grace,2,87
+Life,Healing Ray,2,82
+Life,Healing Touch,1,81
+Life,Life Magic Specialization,20,2509
+Life,Life Power,4,89
+Life,Life Reach,4,90
+Life,Purify,1,83
+Life,Purify Burst,3,85
+Life,Resurrection,4,88
+Light Armor,Acrobatics,1,99
+Light Armor,Dodge,1,91
+Light Armor,Escape,1,93
+Light Armor,Evasion,1,92
+Light Armor,Flurry,1,96
+Light Armor,Light Armor Specialization,20,2510
+Light Armor,Sprint,1,97
+Light Armor,Swiftness,4,95
+Moon,Animal Charm,1,358
+Moon,Celestial Blessing,1,103
+Moon,Cocoon of Night,1,1351
+Moon,Fireflies,1,2811
+Moon,Lunar Magic Specialization,20,2511
+Moon,Meteor Shower,1,2812
+Moon,Moon Beams,1,312
+Moon,Moon Eater,4,110
+Moon,Moon Worship,4,109
+Moon,Night Step,1,359
+Moon,Night Vision,1,102
+Moon,Shadow Form,1,104
+Moon,Shooting Star,1,3766
+Moon,Summon Will-O-Wisp,1,108
+Moon,Sun Warding,20,3753
+Moon,Vanish,1,101
+Polearms,Bec de Faucon,4,3323
+Polearms,Defensive Positions,4,120
+Polearms,Leg Sweep,1,117
+Polearms,Polearm Combat,1,472
+Polearms,Polearm Specialization,20,2512
+Polearms,Pull,1,115
+Polearms,Puncture,1,113
+Polearms,Push,1,111
+Polearms,Reach,4,114
+Polearms,Skewer,1,118
+Polearms,Spinning Attack,1,116
+Ranged,Aimed Shot,1,121
+Ranged,Ammo Scavenger,4,129
+Ranged,Blinding Shot,1,124
+Ranged,Disabling Shot,1,122
+Ranged,Draw Strength,4,130
+Ranged,Eagle Eye,4,127
+Ranged,Multi Shot,1,125
+Ranged,Piercing Shot,1,123
+Ranged,Range,4,128
+Ranged,Ranged Combat,1,473
+Ranged,Ranged Specialization,20,2513
+Ranged,Rapid Fire,1,126
+Shield,Angles,4,137
+Shield,Bolster Balance,1,133
+Shield,Charge,1,135
+Shield,Deflect,1,131
+Shield,Dig In,1,134
+Shield,Redirection,4,138
+Shield,Shield Bash,1,132
+Shield,Shield Preservation,4,139
+Shield,Shield Specialization,20,2514
+Shield,Stand your ground,4,140
+Shield,Testudo,1,136
+Subterfuge,Armor Weak Points,4,119
+Subterfuge,Backstab,4,2557
+Subterfuge,Camouflage,1,94
+Subterfuge,Distract,2,522
+Subterfuge,Engage Opponent,1,521
+Subterfuge,Opportunity Strike,2,1359
+Subterfuge,Pick Pockets,2,518
+Subterfuge,Poison Weapon,2,517
+Subterfuge,Pugilism,1,3231
+Subterfuge,Safe Fall,5,934
+Subterfuge,Sap,2,516
+Subterfuge,Silent Movement,2,98
+Subterfuge,Sneak Attack,2,100
+Subterfuge,Subterfuge Specialization,20,2515
+Subterfuge,Train Dexterity,10,153
+Subterfuge,Trip,1,158
+Sun,Blind,1,144
+Sun,Dazzling Rays,1,313
+Sun,Elysian Illumination,1,1352
+Sun,Enlightenment,1,143
+Sun,Light,1,142
+Sun,Moon Warding,20,3752
+Sun,Reveal Hidden,1,146
+Sun,Searing Ray,1,141
+Sun,Solar Flare,1,3783
+Sun,Summon Phoenix,1,148
+Sun,Sun Eater,4,150
+Sun,Sun Magic Specialization,20,2516
+Sun,Sun Worship,4,149
+Tactics,Armor Preservation,4,155
+Tactics,Berserker's Stance,1,306
+Tactics,Defensive Stance,1,71
+Tactics,Elixir Extension,4,3554
+Tactics,Fortify Defenses,1,1358
+Tactics,Healthy,5,151
+Tactics,Heavy Lifter,4,156
+Tactics,Magic Warding,20,3751
+Tactics,Mounted Cary Capacity Focus,10,5776
+Tactics,Mounted Gallop Speed,10,5774
+Tactics,Mounted Proficiency,10,5773
+Tactics,Mounted Speed Focus,10,5879
+Tactics,Offhand Attack,1,152
+Tactics,Offhand Defense,4,157
+Tactics,Offhand Power,4,160
+Tactics,Parry,1,11
+Tactics,Passive Stance,1,307
+Tactics,Reckless Stance,1,305
+Tactics,Tactics Specialization,20,2517
+Tactics,Train Strength,10,154
+Tactics,Weapon Preservation,4,159
+Taming,Collar Recovery,1,476
+Taming,Combat Training,1,433
+Taming,Concentration,1,435
+Taming,Frenzy,1,6351
+Taming,Heal Creature,1,531
+Taming,Obedience,1,432
+Taming,Pet Attack Precision Training,1,3563
+Taming,Pet Hide Toughness Training,1,3561
+Taming,Pet Speed Training,1,3560
+Taming,Pet Strength Training,1,3562
+Taming,Pet Taunting Training,1,3564
+Taming,Refresh,1,436
+Taming,Resurrect Creature,1,530
+Taming,Summoning,1,437
+Taming,Tame Creature,1,430
+Taming,Taming Specialization,20,2520
+Water,Blue Blooded,4,170
+Water,Cone of Cold,4,13308
+Water,Douse,1,162
+Water,Fire Warding,20,3750
+Water,Ice Arrow,1,165
+Water,Ice Field,1,167
+Water,Ice Fist,1,161
+Water,Icy Breath,4,169
+Water,Shield of Ice,1,164
+Water,Soothing Rain,1,163
+Water,Summon Ice Elemental,1,168
+Water,Summon Water Elemental,1,166
+Water,Water Specialization,20,2518
