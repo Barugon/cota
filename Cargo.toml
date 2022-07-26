@@ -3,7 +3,7 @@ authors = ["Barugon"]
 description = "Companion of the Avatar"
 edition = "2021"
 name = "cota"
-version = "4.1.3"
+version = "4.1.4"
 
 [dependencies]
 chrono = "0.4"
