@@ -1,4 +1,6 @@
-# Cross platform build (from Linux)
+# Building CotA
+
+## Linux
 
 ```bash
 cargo install cross
@@ -8,9 +10,7 @@ cargo install cross
 
 ```Dockerfile
 FROM docker.io/library/ubuntu:20.04
-RUN apt update
-RUN DEBIAN_FRONTEND=noninteractive apt -y install tzdata
-RUN apt -y install clang pkg-config libgtk-3-dev mingw-w64
+RUN DEBIAN_FRONTEND=noninteractive apt update && apt -y install tzdata && apt -y install clang pkg-config
 ```
 
 - Create a `Cross.toml` file in the project folder
@@ -30,14 +30,21 @@ sudo dnf install podman
 podman build -t docker.io/library/ubuntu:20.04 .
 ```
 
-- Build the project for Linux using cross
+- Build the project
 
 ```bash
 cross build --release --target=x86_64-unknown-linux-gnu
 ```
 
-- Build the project for Windows using cross
+## Windows
 
 ```bash
-cross build --release --target=x86_64-pc-windows-gnu
+rustup target add x86_64-pc-windows-gnu
+sudo dnf install mingw64-gcc mingw64-winpthreads-static
+```
+
+- Build the project
+
+```bash
+cargo build --release --target=x86_64-pc-windows-gnu
 ```
