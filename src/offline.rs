@@ -79,7 +79,7 @@ impl Offline {
         if let Some(game) = &mut self.game {
           let mut gold = game.gold();
           let speed = (gold as f64 / 100.0).max(1.0);
-          let range = 0..=1000000000000i64;
+          let range = 0..=i32::MAX;
           let widget = DragValue::new(&mut gold).speed(speed).clamp_range(range);
           if ui.add(widget).changed() {
             game.set_gold(gold);
@@ -207,7 +207,7 @@ mod game_info {
 
   impl SkillLvl {
     fn new(data: &GameData, info: Skill) -> Self {
-      let level = data.get_skill_lvl(info.id).unwrap_or(0);
+      let level = data.get_skill_lvl(info.id, info.mul).unwrap_or(0);
       let comp = level;
       Self { info, level, comp }
     }
@@ -235,8 +235,8 @@ mod game_info {
     prd: Vec<SkillLvlGroup>,
     level_cmp: i32,
     level: i32,
-    gold_cmp: i64,
-    gold: i64,
+    gold_cmp: i32,
+    gold: i32,
   }
 
   impl GameInfo {
@@ -385,11 +385,11 @@ mod game_info {
       self.level = level
     }
 
-    pub fn gold(&self) -> i64 {
+    pub fn gold(&self) -> i32 {
       self.gold
     }
 
-    pub fn set_gold(&mut self, gold: i64) {
+    pub fn set_gold(&mut self, gold: i32) {
       self.gold = gold;
     }
 
@@ -463,7 +463,7 @@ mod game_info {
   fn update_json(data: &mut GameData, groups: &Vec<SkillLvlGroup>) {
     for group in groups {
       for skill in &group.skills {
-        data.set_skill_lvl(skill.info.id, skill.level);
+        data.set_skill_lvl(skill.info.id, skill.level, skill.info.mul);
       }
     }
   }
