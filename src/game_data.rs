@@ -102,26 +102,27 @@ impl GameData {
     }
   }
 
-  pub fn get_gold(&self) -> Option<i64> {
+  pub fn get_gold(&self) -> Option<i32> {
     let gold = self.gold.get(G)?;
-    gold.to_i64()
+    let gold = gold.to_i64()?;
+    Some(gold as i32)
   }
 
-  pub fn set_gold(&mut self, gold: i64) {
+  pub fn set_gold(&mut self, gold: i32) {
     self.gold[G] = gold.into();
   }
 
-  pub fn get_skill_lvl(&self, id: u64) -> Option<i32> {
-    get_skill_lvl(self.character.get(SK2).unwrap(), id)
+  pub fn get_skill_lvl(&self, id: u64, mul: f64) -> Option<i32> {
+    get_skill_lvl(self.character.get(SK2).unwrap(), id, mul)
   }
 
-  pub fn set_skill_lvl(&mut self, id: u64, lvl: i32) {
+  pub fn set_skill_lvl(&mut self, id: u64, lvl: i32, mul: f64) {
     assert!((0..=200).contains(&lvl));
     if lvl == 0 {
       self.remove_skill(id)
     } else {
-      assert!(util::LVL_RANGE.contains(&lvl));
-      self.set_skill_exp(id, util::SKILL_EXP[lvl as usize - 1]);
+      let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * mul) as i64;
+      self.set_skill_exp(id, exp);
     }
   }
 
@@ -168,8 +169,8 @@ impl GameData {
   }
 }
 
-pub fn get_skill_lvl(skills: &Value, id: u64) -> Option<i32> {
-  let exp = get_skill_exp(skills, id)?;
+pub fn get_skill_lvl(skills: &Value, id: u64, mul: f64) -> Option<i32> {
+  let exp = (get_skill_exp(skills, id)? as f64 / mul) as i64;
   let idx = find_min(exp, &util::SKILL_EXP)?;
   Some(idx as i32 + 1)
 }
