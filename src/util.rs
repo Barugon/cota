@@ -265,20 +265,25 @@ pub fn get_locale() -> Locale {
 /// Replace a single occurrence of a comma or arabic decimal with a period.
 pub fn replace_decimal(text: &str) -> String {
   const ARABIC_DECIMAL: char = '\u{66b}';
+  const COMMA: char = ',';
+  const PERIOD: char = '.';
 
   // The output can never be larger than the input.
   let mut result = String::with_capacity(text.len());
   let mut iter = text.chars();
-  while let Some(char) = iter.next() {
-    if char == ',' || char == ARABIC_DECIMAL {
-      result.push('.');
-      break;
+
+  for ch in &mut iter {
+    match ch {
+      COMMA | ARABIC_DECIMAL => {
+        result.push(PERIOD);
+        break;
+      }
+      _ => result.push(ch),
     }
-    result.push(char);
   }
 
-  while let Some(char) = iter.next() {
-    result.push(char);
+  for ch in &mut iter {
+    result.push(ch);
   }
 
   result
