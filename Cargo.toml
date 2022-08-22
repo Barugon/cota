@@ -8,9 +8,9 @@ version = "4.1.5"
 [dependencies]
 chrono = "0.4"
 dirs = "4.0"
-eframe = {git = "https://github.com/emilk/egui.git", features = ["persistence"]}
-egui_extras = {git = "https://github.com/emilk/egui.git", features = ["image"]}
-egui_file = {git = "https://github.com/Barugon/egui_file.git"}
+eframe = {version = "0.19", features = ["persistence"]}
+egui_extras = {version = "0.19", features = ["image"]}
+egui_file = "0.2"
 futures = {version = "0.3", features = ["thread-pool"]}
 image = {version = "0.24", features = ["png"]}
 num-format = "0.4"
