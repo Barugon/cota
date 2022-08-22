@@ -201,7 +201,7 @@ impl App {
               handled = true;
             }
             Key::Q if modifiers.command_only() => {
-              frame.quit();
+              frame.close();
               handled = true;
             }
             Key::R
@@ -351,7 +351,7 @@ impl eframe::App for App {
             }
 
             if menu_item(ui, close_menu, "Quit", Some(cmd!("Q"))) {
-              frame.quit();
+              frame.close();
             }
           });
           if self.page == Page::Stats {
@@ -415,7 +415,7 @@ impl eframe::App for App {
       }
       match self.confirm_dlg.take_hence() {
         Some(Hence::Load) => self.choose_load_path(ctx),
-        Some(Hence::Exit) => frame.quit(),
+        Some(Hence::Exit) => frame.close(),
         None => (),
       }
     }
@@ -478,7 +478,7 @@ impl eframe::App for App {
     false
   }
 
-  fn on_exit_event(&mut self) -> bool {
+  fn on_close_event(&mut self) -> bool {
     if !self.offline.is_modified() {
       return true;
     }
@@ -488,6 +488,7 @@ impl eframe::App for App {
         self.confirm_dlg.open(file_name, Hence::Exit);
       }
     }
+
     false
   }
 
