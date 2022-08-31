@@ -51,7 +51,7 @@ impl AboutDlg {
                 .color(Color32::GOLD),
             );
             ui.label(format!("Version {}", util::APP_VERSION));
-            ui.label(format!("Created by {}", util::APP_AUTHORS));
+            ui.label(format!("Copyright © 2022 {}", util::APP_AUTHORS));
           });
           ui.add_space(8.0);
           ui.separator();
