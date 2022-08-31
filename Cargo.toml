@@ -2,6 +2,7 @@
 authors = ["Barugon"]
 description = "Companion of the Avatar"
 edition = "2021"
+license = "GPL-3.0-or-later"
 name = "cota"
 version = "4.1.6"
 
