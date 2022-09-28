@@ -135,8 +135,8 @@ impl App {
     cc.egui_ctx.set_style(style);
 
     // Threading.
-    let cpus = std::cmp::max(1, num_cpus::get()) + 1;
-    let thread_pool = ThreadPoolBuilder::new().pool_size(cpus).create().unwrap();
+    let num_threads = std::cmp::max(2, num_cpus::get());
+    let thread_pool = ThreadPoolBuilder::new().pool_size(num_threads).create().unwrap();
     let thread_pool = Arc::new(thread_pool);
 
     // State.
