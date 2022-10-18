@@ -1,6 +1,6 @@
 use crate::util::{self, Search};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
-use futures::{channel::mpsc, executor::ThreadPool, StreamExt};
+use futures::{channel::mpsc, executor::ThreadPool, future::join_all, StreamExt};
 use regex::Regex;
 use std::{
   cmp::Reverse,
@@ -123,6 +123,7 @@ pub async fn get_stats_timestamps(
 
     for filename in filenames {
       canceled!(cancel, Vec::new());
+
       let path = log_path.join(filename.as_str());
       let cancel = cancel.clone();
       futures.push(async move {
@@ -132,6 +133,7 @@ pub async fn get_stats_timestamps(
 
         for line in text.lines() {
           canceled!(cancel, Vec::new());
+
           if let Some(ts) = get_stats_timestamp(line, date) {
             timestamps.push(ts);
           }
@@ -144,10 +146,9 @@ pub async fn get_stats_timestamps(
     futures
   };
 
-  let (results, size) = if let Some(thread_pool) = thread_pool {
-    // Process each future on a pooled thread.
-    let count = futures.len();
-    let mut rx = {
+  let results = if let Some(thread_pool) = thread_pool {
+    {
+      // Process each future on a pooled thread.
       let (tx, rx) = mpsc::unbounded();
       for future in futures {
         let tx = tx.clone();
@@ -157,39 +158,18 @@ pub async fn get_stats_timestamps(
         });
       }
       rx
-    };
-
-    // Collect the results from the MPSC receiver.
-    let mut size = 0;
-    let mut results = Vec::with_capacity(count);
-    while let Some(result) = rx.next().await {
-      canceled!(cancel, Vec::new());
-      size += result.len();
-      results.push(result);
     }
-
-    (results, size)
+    .collect()
+    .await
   } else {
     // Collect the results directly.
-    let mut size = 0;
-    let mut results = Vec::with_capacity(futures.len());
-    for future in futures {
-      canceled!(cancel, Vec::new());
-      let result = future.await;
-      size += result.len();
-      results.push(result);
-    }
-
-    (results, size)
+    join_all(futures).await
   };
 
   canceled!(cancel, Vec::new());
 
   // Flatten the results.
-  let mut timestamps = Vec::with_capacity(size);
-  for mut result in results {
-    timestamps.append(&mut result);
-  }
+  let mut timestamps: Vec<i64> = results.into_iter().flat_map(|v| v.into_iter()).collect();
 
   canceled!(cancel, Vec::new());
 
