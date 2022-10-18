@@ -147,20 +147,17 @@ pub async fn get_stats_timestamps(
   };
 
   let results = if let Some(thread_pool) = thread_pool {
-    {
-      // Process each future on a pooled thread.
-      let (tx, rx) = mpsc::unbounded();
-      for future in futures {
-        let tx = tx.clone();
-        thread_pool.spawn_ok(async move {
-          let result = future.await;
-          tx.unbounded_send(result).unwrap();
-        });
-      }
-      rx
+    // Process each future on a pooled thread.
+    let (tx, rx) = mpsc::unbounded();
+    for future in futures {
+      let tx = tx.clone();
+      thread_pool.spawn_ok(async move {
+        let result = future.await;
+        tx.unbounded_send(result).unwrap();
+      });
     }
-    .collect()
-    .await
+    drop(tx);
+    rx.collect().await
   } else {
     // Collect the results directly.
     join_all(futures).await
