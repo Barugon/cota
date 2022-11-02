@@ -11,7 +11,7 @@ chrono = "0.4"
 dirs = "4.0"
 eframe = {version = "0.19", features = ["persistence"]}
 egui_extras = {version = "0.19", features = ["image"]}
-egui_file = "0.2"
+egui_file = "0.3"
 futures = {version = "0.3", features = ["thread-pool"]}
 image = {version = "0.24", features = ["png"]}
 num-format = "0.4"
