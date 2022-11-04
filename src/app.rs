@@ -136,7 +136,10 @@ impl App {
 
     // Threading.
     let num_threads = std::cmp::max(2, num_cpus::get());
-    let thread_pool = ThreadPoolBuilder::new().pool_size(num_threads).create().unwrap();
+    let thread_pool = ThreadPoolBuilder::new()
+      .pool_size(num_threads)
+      .create()
+      .unwrap();
     let thread_pool = Arc::new(thread_pool);
 
     // State.
@@ -254,7 +257,7 @@ impl App {
       }
     }
 
-    let path = some!(config::get_sota_config_path());
+    let Some(path) = config::get_sota_config_path() else { return; };
     let path = path.join("SavedGames");
     let mut file_dlg = egui_file::FileDialog::open_file(Some(path))
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
@@ -270,7 +273,7 @@ impl App {
   }
 
   fn choose_store_path(&mut self, ctx: &Context) {
-    let path = some!(self.offline.file_path());
+    let Some(path) = self.offline.file_path() else { return; };
     let mut file_dlg = egui_file::FileDialog::save_file(Some(path))
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])

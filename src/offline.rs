@@ -139,7 +139,7 @@ impl Offline {
   }
 
   pub fn store(&mut self) {
-    let game = some!(&mut self.game);
+    let Some(game) = &mut self.game else { return };
     if let Err(err) = game.store() {
       self.error = Some(err);
     } else {
@@ -148,7 +148,7 @@ impl Offline {
   }
 
   pub fn store_as(&mut self, path: PathBuf) {
-    let game = some!(&mut self.game);
+    let Some(game) = &mut self.game else { return };
     if let Err(err) = game.store_as(path) {
       self.error = Some(err);
     } else {
@@ -157,7 +157,7 @@ impl Offline {
   }
 
   pub fn discard(&mut self) {
-    let game = some!(&mut self.game);
+    let Some(game) = &mut self.game else { return };
     game.discard_changes();
     self.modified = false;
   }
