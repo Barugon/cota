@@ -27,6 +27,7 @@ macro_rules! ok {
     match $res {
       Ok(val) => val,
       Err(_) => {
+        debugln!("{}", _err);
         return;
       }
     }
