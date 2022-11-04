@@ -22,22 +22,6 @@ macro_rules! debugln {
 }
 
 #[macro_export]
-macro_rules! some {
-  ($opt:expr) => {
-    match $opt {
-      Some(val) => val,
-      None => return,
-    }
-  };
-  ($opt:expr, $ret:expr) => {
-    match $opt {
-      Some(val) => val,
-      None => return $ret,
-    }
-  };
-}
-
-#[macro_export]
 macro_rules! ok {
   ($res:expr) => {
     match $res {
@@ -121,7 +105,7 @@ fn find_ignore_case(text: &str, find: &str) -> Option<Range<usize>> {
 
   loop {
     // If we made it to the end of find_iter then it's a match.
-    let find_ch = some!(find_iter.next(), Some(start..end));
+    let Some(find_ch) = find_iter.next() else { return Some(start..end) };
 
     // Exit if we arrive at the end of text_iter.
     let (next, upper_ch) = text_iter.next()?;
@@ -299,7 +283,7 @@ pub fn f64_to_string(value: f64, locale: Locale) -> String {
 
 /// Convert a timestamp into a date & time string.
 pub fn timestamp_to_string(ts: Option<i64>) -> String {
-  let ts = some!(ts, String::new());
+  let Some(ts) = ts else { return String::new() };
   NaiveDateTime::from_timestamp(ts, 0)
     .format("%Y-%m-%d %H:%M:%S")
     .to_string()

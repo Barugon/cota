@@ -27,36 +27,38 @@ impl GameData {
       Ok(text) => {
         // Get the avatar ID.
         let err = Err(Cow::from("Unable to determine the current avatar"));
-        let avatar = some!(get_avatar_id(&text), err);
+        let Some(avatar) = get_avatar_id(&text) else { return err };
 
         // Get the 'UserGold' json.
         let err = Err(Cow::from("Unable to find user gold"));
-        let gold = some!(get_json(&text, "UserGold", USER_ID), err);
+        let Some(gold) = get_json(&text, "UserGold", USER_ID) else { return err };
         if !gold.is_object() {
           return Err(Cow::from("Error reading user gold"));
         }
 
         // Get the 'CharacterSheet' JSON.
         let err = Err(Cow::from("Unable to find character sheet"));
-        let character = some!(get_json(&text, "CharacterSheet", &avatar), err);
+        let Some(character) = get_json(&text, "CharacterSheet", &avatar) else { return err };
         if !character.is_object() {
           return Err(Cow::from("Error reading character sheet"));
         }
 
         // Make sure adventurer experience is there.
         let err = Err(Cow::from("Unable to parse adventurer experience"));
-        some!(some!(character.get(AE), err).to_i64(), err);
+        if character.get(AE).and_then(|exp| exp.to_i64()).is_none() {
+          return err;
+        }
 
         // Get the skills value.
         let err = Err(Cow::from("Unable to find skills"));
-        let skills = some!(character.get(SK2), err);
+        let Some(skills) = character.get(SK2) else { return err };
         if !skills.is_object() {
           return Err(Cow::from("Error reading skills"));
         }
 
         // Find a date.
         let err = Err(Cow::from("Unable to parse the date/time"));
-        let date = some!(find_date(skills), err);
+        let Some(date) = find_date(skills) else { return err };
 
         Ok(GameData {
           path: RwLock::new(path),
@@ -79,14 +81,11 @@ impl GameData {
   pub fn store_as(&self, path: PathBuf) -> Result<(), Cow<'static, str>> {
     // Set UserGold.
     let err = Err(Cow::from("Unable to set UserGold"));
-    let text = some!(set_json(&self.text, "UserGold", USER_ID, &self.gold), err);
+    let Some(text) = set_json(&self.text, "UserGold", USER_ID, &self.gold) else { return err };
 
     // Set CharacterSheet.
     let err = Err(Cow::from("Unable to set CharacterSheet"));
-    let text = some!(
-      set_json(&text, "CharacterSheet", &self.avatar, &self.character),
-      err
-    );
+    let Some(text) = set_json(&text, "CharacterSheet", &self.avatar, &self.character) else { return err };
 
     // Create the save-game file and store the data.
     match File::create(&path) {
