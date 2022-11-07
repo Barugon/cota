@@ -5,6 +5,7 @@ use std::{
 };
 
 const LOG_PATH_KEY: &str = "log_path";
+const SAVE_PATH_KEY: &str = "save_path";
 const AVATAR_KEY: &str = "avatar";
 const NOTES_KEY: &str = "notes";
 
@@ -23,9 +24,25 @@ pub fn get_log_path(storage: &dyn Storage) -> Option<PathBuf> {
   }
 }
 
+pub fn get_save_path(storage: &dyn Storage) -> Option<PathBuf> {
+  if let Some(folder) = get_value(storage, SAVE_PATH_KEY) {
+    Some(PathBuf::from(folder))
+  } else {
+    get_default_save_path()
+  }
+}
+
 pub fn set_log_path(storage: &mut dyn Storage, folder: &Path) {
   if let Some(folder) = folder.to_str() {
     set_value(storage, LOG_PATH_KEY, folder.to_owned());
+  } else {
+    println!("Unable to convert path to string: {:?}", folder);
+  }
+}
+
+pub fn set_save_path(storage: &mut dyn Storage, folder: &Path) {
+  if let Some(folder) = folder.to_str() {
+    set_value(storage, SAVE_PATH_KEY, folder.to_owned());
   } else {
     println!("Unable to convert path to string: {:?}", folder);
   }
@@ -55,6 +72,13 @@ pub fn set_notes(storage: &mut dyn Storage, avatar: &str, notes: String) {
 fn get_default_log_path() -> Option<PathBuf> {
   if let Some(path) = get_sota_config_path() {
     return Some(path.join("ChatLogs"));
+  }
+  env::current_dir().ok()
+}
+
+fn get_default_save_path() -> Option<PathBuf> {
+  if let Some(path) = get_sota_config_path() {
+    return Some(path.join("SavedGames"));
   }
   env::current_dir().ok()
 }
