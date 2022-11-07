@@ -15,7 +15,7 @@ use eframe::{
   },
   emath::{self, Align2},
   epaint::Color32,
-  glow,
+  glow, Storage,
 };
 use futures::executor::ThreadPoolBuilder;
 use std::sync::{atomic::Ordering, Arc};
@@ -248,7 +248,7 @@ impl App {
     self.file_dlg = Some(file_dlg);
   }
 
-  fn choose_load_path(&mut self, ctx: &Context) {
+  fn choose_load_path(&mut self, ctx: &Context, storage: &dyn Storage) {
     if self.offline.is_modified() {
       // Current save-game is modified, deal with that first.
       if let Some(file_name) = self.offline.file_name() {
@@ -257,8 +257,7 @@ impl App {
       }
     }
 
-    let Some(path) = config::get_sota_config_path() else { return; };
-    let path = path.join("SavedGames");
+    let Some(path) = config::get_save_path(storage) else { return; };
     let mut file_dlg = egui_file::FileDialog::open_file(Some(path))
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
@@ -292,7 +291,7 @@ impl eframe::App for App {
   fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
     // Process load request from the offline page.
     if self.offline.load_request() {
-      self.choose_load_path(ctx);
+      self.choose_load_path(ctx, frame.storage_mut().unwrap());
     }
 
     // Set the progress cursor if the app is busy.
@@ -331,7 +330,7 @@ impl eframe::App for App {
               }
               Page::Offline => {
                 if menu_item(ui, close_menu, "Load Save-game...", None) {
-                  self.choose_load_path(ctx);
+                  self.choose_load_path(ctx, frame.storage_mut().unwrap());
                 }
 
                 let enabled = self.offline.is_modified();
@@ -400,7 +399,12 @@ impl eframe::App for App {
                 config::set_log_path(frame.storage_mut().unwrap(), &path);
                 self.stats.set_log_path(ctx, path);
               }
-              egui_file::DialogType::OpenFile => self.offline.load(path),
+              egui_file::DialogType::OpenFile => {
+                let folder = path.with_file_name(String::default());
+                if self.offline.load(path) {
+                  config::set_save_path(frame.storage_mut().unwrap(), &folder);
+                }
+              }
               egui_file::DialogType::SaveFile => self.offline.store_as(path),
             }
           }
@@ -417,7 +421,7 @@ impl eframe::App for App {
         _ => (),
       }
       match self.confirm_dlg.take_hence() {
-        Some(Hence::Load) => self.choose_load_path(ctx),
+        Some(Hence::Load) => self.choose_load_path(ctx, frame.storage_mut().unwrap()),
         Some(Hence::Exit) => frame.close(),
         None => (),
       }

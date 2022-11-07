@@ -116,16 +116,18 @@ impl Offline {
     });
   }
 
-  pub fn load(&mut self, path: PathBuf) {
+  pub fn load(&mut self, path: PathBuf) -> bool {
     self.modified = false;
     match GameData::load(path) {
       Ok(game) => {
         self.game = Some(GameInfo::new(game));
         self.error = None;
+        true
       }
       Err(err) => {
         self.game = None;
         self.error = Some(err);
+        false
       }
     }
   }
