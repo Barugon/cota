@@ -1,5 +1,7 @@
 # Companion of the Avatar
 
+[![Dependency status](https://deps.rs/repo/github/Barugon/cota/status.svg)](https://deps.rs/repo/github/Barugon/cota)
+
 CotA, a companion application for [Shroud of the Avatar](https://www.shroudoftheavatar.com), is written in 100% Rust using [egui](https://github.com/emilk/egui) (also 100% Rust) for it's user interface.
 
 **Click [here](https://github.com/Barugon/cota/releases) for binaries**
