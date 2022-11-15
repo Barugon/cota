@@ -368,14 +368,13 @@ fn log_date_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
   let minute = iter.next()?.parse().ok()?;
   let second = iter.next()?.parse().ok()?;
 
-  Some(NaiveDateTime::new(date, NaiveTime::from_hms(hour, minute, second)).timestamp())
+  Some(NaiveDateTime::new(date, NaiveTime::from_hms_opt(hour, minute, second)?).timestamp())
 }
 
 /// Convert a timestamp into a log filename date string.
 fn timestamp_to_file_date(ts: i64) -> String {
-  NaiveDateTime::from_timestamp(ts, 0)
-    .format("%Y-%m-%d")
-    .to_string()
+  let Some(dt) = NaiveDateTime::from_timestamp_opt(ts, 0) else { return String::default() };
+  dt.format("%Y-%m-%d").to_string()
 }
 
 /// Get a NaiveDate from a log filename.
