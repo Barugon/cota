@@ -285,9 +285,8 @@ pub fn f64_to_string(value: f64, locale: Locale) -> String {
 /// Convert a timestamp into a date & time string.
 pub fn timestamp_to_string(ts: Option<i64>) -> String {
   let Some(ts) = ts else { return String::new() };
-  NaiveDateTime::from_timestamp(ts, 0)
-    .format("%Y-%m-%d %H:%M:%S")
-    .to_string()
+  let Some(dt) = NaiveDateTime::from_timestamp_opt(ts, 0) else { return String::new() };
+  dt.format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
 #[cfg(test)]
