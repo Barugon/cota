@@ -40,7 +40,7 @@ cross build --release --target=x86_64-unknown-linux-gnu
 
 ```bash
 rustup target add x86_64-pc-windows-gnu
-sudo dnf install mingw64-gcc mingw64-winpthreads-static
+sudo dnf install mingw64-gcc
 ```
 
 - Build the project
