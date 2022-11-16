@@ -1,3 +1,4 @@
 .vscode/launch.json
 Cargo.lock
+Dockerfile
 target
