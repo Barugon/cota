@@ -18,7 +18,11 @@ use eframe::{
   glow, Storage,
 };
 use futures::executor::ThreadPoolBuilder;
-use std::sync::{atomic::Ordering, Arc};
+use std::{
+  ffi::OsStr,
+  path::Path,
+  sync::{atomic::Ordering, Arc},
+};
 
 macro_rules! cmd {
   ($key:literal) => {
@@ -234,11 +238,15 @@ impl App {
 
   fn choose_folder_path(&mut self, ctx: &Context) {
     let path = Some(self.stats.log_path().into());
+    let filter = Box::new(|path: &Path| -> bool {
+      return path.extension() == Some(OsStr::new("txt"));
+    });
+
     let mut file_dlg = egui_file::FileDialog::select_folder(path)
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
       .default_size(ctx.available_rect().size())
-      .filter("txt".into())
+      .filter(filter)
       .show_new_folder(false)
       .show_rename(false)
       .resizable(false);
@@ -258,11 +266,15 @@ impl App {
     }
 
     let Some(path) = config::get_save_path(storage) else { return; };
+    let filter = Box::new(|path: &Path| -> bool {
+      return path.extension() == Some(OsStr::new("sota"));
+    });
+
     let mut file_dlg = egui_file::FileDialog::open_file(Some(path))
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
       .default_size(ctx.available_rect().size())
-      .filter("sota".into())
+      .filter(filter)
       .show_new_folder(false)
       .resizable(false);
     file_dlg.open();
@@ -273,11 +285,15 @@ impl App {
 
   fn choose_store_path(&mut self, ctx: &Context) {
     let Some(path) = self.offline.file_path() else { return; };
+    let filter = Box::new(|path: &Path| -> bool {
+      return path.extension() == Some(OsStr::new("sota"));
+    });
+
     let mut file_dlg = egui_file::FileDialog::save_file(Some(path))
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
       .default_size(ctx.available_rect().size())
-      .filter("sota".into())
+      .filter(filter)
       .show_new_folder(false)
       .resizable(false);
     file_dlg.open();
