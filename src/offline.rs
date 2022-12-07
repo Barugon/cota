@@ -61,12 +61,26 @@ impl Offline {
       ui.horizontal(|ui| {
         const LABEL_COLOR: Color32 = Color32::from_rgb(154, 187, 154);
 
-        ui.label(RichText::from("Adventurer Level").color(LABEL_COLOR));
+        ui.label(RichText::from("Adv Lvl").color(LABEL_COLOR));
         if let Some(game) = &mut self.game {
           let mut level = game.adv_level();
           let widget = DragValue::new(&mut level).clamp_range(util::LVL_RANGE);
           if ui.add(widget).changed() {
             game.set_adv_level(level);
+            self.modified = game.modified();
+          }
+        } else {
+          ui.add_enabled_ui(false, |ui| {
+            ui.add_sized(ui.spacing().interact_size, Button::new(RichText::default()));
+          });
+        }
+
+        ui.label(RichText::from("Prd Lvl").color(LABEL_COLOR));
+        if let Some(game) = &mut self.game {
+          let mut level = game.prd_level();
+          let widget = DragValue::new(&mut level).clamp_range(util::LVL_RANGE);
+          if ui.add(widget).changed() {
+            game.set_prd_level(level);
             self.modified = game.modified();
           }
         } else {
@@ -235,8 +249,10 @@ mod game_info {
     data: GameData,
     adv: Vec<SkillLvlGroup>,
     prd: Vec<SkillLvlGroup>,
-    level_cmp: i32,
-    level: i32,
+    adv_lvl_cmp: i32,
+    adv_lvl: i32,
+    prd_lvl_cmp: i32,
+    prd_lvl: i32,
     gold_cmp: i32,
     gold: i32,
   }
@@ -261,15 +277,18 @@ mod game_info {
         prd
       };
 
-      let level = data.get_adv_lvl();
+      let adv_lvl = data.get_adv_lvl();
+      let prd_lvl = data.get_prd_lvl();
       let gold = data.get_gold().unwrap_or(0);
 
       GameInfo {
         data,
         adv,
         prd,
-        level_cmp: level,
-        level,
+        adv_lvl_cmp: adv_lvl,
+        adv_lvl,
+        prd_lvl_cmp: prd_lvl,
+        prd_lvl,
         gold_cmp: gold,
         gold,
       }
@@ -380,11 +399,19 @@ mod game_info {
     }
 
     pub fn adv_level(&self) -> i32 {
-      self.level
+      self.adv_lvl
     }
 
     pub fn set_adv_level(&mut self, level: i32) {
-      self.level = level
+      self.adv_lvl = level
+    }
+
+    pub fn prd_level(&self) -> i32 {
+      self.prd_lvl
+    }
+
+    pub fn set_prd_level(&mut self, level: i32) {
+      self.prd_lvl = level
     }
 
     pub fn gold(&self) -> i32 {
@@ -414,14 +441,16 @@ mod game_info {
     }
 
     pub fn modified(&self) -> bool {
-      self.level != self.level_cmp
+      self.adv_lvl != self.adv_lvl_cmp
+        || self.prd_lvl != self.prd_lvl_cmp
         || self.gold != self.gold_cmp
         || modified(&self.adv)
         || modified(&self.prd)
     }
 
     pub fn discard_changes(&mut self) {
-      self.level = self.level_cmp;
+      self.adv_lvl = self.adv_lvl_cmp;
+      self.prd_lvl = self.prd_lvl_cmp;
       self.gold = self.gold_cmp;
       discard_changes(&mut self.adv);
       discard_changes(&mut self.prd);
@@ -437,14 +466,16 @@ mod game_info {
     }
 
     fn accept_changes(&mut self) {
-      self.level_cmp = self.level;
+      self.adv_lvl_cmp = self.adv_lvl;
+      self.prd_lvl_cmp = self.prd_lvl;
       self.gold_cmp = self.gold;
       accept_changes(&mut self.adv);
       accept_changes(&mut self.prd);
     }
 
     fn update_json(&mut self) {
-      self.data.set_adv_lvl(self.level);
+      self.data.set_adv_lvl(self.adv_lvl);
+      self.data.set_prd_lvl(self.prd_lvl);
       self.data.set_gold(self.gold);
       update_json(&mut self.data, &self.adv);
       update_json(&mut self.data, &self.prd);
