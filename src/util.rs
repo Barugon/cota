@@ -18,7 +18,7 @@ pub const LVL_RANGE: RangeInclusive<i32> = 1..=200;
 
 #[macro_export]
 macro_rules! debugln {
-    ($($arg:tt)*) => (#[cfg(debug_assertions)] println!($($arg)*));
+  ($($arg:tt)*) => (#[cfg(debug_assertions)] println!($($arg)*));
 }
 
 #[macro_export]
