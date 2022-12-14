@@ -90,12 +90,14 @@ impl NotesDlg {
   }
 
   pub fn open(&mut self, avatar: &str, text: String) {
-    self.state.enabled.store(false, Ordering::Relaxed);
-    self.title = format!("📓  Notes for {}", avatar);
-    self.text = text;
-    self.result = None;
-    self.visible = true;
-    self.init = true;
+    if !self.visible {
+      self.state.disable.store(true, Ordering::Relaxed);
+      self.title = format!("📓  Notes for {}", avatar);
+      self.text = text;
+      self.result = None;
+      self.visible = true;
+      self.init = true;
+    }
   }
 
   pub fn take_text(&mut self) -> Option<String> {
@@ -103,17 +105,21 @@ impl NotesDlg {
   }
 
   fn accept(&mut self) {
-    self.state.enabled.store(true, Ordering::Relaxed);
-    let mut text = String::new();
-    std::mem::swap(&mut text, &mut self.text);
-    self.result = Some(text);
-    self.visible = false;
+    if self.visible {
+      self.state.disable.store(false, Ordering::Relaxed);
+      let mut text = String::new();
+      std::mem::swap(&mut text, &mut self.text);
+      self.result = Some(text);
+      self.visible = false;
+    }
   }
 
   fn reject(&mut self) {
-    self.state.enabled.store(true, Ordering::Relaxed);
-    self.text.clear();
-    self.visible = false;
+    if self.visible {
+      self.state.disable.store(false, Ordering::Relaxed);
+      self.text.clear();
+      self.visible = false;
+    }
   }
 
   fn handle_hotkeys(&mut self, ctx: &Context) {

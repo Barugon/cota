@@ -100,11 +100,13 @@ impl SearchDlg {
   }
 
   pub fn open(&mut self, title: String) {
-    self.state.enabled.store(false, Ordering::Relaxed);
-    self.title = title;
-    self.search = None;
-    self.visible = true;
-    self.focus = true;
+    if !self.visible {
+      self.state.disable.store(true, Ordering::Relaxed);
+      self.title = title;
+      self.search = None;
+      self.visible = true;
+      self.focus = true;
+    }
   }
 
   pub fn take_search_term(&mut self) -> Option<util::Search> {
@@ -112,39 +114,43 @@ impl SearchDlg {
   }
 
   fn accept(&mut self) {
-    if self.text.is_empty() {
-      return;
-    }
-
-    self.search = match self.search_type {
-      SearchType::Default | SearchType::NoCase => {
-        let ignore_case = self.search_type == SearchType::NoCase;
-        let mut find = String::new();
-        std::mem::swap(&mut find, &mut self.text);
-        Some(util::Search::String { find, ignore_case })
+    if self.visible {
+      if self.text.is_empty() {
+        return;
       }
-      SearchType::Regex => match Regex::new(&self.text) {
-        Ok(regex) => {
-          self.text.clear();
-          Some(util::Search::Regex(regex))
-        }
-        Err(err) => {
-          self.text = format!("{:?}", err);
-          return;
-        }
-      },
-    };
 
-    self.state.enabled.store(true, Ordering::Relaxed);
-    self.title.clear();
-    self.visible = false;
+      self.search = match self.search_type {
+        SearchType::Default | SearchType::NoCase => {
+          let ignore_case = self.search_type == SearchType::NoCase;
+          let mut find = String::new();
+          std::mem::swap(&mut find, &mut self.text);
+          Some(util::Search::String { find, ignore_case })
+        }
+        SearchType::Regex => match Regex::new(&self.text) {
+          Ok(regex) => {
+            self.text.clear();
+            Some(util::Search::Regex(regex))
+          }
+          Err(err) => {
+            self.text = format!("{:?}", err);
+            return;
+          }
+        },
+      };
+
+      self.state.disable.store(false, Ordering::Relaxed);
+      self.title.clear();
+      self.visible = false;
+    }
   }
 
   fn reject(&mut self) {
-    self.state.enabled.store(true, Ordering::Relaxed);
-    self.title.clear();
-    self.text.clear();
-    self.visible = false;
+    if self.visible {
+      self.state.disable.store(false, Ordering::Relaxed);
+      self.title.clear();
+      self.text.clear();
+      self.visible = false;
+    }
   }
 
   fn handle_hotkeys(&mut self, ctx: &Context) {
