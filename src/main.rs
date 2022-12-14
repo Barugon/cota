@@ -11,6 +11,7 @@ mod config;
 mod confirm_dlg;
 mod experience;
 mod game_data;
+mod items_dlg;
 mod log_data;
 mod log_dlg;
 mod notes_dlg;

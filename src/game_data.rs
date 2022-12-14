@@ -13,8 +13,12 @@ pub struct GameData {
   // Avatar ID.
   avatar: String,
 
+  // Backpack ID.
+  backpack: String,
+
   // Parsed JSON sections.
   character: Value,
+  inventory: Value,
   gold: Value,
 
   // Save date.
@@ -26,45 +30,50 @@ impl GameData {
     match std::fs::read_to_string(&path) {
       Ok(text) => {
         // Get the avatar ID.
-        let err = Err(Cow::from("Unable to determine the current avatar"));
-        let Some(avatar) = get_avatar_id(&text) else { return err };
+        let Some(avatar) = get_avatar_id(&text) else { return Err(Cow::from("Unable to determine the current avatar")) };
 
-        // Get the 'UserGold' json.
-        let err = Err(Cow::from("Unable to find user gold"));
-        let Some(gold) = get_json(&text, "UserGold", USER_ID) else { return err };
-        if !gold.is_object() {
-          return Err(Cow::from("Error reading user gold"));
-        }
-
-        // Get the 'CharacterSheet' JSON.
-        let err = Err(Cow::from("Unable to find character sheet"));
-        let Some(character) = get_json(&text, "CharacterSheet", &avatar) else { return err };
+        // Get the CharacterSheet JSON.
+        let Some(character) = get_json(&text, "CharacterSheet", &avatar) else { return Err(Cow::from("Unable to find character sheet")) };
         if !character.is_object() {
           return Err(Cow::from("Error reading character sheet"));
         }
 
+        // Get the backpack ID.
+        let Some(backpack) = get_backpack_id(&text, &avatar) else { return Err(Cow::from("Unable to find the avatar's backpack")) };
+
+        // Get the ItemStore JSON.
+        let Some(inventory) = get_json(&text, "ItemStore", &backpack) else { return Err(Cow::from("Unable to find inventory")) };
+        if !inventory.is_object() {
+          return Err(Cow::from("Error reading inventory"));
+        }
+
+        // Get the UserGold json.
+        let Some(gold) = get_json(&text, "UserGold", USER_ID) else { return Err(Cow::from("Unable to find user gold")) };
+        if !gold.is_object() {
+          return Err(Cow::from("Error reading user gold"));
+        }
+
         // Make sure adventurer experience is there.
-        let err = Err(Cow::from("Unable to parse adventurer experience"));
         if character.get(AE).and_then(|exp| exp.to_i64()).is_none() {
-          return err;
+          return Err(Cow::from("Unable to parse adventurer experience"));
         }
 
         // Get the skills value.
-        let err = Err(Cow::from("Unable to find skills"));
-        let Some(skills) = character.get(SK2) else { return err };
+        let Some(skills) = character.get(SK2) else { return Err(Cow::from("Unable to find skills")) };
         if !skills.is_object() {
           return Err(Cow::from("Error reading skills"));
         }
 
         // Find a date.
-        let err = Err(Cow::from("Unable to parse the date/time"));
-        let Some(date) = find_date(skills) else { return err };
+        let Some(date) = find_date(skills) else { return Err(Cow::from("Unable to parse the date/time")) };
 
         Ok(GameData {
           path: RwLock::new(path),
           text,
           avatar,
+          backpack,
           character,
+          inventory,
           gold,
           date,
         })
@@ -79,13 +88,14 @@ impl GameData {
   }
 
   pub fn store_as(&self, path: PathBuf) -> Result<(), Cow<'static, str>> {
-    // Set UserGold.
-    let err = Err(Cow::from("Unable to set UserGold"));
-    let Some(text) = set_json(&self.text, "UserGold", USER_ID, &self.gold) else { return err };
-
     // Set CharacterSheet.
-    let err = Err(Cow::from("Unable to set CharacterSheet"));
-    let Some(text) = set_json(&text, "CharacterSheet", &self.avatar, &self.character) else { return err };
+    let Some(text) = set_json(&self.text, "CharacterSheet", &self.avatar, &self.character) else { return Err(Cow::from("Unable to set CharacterSheet")) };
+
+    // Set ItemStore.
+    let Some(text) = set_json(&text, "ItemStore", &self.backpack, &self.inventory) else { return Err(Cow::from("Unable to set ItemStore")) };
+
+    // Set UserGold.
+    let Some(text) = set_json(&text, "UserGold", USER_ID, &self.gold) else { return Err(Cow::from("Unable to set UserGold")) };
 
     // Create the save-game file and store the data.
     match File::create(&path) {
@@ -149,6 +159,40 @@ impl GameData {
     self.path.read().unwrap().clone()
   }
 
+  pub fn get_inventory_items(&self) -> Vec<Item> {
+    let items_val = self.inventory.get(IN).and_then(|v| v.as_object()).unwrap();
+    let mut items = Vec::with_capacity(items_val.len());
+    for (key, val) in items_val {
+      let Some(val) = val.get(IN) else { continue };
+      let Some(name) = get_name(val.get(AN))  else { continue };
+      let Some(cnt) = val.get(QN).and_then(|v| v.as_u64()) else { continue };
+      let dur = Durability::new(val);
+      let bag = val.get(BAG).is_some();
+
+      items.push(Item {
+        id: key.into(),
+        name,
+        cnt,
+        dur,
+        bag,
+      });
+    }
+    items
+  }
+
+  pub fn set_inventory_items(&mut self, items: &Vec<Item>) {
+    let items_val = self.inventory.get_mut(IN).unwrap();
+    for item in items {
+      let val = items_val.get_mut(&item.id).unwrap();
+      let val = val.get_mut(IN).unwrap();
+      val[QN] = item.cnt.into();
+      if let Some(dur) = &item.dur {
+        val[HP] = dur.minor.into();
+        val[PHP] = dur.major.into();
+      }
+    }
+  }
+
   fn set_skill_exp(&mut self, id: u64, exp: i64) {
     let key = format!("{}", id);
     let skills = self.character.get_mut(SK2).unwrap();
@@ -186,6 +230,29 @@ impl GameData {
   }
 }
 
+#[derive(PartialEq, Clone)]
+pub struct Durability {
+  pub minor: f64,
+  pub major: f64,
+}
+
+impl Durability {
+  fn new(val: &Value) -> Option<Self> {
+    let minor = val.get(HP)?.as_f64()?;
+    let major = val.get(PHP)?.as_f64()?;
+    Some(Durability { minor, major })
+  }
+}
+
+#[derive(Clone)]
+pub struct Item {
+  pub id: String,
+  pub name: String,
+  pub cnt: u64,
+  pub dur: Option<Durability>,
+  pub bag: bool,
+}
+
 pub fn get_skill_lvl(skills: &Value, id: u64, mul: f64) -> Option<i32> {
   let exp = (get_skill_exp(skills, id)? as f64 / mul) as i64;
   let idx = find_min(exp, &util::SKILL_EXP)?;
@@ -196,6 +263,12 @@ fn get_skill_exp(skills: &Value, id: u64) -> Option<i64> {
   let skill = skills.get(format!("{}", id))?;
   let exp = skill.get(X)?;
   exp.to_i64()
+}
+
+fn get_name(val: Option<&Value>) -> Option<String> {
+  let text = val?.as_str()?;
+  let pos = text.rfind('/')?;
+  Some(text[pos + 1..].into())
 }
 
 trait ToI64 {
@@ -213,11 +286,16 @@ impl ToI64 for Value {
 }
 
 const USER_ID: &str = "000000000000000000000001";
-const USER: &str = "User";
+const BAG: &str = "bag";
+const PHP: &str = "php";
 const SK2: &str = "sk2";
 const AE: &str = "ae";
-const PE: &str = "pe";
+const AN: &str = "an";
 const DC: &str = "dc";
+const HP: &str = "hp";
+const IN: &str = "in";
+const PE: &str = "pe";
+const QN: &str = "qn";
 const G: &str = "g";
 const M: &str = "m";
 const T: &str = "t";
@@ -238,10 +316,21 @@ fn find_min<T: Ord>(value: T, values: &[T]) -> Option<usize> {
 
 fn get_avatar_id(text: &str) -> Option<String> {
   // Get the User json.
-  let json = get_json(text, USER, USER_ID)?;
+  let json = get_json(text, "User", USER_ID)?;
 
   // Get the avatar ID.
   if let Some(Value::String(id)) = json.get(DC) {
+    return Some(id.clone());
+  }
+  None
+}
+
+fn get_backpack_id(text: &str, avatar: &str) -> Option<String> {
+  // Get the Character json.
+  let json = get_json(text, "Character", avatar)?;
+
+  // Get the backpack ID.
+  if let Some(Value::String(id)) = json.get("mainbp") {
     return Some(id.clone());
   }
   None

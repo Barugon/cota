@@ -1,14 +1,19 @@
 use self::game_info::GameInfo;
-use crate::{game_data::GameData, util};
+use crate::{
+  game_data::GameData,
+  items_dlg::ItemsDlg,
+  util::{self, AppState},
+};
 use eframe::{
   egui::{Button, DragValue, ImageButton, Response, RichText, Ui, WidgetText},
   emath,
   epaint::Color32,
 };
 use egui_extras::RetainedImage;
-use std::{borrow::Cow, path::PathBuf};
+use std::{borrow::Cow, path::PathBuf, sync::Arc};
 
 pub struct Offline {
+  items_dlg: ItemsDlg,
   load_image: RetainedImage,
   store_image: RetainedImage,
   game: Option<GameInfo>,
@@ -18,7 +23,7 @@ pub struct Offline {
 }
 
 impl Offline {
-  pub fn new() -> Self {
+  pub fn new(state: Arc<AppState>) -> Self {
     const LOAD_ICON: &[u8] = include_bytes!("res/load.png");
     const STORE_ICON: &[u8] = include_bytes!("res/store.png");
 
@@ -30,6 +35,7 @@ impl Offline {
     let load_request = false;
 
     Offline {
+      items_dlg: ItemsDlg::new(state),
       load_image,
       store_image,
       game,
@@ -40,6 +46,12 @@ impl Offline {
   }
 
   pub fn show(&mut self, ui: &mut Ui) {
+    if let Some(game) = &mut self.game {
+      if self.items_dlg.show(game.items_mut(), ui.ctx()) {
+        self.modified = game.modified();
+      }
+    }
+
     ui.horizontal(|ui| {
       if image_button(&self.load_image, ui)
         .on_hover_text_at_pointer("Load Save-game")
@@ -54,6 +66,16 @@ impl Offline {
         {
           self.store();
         }
+      });
+
+      ui.separator();
+
+      ui.horizontal(|ui| {
+        ui.add_enabled_ui(self.game.is_some(), |ui| {
+          if ui.button("Items").clicked() {
+            self.items_dlg.open();
+          }
+        });
       });
 
       ui.separator();
@@ -93,7 +115,7 @@ impl Offline {
         if let Some(game) = &mut self.game {
           let mut gold = game.gold();
           let speed = (gold as f64 / 100.0).max(1.0);
-          let range = 0..=i32::MAX;
+          let range = 0..=i32::MAX / 2;
           let widget = DragValue::new(&mut gold).speed(speed).clamp_range(range);
           if ui.add(widget).changed() {
             game.set_gold(gold);
@@ -193,6 +215,10 @@ impl Offline {
     self.load_request = false;
     load_request
   }
+
+  pub fn on_close_event(&mut self) {
+    self.items_dlg.close();
+  }
 }
 
 fn image_button(image: &RetainedImage, ui: &mut Ui) -> Response {
@@ -202,17 +228,16 @@ fn image_button(image: &RetainedImage, ui: &mut Ui) -> Response {
 }
 
 mod game_info {
+  use crate::{
+    game_data::{GameData, Item},
+    util::{self, Skill, SkillCategory, SkillGroup},
+  };
   use eframe::{
     egui::{CollapsingHeader, DragValue, Layout, RichText, ScrollArea, TextStyle, Ui},
     emath::{Align, Vec2},
     epaint::Color32,
   };
   use egui_extras::{Size, TableBuilder};
-
-  use crate::{
-    game_data::GameData,
-    util::{self, Skill, SkillCategory, SkillGroup},
-  };
   use std::{borrow::Cow, path::PathBuf};
 
   pub struct SkillLvl {
@@ -249,6 +274,8 @@ mod game_info {
     data: GameData,
     adv: Vec<SkillLvlGroup>,
     prd: Vec<SkillLvlGroup>,
+    items_cmp: Vec<Item>,
+    items: Vec<Item>,
     adv_lvl_cmp: i32,
     adv_lvl: i32,
     prd_lvl_cmp: i32,
@@ -277,6 +304,7 @@ mod game_info {
         prd
       };
 
+      let items = data.get_inventory_items();
       let adv_lvl = data.get_adv_lvl();
       let prd_lvl = data.get_prd_lvl();
       let gold = data.get_gold().unwrap_or(0);
@@ -285,6 +313,8 @@ mod game_info {
         data,
         adv,
         prd,
+        items_cmp: items.clone(),
+        items,
         adv_lvl_cmp: adv_lvl,
         adv_lvl,
         prd_lvl_cmp: prd_lvl,
@@ -398,6 +428,10 @@ mod game_info {
       changed
     }
 
+    pub fn items_mut(&mut self) -> &mut Vec<Item> {
+      &mut self.items
+    }
+
     pub fn adv_level(&self) -> i32 {
       self.adv_lvl
     }
@@ -444,11 +478,13 @@ mod game_info {
       self.adv_lvl != self.adv_lvl_cmp
         || self.prd_lvl != self.prd_lvl_cmp
         || self.gold != self.gold_cmp
+        || self.items_modified()
         || modified(&self.adv)
         || modified(&self.prd)
     }
 
     pub fn discard_changes(&mut self) {
+      self.items = self.items_cmp.clone();
       self.adv_lvl = self.adv_lvl_cmp;
       self.prd_lvl = self.prd_lvl_cmp;
       self.gold = self.gold_cmp;
@@ -466,6 +502,7 @@ mod game_info {
     }
 
     fn accept_changes(&mut self) {
+      self.items_cmp = self.items.clone();
       self.adv_lvl_cmp = self.adv_lvl;
       self.prd_lvl_cmp = self.prd_lvl;
       self.gold_cmp = self.gold;
@@ -474,11 +511,23 @@ mod game_info {
     }
 
     fn update_json(&mut self) {
+      self.data.set_inventory_items(&self.items);
       self.data.set_adv_lvl(self.adv_lvl);
       self.data.set_prd_lvl(self.prd_lvl);
       self.data.set_gold(self.gold);
       update_json(&mut self.data, &self.adv);
       update_json(&mut self.data, &self.prd);
+    }
+
+    fn items_modified(&self) -> bool {
+      assert_eq!(self.items.len(), self.items_cmp.len());
+      for (a, b) in self.items.iter().zip(self.items_cmp.iter()) {
+        assert_eq!(a.id, b.id);
+        if a.cnt != b.cnt || a.dur != b.dur {
+          return true;
+        }
+      }
+      false
     }
   }
 
