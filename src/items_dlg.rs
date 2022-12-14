@@ -65,6 +65,8 @@ impl ItemsDlg {
                     });
                     row.col(|ui| {
                       if !item.bag {
+                        // It's safe to adjust the stack size for all items (except containers) even for those
+                        // that are equipped or have durability.
                         let speed = (item.cnt as f64 / 100.0).max(1.0);
                         let range = 1..=i16::MAX;
                         let widget = DragValue::new(&mut item.cnt)
@@ -79,6 +81,8 @@ impl ItemsDlg {
                       if let Some(dur) = &mut item.dur {
                         ui.set_enabled(dur.minor != dur.major);
                         if ui.button("Repair").clicked() {
+                          // The actual maximum durability is unknown here, so just set the durability to a high value.
+                          // The value will be adjusted in-game to the actual maximum when the item takes damage.
                           dur.minor = 5000.0;
                           dur.major = 5000.0;
                           modified = true;
