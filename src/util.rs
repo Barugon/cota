@@ -1,4 +1,5 @@
 use chrono::NaiveDateTime;
+use eframe::egui::{TextStyle, Ui};
 use num_format::Locale;
 use regex::Regex;
 use std::{
@@ -287,6 +288,22 @@ pub fn timestamp_to_string(ts: Option<i64>) -> String {
   let Some(ts) = ts else { return String::new() };
   let Some(dt) = NaiveDateTime::from_timestamp_opt(ts, 0) else { return String::new() };
   dt.format("%Y-%m-%d %H:%M:%S").to_string()
+}
+
+/// Get the size of a scrollbar.
+pub fn scroll_bar_size(ui: &Ui) -> f32 {
+  let spacing = ui.spacing();
+  spacing.scroll_bar_inner_margin + spacing.scroll_bar_width + spacing.scroll_bar_outer_margin
+}
+
+/// Get the size of a Button.
+pub fn button_size(ui: &Ui) -> f32 {
+  text_size(ui) + ui.spacing().button_padding[1] * 2.0
+}
+
+/// Get the size of body text.
+pub fn text_size(ui: &Ui) -> f32 {
+  TextStyle::Body.resolve(ui.style()).size
 }
 
 #[cfg(test)]

@@ -7,11 +7,11 @@ use crate::{
   util::{self, AppState, Search},
 };
 use eframe::{
-  egui::{ComboBox, Context, Layout, RichText, TextStyle, Ui},
+  egui::{ComboBox, Context, Layout, RichText, Ui},
   emath::Align,
   epaint::Color32,
 };
-use egui_extras::{Size, TableBuilder};
+use egui_extras::{Column, TableBuilder};
 use futures::{channel::mpsc, executor::ThreadPool};
 use num_format::Locale;
 use std::{
@@ -261,12 +261,14 @@ impl Stats {
 
     ui.add_enabled_ui(!self.stats.is_empty(), |ui| {
       const NAME_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
-      let row_size = TextStyle::Body.resolve(ui.style()).size + 4.0;
+      let spacing = ui.spacing().item_spacing;
+      let row_size = util::text_size(ui) + spacing[1];
+      let available_width = ui.available_width();
       TableBuilder::new(ui)
         .cell_layout(Layout::left_to_right(Align::Center))
         .striped(true)
-        .column(Size::relative(0.8))
-        .column(Size::remainder())
+        .column(Column::exact(available_width * 0.8 - spacing[0]))
+        .column(Column::remainder())
         .header(row_size, |mut header| {
           const HEADER_COLOR: Color32 = Color32::from_rgb(229, 187, 123);
           header.col(|ui| {

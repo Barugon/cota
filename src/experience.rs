@@ -1,10 +1,10 @@
 use crate::util::{self, Skill, SkillCategory, SkillGroup};
 use eframe::{
-  egui::{DragValue, Layout, RichText, ScrollArea, TextStyle, Ui},
+  egui::{DragValue, Layout, RichText, ScrollArea, Ui},
   emath::{Align, Vec2},
   epaint::Color32,
 };
-use egui_extras::{Size, TableBuilder};
+use egui_extras::{Column, TableBuilder};
 use num_format::{Locale, ToFormattedString};
 
 pub struct Experience {
@@ -79,9 +79,6 @@ impl Experience {
   }
 
   fn show_skill_category(&mut self, ui: &mut Ui, category: SkillCategory) {
-    let row_size = TextStyle::Body.resolve(ui.style()).size + 4.0;
-    let table_layout = Layout::left_to_right(Align::Center);
-    let table_layout = table_layout.with_cross_align(Align::Center);
     let (scroll_id, groups) = match category {
       SkillCategory::Adventurer => ("adventurer_skills", &self.adventurer),
       SkillCategory::Producer => ("producer_skills", &self.producer),
@@ -96,13 +93,16 @@ impl Experience {
             // Use a single column in order to force the scroll area to fill the entire available width.
             ui.columns(1, |col| {
               let response = col[0].collapsing(skill_group.name, |ui| {
+                let spacing = ui.spacing().item_spacing;
+                let row_size = util::button_size(ui) + spacing[1];
+                let available_width = ui.available_width() - util::scroll_bar_size(ui);
                 TableBuilder::new(ui)
-                  .cell_layout(table_layout)
+                  .cell_layout(Layout::left_to_right(Align::Center))
                   .striped(true)
-                  .scroll(false)
-                  .column(Size::relative(0.64))
-                  .column(Size::relative(0.18))
-                  .column(Size::remainder())
+                  .vscroll(false)
+                  .column(Column::exact(available_width * 0.64))
+                  .column(Column::exact(available_width * 0.18))
+                  .column(Column::remainder())
                   .header(row_size, |mut header| {
                     const HEADER_COLOR: Color32 = Color32::from_rgb(229, 187, 123);
                     header.col(|ui| {

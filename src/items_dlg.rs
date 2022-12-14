@@ -1,10 +1,13 @@
-use crate::{game_data::Item, util::AppState};
+use crate::{
+  game_data::Item,
+  util::{self, AppState},
+};
 use eframe::{
-  egui::{Context, DragValue, Key, Layout, RichText, TextStyle, Window},
+  egui::{Context, DragValue, Key, Layout, RichText, Window},
   emath::{Align, Align2},
   epaint::Color32,
 };
-use egui_extras::{Size, TableBuilder};
+use egui_extras::{Column, TableBuilder};
 use std::sync::{atomic::Ordering, Arc};
 
 pub struct ItemsDlg {
@@ -39,13 +42,15 @@ impl ItemsDlg {
           // This add_visible_ui is here only to constrain the set_max_height call.
           ui.add_visible_ui(true, |ui| {
             ui.set_max_height(available.height() * 0.8);
-            let row_size = TextStyle::Body.resolve(ui.style()).size + 4.0;
+            let spacing = ui.spacing().item_spacing;
+            let row_size = util::button_size(ui) + spacing[1] * 2.0;
+            let available_width = ui.available_width() - util::scroll_bar_size(ui);
             TableBuilder::new(ui)
               .cell_layout(Layout::left_to_right(Align::Center))
               .striped(true)
-              .column(Size::relative(0.75))
-              .column(Size::relative(0.11))
-              .column(Size::remainder())
+              .column(Column::exact(available_width * 0.75 - spacing[0]))
+              .column(Column::exact(available_width * 0.125 - spacing[0]))
+              .column(Column::remainder())
               .header(row_size, |mut header| {
                 const HEADER_COLOR: Color32 = Color32::from_rgb(229, 187, 123);
                 header.col(|ui| {
