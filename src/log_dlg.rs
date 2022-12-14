@@ -97,12 +97,14 @@ impl LogDlg {
   }
 
   pub fn open(&mut self, avatar: &str, cancel: Arc<AtomicBool>) {
-    self.state.enabled.store(false, Ordering::Relaxed);
-    self.title = format!("🗊  Search Results ({})", avatar);
-    self.status = RichText::from("Processing...").color(Color32::from_rgb(229, 187, 123));
-    self.cancel = Some(cancel);
-    self.visible = true;
-    self.init = true;
+    if !self.visible {
+      self.state.disable.store(false, Ordering::Relaxed);
+      self.title = format!("🗊  Search Results ({})", avatar);
+      self.status = RichText::from("Processing...").color(Color32::from_rgb(229, 187, 123));
+      self.cancel = Some(cancel);
+      self.visible = true;
+      self.init = true;
+    }
   }
 
   pub fn set_text(&mut self, text: String, search: Search, ctx: &Context) {
@@ -121,14 +123,16 @@ impl LogDlg {
   }
 
   fn close(&mut self) {
-    self.state.enabled.store(true, Ordering::Relaxed);
-    if let Some(cancel) = self.cancel.take() {
-      // Cancel the search if it's still outstanding.
-      cancel.store(true, Ordering::Relaxed);
+    if self.visible {
+      self.state.disable.store(false, Ordering::Relaxed);
+      if let Some(cancel) = self.cancel.take() {
+        // Cancel the search if it's still outstanding.
+        cancel.store(true, Ordering::Relaxed);
+      }
+      self.status = Default::default();
+      self.layout = None;
+      self.visible = false;
     }
-    self.status = Default::default();
-    self.layout = None;
-    self.visible = false;
   }
 
   fn handle_hotkeys(&mut self, ctx: &Context) {

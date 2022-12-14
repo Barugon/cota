@@ -62,14 +62,14 @@ pub struct AppState {
   pub busy: AtomicBool,
 
   /// Enable/disable the whole UI.
-  pub enabled: AtomicBool,
+  pub disable: AtomicBool,
 }
 
 impl Default for AppState {
   fn default() -> Self {
     Self {
       busy: AtomicBool::new(false),
-      enabled: AtomicBool::new(true),
+      disable: AtomicBool::new(false),
     }
   }
 }

@@ -70,13 +70,17 @@ impl AboutDlg {
   }
 
   pub fn open(&mut self) {
-    self.state.enabled.store(false, Ordering::Relaxed);
-    self.visible = true;
+    if !self.visible {
+      self.state.disable.store(true, Ordering::Relaxed);
+      self.visible = true;
+    }
   }
 
   fn close(&mut self) {
-    self.state.enabled.store(true, Ordering::Relaxed);
-    self.visible = false;
+    if self.visible {
+      self.state.disable.store(false, Ordering::Relaxed);
+      self.visible = false;
+    }
   }
 
   fn handle_hotkeys(&mut self, ctx: &Context) {

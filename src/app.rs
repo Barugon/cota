@@ -156,7 +156,7 @@ impl App {
     let stats = Stats::new(ctx, log_path, state.clone(), thread_pool.clone());
     let chronometer = Chronometer::new(thread_pool);
     let experience = Experience::new();
-    let offline = Offline::new();
+    let offline = Offline::new(Arc::clone(&state));
 
     // Dialog windows.
     let about_dlg = AboutDlg::new(state.clone());
@@ -185,7 +185,7 @@ impl App {
         modifiers,
       } = event
       {
-        if *pressed && self.state.enabled.load(Ordering::Relaxed) {
+        if *pressed && !self.state.disable.load(Ordering::Relaxed) {
           match key {
             Key::Escape if self.page == Page::Stats && !self.stats.filter().is_none() => {
               self.stats.set_filter(StatsFilter::None);
@@ -252,7 +252,7 @@ impl App {
       .resizable(false);
     file_dlg.open();
 
-    self.state.enabled.store(false, Ordering::Relaxed);
+    self.state.disable.store(true, Ordering::Relaxed);
     self.file_dlg = Some(file_dlg);
   }
 
@@ -279,7 +279,7 @@ impl App {
       .resizable(false);
     file_dlg.open();
 
-    self.state.enabled.store(false, Ordering::Relaxed);
+    self.state.disable.store(true, Ordering::Relaxed);
     self.file_dlg = Some(file_dlg);
   }
 
@@ -298,7 +298,7 @@ impl App {
       .resizable(false);
     file_dlg.open();
 
-    self.state.enabled.store(false, Ordering::Relaxed);
+    self.state.disable.store(true, Ordering::Relaxed);
     self.file_dlg = Some(file_dlg);
   }
 }
@@ -319,7 +319,7 @@ impl eframe::App for App {
     let close_menu = self.handle_hotkeys(ctx, frame);
 
     // Top panel for the menu bar.
-    let enabled = self.state.enabled.load(Ordering::Relaxed);
+    let enabled = !self.state.disable.load(Ordering::Relaxed);
     top_panel(ctx, |ui| {
       ui.set_enabled(enabled);
       ui.horizontal_centered(|ui| {
@@ -425,7 +425,7 @@ impl eframe::App for App {
             }
           }
         }
-        self.state.enabled.store(true, Ordering::Relaxed);
+        self.state.disable.store(false, Ordering::Relaxed);
         self.file_dlg = None;
       }
     }
@@ -506,6 +506,7 @@ impl eframe::App for App {
       return true;
     }
 
+    self.offline.on_close_event();
     if !self.confirm_dlg.visible() {
       if let Some(file_name) = self.offline.file_name() {
         self.confirm_dlg.open(file_name, Hence::Exit);

@@ -81,11 +81,13 @@ impl ConfirmDlg {
   }
 
   pub fn open(&mut self, file: String, hence: Hence) {
-    self.state.enabled.store(false, Ordering::Relaxed);
-    self.file = file;
-    self.hence = Some(hence);
-    self.choice = None;
-    self.visible = true;
+    if !self.visible {
+      self.state.disable.store(false, Ordering::Relaxed);
+      self.file = file;
+      self.hence = Some(hence);
+      self.choice = None;
+      self.visible = true;
+    }
   }
 
   pub fn visible(&self) -> bool {
@@ -101,13 +103,15 @@ impl ConfirmDlg {
   }
 
   fn close(&mut self, choice: Option<Choice>) {
-    self.state.enabled.store(true, Ordering::Relaxed);
-    if choice.is_none() {
-      // If choice is None then hence is None.
-      self.hence = None;
+    if self.visible {
+      self.state.disable.store(false, Ordering::Relaxed);
+      if choice.is_none() {
+        // If choice is None then hence is None.
+        self.hence = None;
+      }
+      self.choice = choice;
+      self.visible = false;
     }
-    self.choice = choice;
-    self.visible = false;
   }
 
   fn handle_hotkeys(&mut self, ctx: &Context) {
