@@ -233,11 +233,11 @@ mod game_info {
     util::{self, Skill, SkillCategory, SkillGroup},
   };
   use eframe::{
-    egui::{CollapsingHeader, DragValue, Layout, RichText, ScrollArea, TextStyle, Ui},
+    egui::{CollapsingHeader, DragValue, Layout, RichText, ScrollArea, Ui},
     emath::{Align, Vec2},
     epaint::Color32,
   };
-  use egui_extras::{Size, TableBuilder};
+  use egui_extras::{Column, TableBuilder};
   use std::{borrow::Cow, path::PathBuf};
 
   pub struct SkillLvl {
@@ -355,9 +355,6 @@ mod game_info {
     }
 
     fn show_skill_category(&mut self, ui: &mut Ui, category: SkillCategory) -> bool {
-      let row_size = TextStyle::Body.resolve(ui.style()).size + 4.0;
-      let table_layout = Layout::left_to_right(Align::Center);
-      let table_layout = table_layout.with_cross_align(Align::Center);
       let (scroll_id, groups) = match category {
         SkillCategory::Adventurer => ("offline_adventurer_skills", &mut self.adv),
         SkillCategory::Producer => ("offline_producer_skills", &mut self.prd),
@@ -375,13 +372,16 @@ mod game_info {
                 CollapsingHeader::new(skill_group.name)
                   .id_source(format!("{}_offline", skill_group.name.to_lowercase()))
                   .show(&mut col[0], |ui| {
+                    let spacing = ui.spacing().item_spacing;
+                    let row_size = util::button_size(ui) + spacing[1] * 2.0;
+                    let available_width = ui.available_width();
                     TableBuilder::new(ui)
-                      .cell_layout(table_layout)
+                      .cell_layout(Layout::left_to_right(Align::Center))
                       .striped(true)
-                      .scroll(false)
-                      .column(Size::relative(0.64))
-                      .column(Size::relative(0.18))
-                      .column(Size::remainder())
+                      .vscroll(false)
+                      .column(Column::exact(available_width * 0.64 - spacing[0]))
+                      .column(Column::exact(available_width * 0.18 - spacing[0]))
+                      .column(Column::remainder())
                       .header(row_size, |mut header| {
                         const HEADER_COLOR: Color32 = Color32::from_rgb(229, 187, 123);
                         header.col(|ui| {
