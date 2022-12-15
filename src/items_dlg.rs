@@ -31,7 +31,7 @@ impl ItemsDlg {
       let available = ctx.available_rect();
       let mut open = true;
 
-      Window::new(RichText::from("🎒  Inventory Items").strong())
+      Window::new(RichText::from("⚔  Inventory Items").strong())
         .open(&mut open)
         .collapsible(false)
         .resizable(false)
