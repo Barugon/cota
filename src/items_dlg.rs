@@ -86,8 +86,8 @@ impl ItemsDlg {
                       if let Some(dur) = &mut item.dur {
                         ui.set_enabled(dur.minor != dur.major);
                         if ui.button("Repair").clicked() {
-                          // The actual maximum durability is unknown here, so just set the durability to a high value.
-                          // The value will be adjusted in-game to the actual maximum when the item takes damage.
+                          // The actual maximum durability is unknown here, so just set the durability to a high
+                          // value, it will be adjusted in-game to the actual maximum when the item takes damage.
                           dur.minor = 5000.0;
                           dur.major = 5000.0;
                           modified = true;
