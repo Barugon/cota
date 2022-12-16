@@ -262,7 +262,7 @@ impl Stats {
     ui.add_enabled_ui(!self.stats.is_empty(), |ui| {
       const NAME_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
       let spacing = ui.spacing().item_spacing;
-      let row_size = util::text_size(ui) + spacing[1];
+      let row_size = util::text_size(ui) + spacing[1] * 2.0;
       let available_width = ui.available_width();
       TableBuilder::new(ui)
         .cell_layout(Layout::left_to_right(Align::Center))
