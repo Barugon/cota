@@ -42,4 +42,6 @@ Using either straight text or regular expressions.
 
 ### Offline save-game editor
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/170775639.yDCLLWbV.Screenshotfrom20220710124857.png)
+![screenshot](https://a4.pbase.com/o12/09/605909/1/170775639.JD7XD39u.Screenshotfrom20221216144706.png)
+
+![screenshot](https://a4.pbase.com/o12/09/605909/1/173233692.lKzg5kgV.Screenshotfrom20221216144200.png)
