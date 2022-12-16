@@ -290,18 +290,18 @@ pub fn timestamp_to_string(ts: Option<i64>) -> String {
   dt.format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
-/// Get the size of a scrollbar.
+/// Get the size (thickness) of a scrollbar.
 pub fn scroll_bar_size(ui: &Ui) -> f32 {
   let spacing = ui.spacing();
   spacing.scroll_bar_inner_margin + spacing.scroll_bar_width + spacing.scroll_bar_outer_margin
 }
 
-/// Get the size of a Button.
+/// Get the size (height) of a Button.
 pub fn button_size(ui: &Ui) -> f32 {
   text_size(ui) + ui.spacing().button_padding[1] * 2.0
 }
 
-/// Get the size of body text.
+/// Get the size (height) of body text.
 pub fn text_size(ui: &Ui) -> f32 {
   TextStyle::Body.resolve(ui.style()).size
 }
