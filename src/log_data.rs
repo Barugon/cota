@@ -234,7 +234,7 @@ pub async fn find_log_entries(
   for filename in filenames {
     canceled!(cancel, String::new());
     let path = log_path.join(filename);
-    if let Ok(text) = fs::read_to_string(&path) {
+    if let Ok(text) = fs::read_to_string(path) {
       if text.is_empty() || !verify_log_text(&text) {
         continue;
       }
