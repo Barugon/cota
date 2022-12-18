@@ -238,7 +238,7 @@ mod game_info {
     epaint::Color32,
   };
   use egui_extras::{Column, TableBuilder};
-  use std::{borrow::Cow, path::PathBuf};
+  use std::{borrow::Cow, ffi::OsStr, path::PathBuf};
 
   pub struct SkillLvl {
     info: Skill,
@@ -466,6 +466,13 @@ mod game_info {
     }
 
     pub fn store_as(&mut self, path: PathBuf) -> Result<(), Cow<'static, str>> {
+      // Make sure the extension is "sota".
+      let path = if path.extension() != Some(OsStr::new("sota")) {
+        path.with_extension("sota")
+      } else {
+        path
+      };
+
       self.update_json();
       let result = self.data.store_as(path);
       if result.is_ok() {
