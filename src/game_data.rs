@@ -58,6 +58,11 @@ impl GameData {
           return Err(Cow::from("Unable to parse adventurer experience"));
         }
 
+        // Make sure producer experience is there.
+        if character.get(PE).and_then(|exp| exp.to_i64()).is_none() {
+          return Err(Cow::from("Unable to parse producer experience"));
+        }
+
         // Get the skills value.
         let Some(skills) = character.get(SK2) else { return Err(Cow::from("Unable to find skills")) };
         if !skills.is_object() {
