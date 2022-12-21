@@ -18,9 +18,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt -y install tzdata && apt -y
 ```toml
 [target.x86_64-unknown-linux-gnu]
 image = "docker.io/library/ubuntu:20.04"
-
-[target.x86_64-pc-windows-gnu]
-image = "docker.io/library/ubuntu:20.04"
 ```
 
 - Build the docker image
