@@ -484,7 +484,7 @@ mod game_info {
     pub fn modified(&self) -> bool {
       self.adv_lvl != self.adv_lvl_cmp
         || self.prd_lvl != self.prd_lvl_cmp
-        || self.gold != self.gold_cmp
+        || self.gold_modified()
         || self.items_modified()
         || modified(&self.adv)
         || modified(&self.prd)
@@ -524,6 +524,13 @@ mod game_info {
       self.data.set_gold(self.gold);
       update_json(&mut self.data, &self.adv);
       update_json(&mut self.data, &self.prd);
+    }
+
+    fn gold_modified(&self) -> bool {
+      if self.gold != self.gold_cmp {
+        return self.gold < self.gold_cmp || self.gold != i32::MAX / 2;
+      }
+      false
     }
 
     fn items_modified(&self) -> bool {
