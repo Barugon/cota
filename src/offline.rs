@@ -528,7 +528,7 @@ mod game_info {
 
     fn gold_modified(&self) -> bool {
       if self.gold != self.gold_cmp {
-        return self.gold < self.gold_cmp || self.gold != i32::MAX / 2;
+        return self.gold_cmp < self.gold || self.gold != i32::MAX / 2;
       }
       false
     }
