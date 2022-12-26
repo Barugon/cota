@@ -346,7 +346,7 @@ fn get_avatar_id(text: &str) -> Option<String> {
 }
 
 fn get_avatar_name(text: &str, avatar: &str) -> Option<String> {
-  // Get the Character json.
+  // Get the CharacterName json.
   let json = get_json(text, "CharacterName", avatar)?;
 
   // Get the avatar name.
