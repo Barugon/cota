@@ -115,7 +115,7 @@ impl Offline {
         if let Some(game) = &mut self.game {
           let mut gold = game.gold();
           let speed = (gold as f64 / 100.0).max(1.0);
-          let range = 0..=i32::MAX / 2;
+          let range = 0..=MAX_GOLD;
           let widget = DragValue::new(&mut gold).speed(speed).clamp_range(range);
           if ui.add(widget).changed() {
             game.set_gold(gold);
@@ -229,6 +229,8 @@ fn image_button(image: &RetainedImage, ui: &mut Ui) -> Response {
   let image_size = emath::vec2(image.size()[0] as f32, image.size()[1] as f32);
   ui.add(ImageButton::new(texture_id, image_size))
 }
+
+const MAX_GOLD: i32 = i32::MAX / 2;
 
 mod game_info {
   use crate::{
@@ -538,7 +540,7 @@ mod game_info {
 
     fn gold_modified(&self) -> bool {
       if self.gold != self.gold_cmp {
-        return self.gold_cmp < self.gold || self.gold != i32::MAX / 2;
+        return self.gold_cmp < self.gold || self.gold != super::MAX_GOLD;
       }
       false
     }
