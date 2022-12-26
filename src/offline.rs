@@ -144,11 +144,13 @@ impl Offline {
         ui.label(WidgetText::from(error.as_ref()).color(Color32::LIGHT_RED));
       } else if let Some(game) = self.game.as_ref() {
         let file_name = game.get_file_name();
-        ui.label(if self.is_modified() {
-          format!("Editing {} - *{}", game.avatar_name(), file_name)
-        } else {
-          format!("Editing {} - {}", game.avatar_name(), file_name)
-        });
+        let modified = if self.is_modified() { "*" } else { "" };
+        ui.label(format!(
+          "Editing {} - {}{}",
+          game.avatar_name(),
+          modified,
+          file_name
+        ));
       }
     });
   }
