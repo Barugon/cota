@@ -142,11 +142,12 @@ impl Offline {
     ui.centered_and_justified(|ui| {
       if let Some(error) = &self.error {
         ui.label(WidgetText::from(error.as_ref()).color(Color32::LIGHT_RED));
-      } else if let Some(file_name) = self.file_name() {
+      } else if let Some(game) = self.game.as_ref() {
+        let file_name = game.get_file_name();
         ui.label(if self.is_modified() {
-          format!("Editing {} (modified)", file_name)
+          format!("Editing {} - *{}", game.avatar_name(), file_name)
         } else {
-          format!("Editing {}", file_name)
+          format!("Editing {} - {}", game.avatar_name(), file_name)
         });
       }
     });
@@ -426,6 +427,10 @@ mod game_info {
       });
 
       changed
+    }
+
+    pub fn avatar_name(&self) -> &str {
+      self.data.avatar_name()
     }
 
     pub fn items_mut(&mut self) -> &mut Vec<Item> {
