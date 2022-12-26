@@ -516,10 +516,13 @@ mod game_info {
     }
 
     fn accept_changes(&mut self) {
+      // Since gold can be larger than the editor maximum, we need to check here.
+      if self.gold_modified() {
+        self.gold_cmp = self.gold;
+      }
       self.items_cmp = self.items.clone();
       self.adv_lvl_cmp = self.adv_lvl;
       self.prd_lvl_cmp = self.prd_lvl;
-      self.gold_cmp = self.gold;
       accept_changes(&mut self.adv);
       accept_changes(&mut self.prd);
     }
