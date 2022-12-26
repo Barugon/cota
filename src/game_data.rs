@@ -15,6 +15,9 @@ pub struct GameData {
   // Avatar ID.
   avatar: String,
 
+  // Avatar name.
+  name: String,
+
   // Backpack ID.
   backpack: String,
 
@@ -33,6 +36,9 @@ impl GameData {
       Ok(text) => {
         // Get the avatar ID.
         let Some(avatar) = get_avatar_id(&text) else { return Err(Cow::from("Unable to determine the current avatar")) };
+
+        // Get the avatar name.
+        let Some(name) = get_avatar_name(&text, &avatar) else { return Err(Cow::from("Unable to get the avatar name")) };
 
         // Get the CharacterSheet JSON.
         let Some(character) = get_json(&text, "CharacterSheet", &avatar) else { return Err(Cow::from("Unable to find character sheet")) };
@@ -78,6 +84,7 @@ impl GameData {
           path: RwLock::new(path),
           text,
           avatar,
+          name,
           backpack,
           character,
           inventory,
@@ -116,6 +123,10 @@ impl GameData {
       },
       Err(err) => Err(Cow::from(format!("Unable to store file: {}", err))),
     }
+  }
+
+  pub fn avatar_name(&self) -> &str {
+    &self.name
   }
 
   pub fn get_gold(&self) -> Option<i32> {
@@ -293,12 +304,14 @@ impl ToI64 for Value {
 }
 
 const USER_ID: &str = "000000000000000000000001";
+const MAINBP: &str = "mainbp";
 const BAG: &str = "bag";
 const PHP: &str = "php";
 const SK2: &str = "sk2";
 const AE: &str = "ae";
 const AN: &str = "an";
 const DC: &str = "dc";
+const FN: &str = "fn";
 const HP: &str = "hp";
 const IN: &str = "in";
 const PE: &str = "pe";
@@ -332,12 +345,23 @@ fn get_avatar_id(text: &str) -> Option<String> {
   None
 }
 
+fn get_avatar_name(text: &str, avatar: &str) -> Option<String> {
+  // Get the Character json.
+  let json = get_json(text, "CharacterName", avatar)?;
+
+  // Get the avatar name.
+  if let Some(Value::String(name)) = json.get(FN) {
+    return Some(name.clone());
+  }
+  None
+}
+
 fn get_backpack_id(text: &str, avatar: &str) -> Option<String> {
   // Get the Character json.
   let json = get_json(text, "Character", avatar)?;
 
   // Get the backpack ID.
-  if let Some(Value::String(id)) = json.get("mainbp") {
+  if let Some(Value::String(id)) = json.get(MAINBP) {
     return Some(id.clone());
   }
   None
