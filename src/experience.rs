@@ -45,8 +45,8 @@ impl Experience {
       if let Some(exp) = self.get_needed_exp() {
         let (text, exp) = if exp < 0 {
           // Half experience returned for un-training.
-          let exp = exp.abs() / 2;
-          (format!("({})", exp.to_formatted_string(&self.locale)), exp)
+          let exp = exp / 2;
+          (format!("({})", exp.abs().to_formatted_string(&self.locale)), exp)
         } else {
           (exp.to_formatted_string(&self.locale), exp)
         };
