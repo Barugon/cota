@@ -1,6 +1,7 @@
 use crate::util::{self, Skill, SkillCategory, SkillGroup};
+use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::{
-  egui::{DragValue, Layout, RichText, ScrollArea, Ui},
+  egui::{DragValue, Label, Layout, RichText, ScrollArea, Sense, Ui, Widget},
   emath::{Align, Vec2},
   epaint::Color32,
 };
@@ -42,15 +43,20 @@ impl Experience {
 
       ui.label(RichText::from("Experience").color(LABEL_COLOR));
       if let Some(exp) = self.get_needed_exp() {
-        let text = if exp < 0 {
+        let (text, exp) = if exp < 0 {
           // Half experience returned for un-training.
           let exp = exp.abs() / 2;
-          format!("({})", exp.to_formatted_string(&self.locale))
+          (format!("({})", exp.to_formatted_string(&self.locale)), exp)
         } else {
-          exp.to_formatted_string(&self.locale)
+          (exp.to_formatted_string(&self.locale), exp)
         };
-        let exp = RichText::from(text).strong();
-        ui.label(exp);
+        let text = RichText::from(text).strong();
+        let response = Label::new(text).sense(Sense::click()).ui(ui);
+        if response.on_hover_text_at_pointer("Click to copy").clicked() {
+          if let Ok::<ClipboardContext, _>(mut ctx) = ClipboardProvider::new() {
+            let _ = ctx.set_contents(format!("{}", exp));
+          }
+        }
       }
     });
 
