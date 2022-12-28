@@ -46,11 +46,14 @@ impl Experience {
         let (text, exp) = if exp < 0 {
           // Half experience returned for un-training.
           let exp = exp / 2;
-          (format!("({})", exp.abs().to_formatted_string(&self.locale)), exp)
+          let text = format!("({})", exp.abs().to_formatted_string(&self.locale));
+          let text = RichText::from(text).color(Color32::LIGHT_RED);
+          (text, exp)
         } else {
-          (exp.to_formatted_string(&self.locale), exp)
+          let text = exp.to_formatted_string(&self.locale);
+          let text = RichText::from(text).color(Color32::WHITE);
+          (text, exp)
         };
-        let text = RichText::from(text).strong();
         let response = Label::new(text).sense(Sense::click()).ui(ui);
         if response.on_hover_text_at_pointer("Click to copy").clicked() {
           // Copy the value to the clipboard.
