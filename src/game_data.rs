@@ -190,7 +190,9 @@ impl GameData {
       items.push(Item {
         id: key.into(),
         name,
+        cnt_cmp: cnt,
         cnt,
+        dur_cmp: dur.clone(),
         dur,
         bag,
       });
@@ -264,11 +266,30 @@ impl Durability {
 
 #[derive(Clone)]
 pub struct Item {
+  cnt_cmp: u64,
+  dur_cmp: Option<Durability>,
+
   pub id: String,
   pub name: String,
   pub cnt: u64,
   pub dur: Option<Durability>,
   pub bag: bool,
+}
+
+impl Item {
+  pub fn changed(&self) -> bool {
+    self.cnt != self.cnt_cmp || self.dur != self.dur_cmp
+  }
+
+  pub fn accept(&mut self) {
+    self.cnt = self.cnt_cmp;
+    self.dur = self.dur_cmp.clone();
+  }
+
+  pub fn discard(&mut self) {
+    self.cnt_cmp = self.cnt;
+    self.dur_cmp = self.dur.clone();
+  }
 }
 
 pub fn get_skill_lvl(skills: &Value, id: u64, mul: f64) -> Option<i32> {
@@ -425,8 +446,7 @@ fn set_json(text: &str, collection: &str, id: &str, val: &Value) -> Option<Strin
 
   // Concatenate the XML with the new JSON.
   let parts = [&text[..start], &json, &text[end..]];
-  let mut result = String::new();
-  result.reserve(parts[0].len() + parts[1].len() + parts[2].len());
+  let mut result = String::with_capacity(parts[0].len() + parts[1].len() + parts[2].len());
   result.push_str(parts[0]);
   result.push_str(parts[1]);
   result.push_str(parts[2]);
