@@ -188,11 +188,11 @@ impl GameData {
       let bag = val.get(BAG).is_some();
 
       items.push(Item {
+        cnt_cmp: cnt,
+        dur_cmp: dur.clone(),
         id: key.into(),
         name,
-        cnt_cmp: cnt,
         cnt,
-        dur_cmp: dur.clone(),
         dur,
         bag,
       });
