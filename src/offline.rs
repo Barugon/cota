@@ -279,7 +279,6 @@ mod game_info {
     data: GameData,
     adv: Vec<SkillLvlGroup>,
     prd: Vec<SkillLvlGroup>,
-    items_cmp: Vec<Item>,
     items: Vec<Item>,
     adv_lvl_cmp: i32,
     adv_lvl: i32,
@@ -318,7 +317,6 @@ mod game_info {
         data,
         adv,
         prd,
-        items_cmp: items.clone(),
         items,
         adv_lvl_cmp: adv_lvl,
         adv_lvl,
@@ -500,7 +498,9 @@ mod game_info {
     }
 
     pub fn discard_changes(&mut self) {
-      self.items = self.items_cmp.clone();
+      for item in &mut self.items {
+        item.discard();
+      }
       self.adv_lvl = self.adv_lvl_cmp;
       self.prd_lvl = self.prd_lvl_cmp;
       self.gold = self.gold_cmp;
@@ -522,7 +522,10 @@ mod game_info {
       if self.gold_modified() {
         self.gold_cmp = self.gold;
       }
-      self.items_cmp = self.items.clone();
+
+      for item in &mut self.items {
+        item.accept();
+      }
       self.adv_lvl_cmp = self.adv_lvl;
       self.prd_lvl_cmp = self.prd_lvl;
       accept_changes(&mut self.adv);
@@ -546,10 +549,8 @@ mod game_info {
     }
 
     fn items_modified(&self) -> bool {
-      assert_eq!(self.items.len(), self.items_cmp.len());
-      for (a, b) in self.items.iter().zip(self.items_cmp.iter()) {
-        assert_eq!(a.id, b.id);
-        if a.cnt != b.cnt || a.dur != b.dur {
+      for item in &self.items {
+        if item.changed() {
           return true;
         }
       }
