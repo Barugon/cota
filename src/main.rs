@@ -19,10 +19,11 @@ mod offline;
 mod search_dlg;
 mod stats;
 
-use crate::app::App;
+use app::App;
+use util::{APP_ICON, APP_TITLE};
 
 fn main() {
-  let icon = image::load_from_memory(util::APP_ICON).unwrap();
+  let icon = image::load_from_memory(APP_ICON).unwrap();
   let options = eframe::NativeOptions {
     resizable: false,
     initial_window_size: Some(App::inner_window_size()),
@@ -36,9 +37,5 @@ fn main() {
     ..Default::default()
   };
 
-  eframe::run_native(
-    util::APP_TITLE,
-    options,
-    Box::new(|cc| Box::new(App::new(cc))),
-  );
+  eframe::run_native(APP_TITLE, options, Box::new(|cc| Box::new(App::new(cc))));
 }
