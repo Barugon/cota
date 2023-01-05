@@ -17,7 +17,7 @@ use std::sync::{
 
 pub struct LogDlg {
   title: String,
-  state: Arc<AppState>,
+  state: AppState,
   cancel: Option<Arc<AtomicBool>>,
   status: RichText,
   layout: Option<LayoutJob>,
@@ -27,7 +27,7 @@ pub struct LogDlg {
 
 /// Dialog window for showing log search results.
 impl LogDlg {
-  pub fn new(state: Arc<AppState>) -> Self {
+  pub fn new(state: AppState) -> Self {
     Self {
       title: String::new(),
       state,
@@ -98,7 +98,7 @@ impl LogDlg {
 
   pub fn open(&mut self, avatar: &str, cancel: Arc<AtomicBool>) {
     if !self.visible {
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       self.title = format!("🗊  Search Results ({})", avatar);
       self.status = RichText::from("Processing...").color(Color32::from_rgb(229, 187, 123));
       self.cancel = Some(cancel);
@@ -124,7 +124,7 @@ impl LogDlg {
 
   fn close(&mut self) {
     if self.visible {
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       if let Some(cancel) = self.cancel.take() {
         // Cancel the search if it's still outstanding.
         cancel.store(true, Ordering::Relaxed);

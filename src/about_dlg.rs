@@ -5,16 +5,15 @@ use eframe::{
   epaint::Color32,
 };
 use egui_extras::RetainedImage;
-use std::sync::{atomic::Ordering, Arc};
 
 pub struct AboutDlg {
   logo: RetainedImage,
-  state: Arc<AppState>,
+  state: AppState,
   visible: bool,
 }
 
 impl AboutDlg {
-  pub fn new(state: Arc<AppState>) -> Self {
+  pub fn new(state: AppState) -> Self {
     let logo_id = format!("{}_logo", util::APP_NAME);
     let logo = RetainedImage::from_image_bytes(logo_id, util::APP_ICON).unwrap();
     let visible = false;
@@ -71,14 +70,14 @@ impl AboutDlg {
 
   pub fn open(&mut self) {
     if !self.visible {
-      self.state.disable.store(true, Ordering::Relaxed);
+      self.state.set_disabled(true);
       self.visible = true;
     }
   }
 
   fn close(&mut self) {
     if self.visible {
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       self.visible = false;
     }
   }

@@ -8,15 +8,14 @@ use eframe::{
   epaint::Color32,
 };
 use egui_extras::{Column, TableBuilder};
-use std::sync::{atomic::Ordering, Arc};
 
 pub struct ItemsDlg {
-  state: Arc<AppState>,
+  state: AppState,
   visible: bool,
 }
 
 impl ItemsDlg {
-  pub fn new(state: Arc<AppState>) -> Self {
+  pub fn new(state: AppState) -> Self {
     Self {
       state,
       visible: false,
@@ -116,14 +115,14 @@ impl ItemsDlg {
 
   pub fn open(&mut self) {
     if !self.visible {
-      self.state.disable.store(true, Ordering::Relaxed);
+      self.state.set_disabled(true);
       self.visible = true;
     }
   }
 
   pub fn close(&mut self) {
     if self.visible {
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       self.visible = false;
     }
   }

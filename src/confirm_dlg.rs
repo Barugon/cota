@@ -4,7 +4,6 @@ use eframe::{
   emath::Align2,
   epaint::Color32,
 };
-use std::sync::{atomic::Ordering, Arc};
 
 #[derive(Clone, Copy)]
 pub enum Choice {
@@ -19,7 +18,7 @@ pub enum Hence {
 
 pub struct ConfirmDlg {
   file: String,
-  state: Arc<AppState>,
+  state: AppState,
   choice: Option<Choice>,
   hence: Option<Hence>,
   visible: bool,
@@ -27,7 +26,7 @@ pub struct ConfirmDlg {
 
 /// Dialog window asking the user what to do with save-game changes.
 impl ConfirmDlg {
-  pub fn new(state: Arc<AppState>) -> Self {
+  pub fn new(state: AppState) -> Self {
     Self {
       file: String::new(),
       state,
@@ -82,7 +81,7 @@ impl ConfirmDlg {
 
   pub fn open(&mut self, file: String, hence: Hence) {
     if !self.visible {
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       self.file = file;
       self.hence = Some(hence);
       self.choice = None;
@@ -104,7 +103,7 @@ impl ConfirmDlg {
 
   fn close(&mut self, choice: Option<Choice>) {
     if self.visible {
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       if choice.is_none() {
         // If choice is None then hence is None.
         self.hence = None;

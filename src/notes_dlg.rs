@@ -5,10 +5,9 @@ use eframe::{
   },
   emath::Align2,
 };
-use std::sync::{atomic::Ordering, Arc};
 
 pub struct NotesDlg {
-  state: Arc<AppState>,
+  state: AppState,
   title: String,
   text: String,
   result: Option<String>,
@@ -18,7 +17,7 @@ pub struct NotesDlg {
 
 // Dialog window for editing avatar notes.
 impl NotesDlg {
-  pub fn new(state: Arc<AppState>) -> Self {
+  pub fn new(state: AppState) -> Self {
     Self {
       state,
       title: String::new(),
@@ -91,7 +90,7 @@ impl NotesDlg {
 
   pub fn open(&mut self, avatar: &str, text: String) {
     if !self.visible {
-      self.state.disable.store(true, Ordering::Relaxed);
+      self.state.set_disabled(true);
       self.title = format!("📓  Notes for {}", avatar);
       self.text = text;
       self.result = None;
@@ -106,7 +105,7 @@ impl NotesDlg {
 
   fn accept(&mut self) {
     if self.visible {
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       let mut text = String::new();
       std::mem::swap(&mut text, &mut self.text);
       self.result = Some(text);
@@ -116,7 +115,7 @@ impl NotesDlg {
 
   fn reject(&mut self) {
     if self.visible {
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       self.text.clear();
       self.visible = false;
     }

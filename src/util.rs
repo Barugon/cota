@@ -4,7 +4,10 @@ use num_format::Locale;
 use regex::Regex;
 use std::{
   ops::{Range, RangeInclusive},
-  sync::atomic::AtomicBool,
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
 };
 
 pub const APP_ICON: &[u8] = include_bytes!("res/icon.png");
@@ -58,20 +61,37 @@ macro_rules! canceled {
   };
 }
 
-pub struct AppState {
+#[derive(Default)]
+struct State {
   /// Show the "progress" cursor.
-  pub busy: AtomicBool,
+  busy: AtomicBool,
 
-  /// Enable/disable the whole UI.
-  pub disable: AtomicBool,
+  /// Enable/disable the main UI.
+  disabled: AtomicBool,
 }
 
-impl Default for AppState {
-  fn default() -> Self {
-    Self {
-      busy: AtomicBool::new(false),
-      disable: AtomicBool::new(false),
-    }
+#[derive(Clone, Default)]
+pub struct AppState {
+  state: Arc<State>,
+}
+
+impl AppState {
+  pub fn set_busy(&mut self, busy: bool) {
+    self.state.busy.store(busy, Ordering::Relaxed);
+  }
+
+  #[must_use]
+  pub fn is_busy(&self) -> bool {
+    self.state.busy.load(Ordering::Relaxed)
+  }
+
+  pub fn set_disabled(&mut self, disable: bool) {
+    self.state.disabled.store(disable, Ordering::Relaxed);
+  }
+
+  #[must_use]
+  pub fn is_disabled(&self) -> bool {
+    self.state.disabled.load(Ordering::Relaxed)
   }
 }
 
