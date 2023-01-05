@@ -47,20 +47,6 @@ macro_rules! ok {
   };
 }
 
-#[macro_export]
-macro_rules! canceled {
-  ($cancel:expr) => {
-    if $cancel.load(std::sync::atomic::Ordering::Relaxed) {
-      return;
-    }
-  };
-  ($cancel:expr, $ret:expr) => {
-    if $cancel.load(std::sync::atomic::Ordering::Relaxed) {
-      return $ret;
-    }
-  };
-}
-
 #[derive(Default)]
 struct State {
   /// Show the "progress" cursor.
@@ -92,6 +78,22 @@ impl AppState {
   #[must_use]
   pub fn is_disabled(&self) -> bool {
     self.state.disabled.load(Ordering::Relaxed)
+  }
+}
+
+#[derive(Clone, Default)]
+pub struct Cancel {
+  canceled: Arc<AtomicBool>,
+}
+
+impl Cancel {
+  pub fn cancel(&mut self) {
+    self.canceled.store(true, Ordering::Relaxed);
+  }
+
+  #[must_use]
+  pub fn is_canceled(&self) -> bool {
+    self.canceled.load(Ordering::Relaxed)
   }
 }
 

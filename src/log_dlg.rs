@@ -1,6 +1,6 @@
 use crate::{
   log_data,
-  util::{self, AppState, Search},
+  util::{self, AppState, Cancel, Search},
 };
 use eframe::{
   egui::{Context, Key, RichText, ScrollArea, TextEdit, TextFormat, Ui, Window},
@@ -10,15 +10,11 @@ use eframe::{
     Color32, FontFamily, FontId,
   },
 };
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
-};
 
 pub struct LogDlg {
   title: String,
   state: AppState,
-  cancel: Option<Arc<AtomicBool>>,
+  cancel: Option<Cancel>,
   status: RichText,
   layout: Option<LayoutJob>,
   visible: bool,
@@ -96,7 +92,7 @@ impl LogDlg {
     self.visible
   }
 
-  pub fn open(&mut self, avatar: &str, cancel: Arc<AtomicBool>) {
+  pub fn open(&mut self, avatar: &str, cancel: Cancel) {
     if !self.visible {
       self.state.set_disabled(false);
       self.title = format!("🗊  Search Results ({})", avatar);
@@ -125,9 +121,9 @@ impl LogDlg {
   fn close(&mut self) {
     if self.visible {
       self.state.set_disabled(false);
-      if let Some(cancel) = self.cancel.take() {
+      if let Some(mut cancel) = self.cancel.take() {
         // Cancel the search if it's still outstanding.
-        cancel.store(true, Ordering::Relaxed);
+        cancel.cancel();
       }
       self.status = Default::default();
       self.layout = None;

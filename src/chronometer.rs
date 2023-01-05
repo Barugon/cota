@@ -1,3 +1,4 @@
+use crate::util::Cancel;
 use chrono::{DateTime, TimeZone, Utc};
 use eframe::{
   egui::{Context, Grid, Layout, RichText, Ui},
@@ -5,17 +6,11 @@ use eframe::{
   epaint::Color32,
 };
 use futures::executor::ThreadPool;
-use std::{
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
-  time::Duration,
-};
+use std::{sync::Arc, time::Duration};
 
 pub struct Chronometer {
   thread_pool: Arc<ThreadPool>,
-  timer_cancel: Option<Arc<AtomicBool>>,
+  timer_cancel: Option<Cancel>,
 }
 
 impl Chronometer {
@@ -204,11 +199,11 @@ impl Chronometer {
     self.stop_timer();
 
     let ctx = ctx.clone();
-    let cancel = Arc::new(AtomicBool::new(false));
+    let cancel = Cancel::default();
     self.timer_cancel = Some(cancel.clone());
 
     self.thread_pool.spawn_ok(async move {
-      while !cancel.load(Ordering::Relaxed) {
+      while !cancel.is_canceled() {
         // Request a repaint every quarter-second.
         std::thread::sleep(Duration::from_millis(250));
         ctx.request_repaint();
@@ -217,8 +212,8 @@ impl Chronometer {
   }
 
   pub fn stop_timer(&mut self) {
-    if let Some(timer_cancel) = self.timer_cancel.take() {
-      timer_cancel.store(true, Ordering::Relaxed);
+    if let Some(mut timer_cancel) = self.timer_cancel.take() {
+      timer_cancel.cancel();
     }
   }
 }
