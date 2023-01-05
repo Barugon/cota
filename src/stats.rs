@@ -4,7 +4,7 @@ use crate::{
   log_dlg::LogDlg,
   notes_dlg::NotesDlg,
   search_dlg::SearchDlg,
-  util::{self, AppState, Search},
+  util::{self, AppState, Cancel, Search},
 };
 use eframe::{
   egui::{ComboBox, Context, Layout, RichText, Ui},
@@ -17,10 +17,7 @@ use num_format::Locale;
 use std::{
   collections::HashMap,
   path::{Path, PathBuf},
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
+  sync::Arc,
 };
 
 pub struct Stats {
@@ -429,8 +426,8 @@ impl Stats {
       self.channel.cancel_search.take(),
     ];
 
-    for cancel in cancelers.into_iter().flatten() {
-      cancel.store(true, Ordering::Relaxed);
+    for mut cancel in cancelers.into_iter().flatten() {
+      cancel.cancel();
     }
   }
 
@@ -443,11 +440,11 @@ impl Stats {
     self.stats = StatsData::default();
 
     // Cancel any previous request.
-    if let Some(cancel) = self.channel.cancel_avatars.take() {
-      cancel.store(true, Ordering::Relaxed);
+    if let Some(mut cancel) = self.channel.cancel_avatars.take() {
+      cancel.cancel();
     }
 
-    let cancel = Arc::new(AtomicBool::new(false));
+    let cancel = Cancel::default();
     self.channel.cancel_avatars = Some(cancel.clone());
 
     // Show the busy cursor.
@@ -473,12 +470,12 @@ impl Stats {
     self.stats = StatsData::default();
 
     // Cancel any previous request.
-    if let Some(cancel) = self.channel.cancel_dates.take() {
-      cancel.store(true, Ordering::Relaxed);
+    if let Some(mut cancel) = self.channel.cancel_dates.take() {
+      cancel.cancel();
     }
 
     if !self.avatar.is_empty() {
-      let cancel = Arc::new(AtomicBool::new(false));
+      let cancel = Cancel::default();
       self.channel.cancel_dates = Some(cancel.clone());
 
       // Show the busy cursor.
@@ -509,13 +506,13 @@ impl Stats {
     self.stats = StatsData::default();
 
     // Cancel any previous request.
-    if let Some(cancel) = self.channel.cancel_stats.take() {
-      cancel.store(true, Ordering::Relaxed);
+    if let Some(mut cancel) = self.channel.cancel_stats.take() {
+      cancel.cancel();
     }
 
     if let Some(date) = self.date {
       if !self.avatar.is_empty() {
-        let cancel = Arc::new(AtomicBool::new(false));
+        let cancel = Cancel::default();
         self.channel.cancel_stats = Some(cancel.clone());
 
         // Show the busy cursor.
@@ -544,7 +541,7 @@ impl Stats {
       return;
     }
 
-    let cancel = Arc::new(AtomicBool::new(false));
+    let cancel = Cancel::default();
     self.channel.cancel_search = Some(cancel.clone());
     self.log_dlg.open(&self.avatar, cancel.clone());
 
@@ -614,8 +611,8 @@ enum Message {
 struct Channel {
   tx: mpsc::UnboundedSender<Message>,
   rx: mpsc::UnboundedReceiver<Message>,
-  cancel_avatars: Option<Arc<AtomicBool>>,
-  cancel_dates: Option<Arc<AtomicBool>>,
-  cancel_stats: Option<Arc<AtomicBool>>,
-  cancel_search: Option<Arc<AtomicBool>>,
+  cancel_avatars: Option<Cancel>,
+  cancel_dates: Option<Cancel>,
+  cancel_stats: Option<Cancel>,
+  cancel_search: Option<Cancel>,
 }

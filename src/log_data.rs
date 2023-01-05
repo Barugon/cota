@@ -1,4 +1,4 @@
-use crate::util::{self, Search};
+use crate::util::{self, Cancel, Search};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{channel::mpsc, executor::ThreadPool, future::join_all, StreamExt};
 use regex::Regex;
@@ -8,7 +8,7 @@ use std::{
   fs,
   path::{Path, PathBuf},
   str::SplitWhitespace,
-  sync::{atomic::AtomicBool, Arc},
+  sync::Arc,
 };
 
 /// Get the date portion of a log entry.
@@ -84,12 +84,15 @@ const STATS_KEY: &str = " AdventurerLevel: ";
 const LOG_SEARCH_LIMIT: usize = 256 * 1024;
 
 /// Get a vector of avatar names from the log file names.
-pub async fn get_avatars(log_path: PathBuf, cancel: Arc<AtomicBool>) -> Vec<String> {
+pub async fn get_avatars(log_path: PathBuf, cancel: Cancel) -> Vec<String> {
   let filenames = get_log_filenames(&log_path, None, None);
   let mut name_set = HashSet::new();
 
   for filename in &filenames {
-    canceled!(cancel, Vec::new());
+    if cancel.is_canceled() {
+      return Vec::new();
+    }
+
     let filename = &filename[FILENAME_START.len()..];
     if let Some(pos) = filename.rfind('_') {
       name_set.insert(&filename[..pos]);
@@ -98,11 +101,16 @@ pub async fn get_avatars(log_path: PathBuf, cancel: Arc<AtomicBool>) -> Vec<Stri
 
   let mut avatars = Vec::with_capacity(name_set.len());
   for name in name_set {
-    canceled!(cancel, Vec::new());
+    if cancel.is_canceled() {
+      return Vec::new();
+    }
+
     avatars.push(String::from(name));
   }
 
-  canceled!(cancel, Vec::new());
+  if cancel.is_canceled() {
+    return Vec::new();
+  }
 
   // Sort the avatars.
   avatars.sort_unstable();
@@ -113,7 +121,7 @@ pub async fn get_avatars(log_path: PathBuf, cancel: Arc<AtomicBool>) -> Vec<Stri
 pub async fn get_stats_timestamps(
   log_path: PathBuf,
   avatar: String,
-  cancel: Arc<AtomicBool>,
+  cancel: Cancel,
   thread_pool: Option<Arc<ThreadPool>>,
 ) -> Vec<i64> {
   // Collect the futures, one for each matching log file.
@@ -122,7 +130,9 @@ pub async fn get_stats_timestamps(
     let mut futures = Vec::with_capacity(filenames.len());
 
     for filename in filenames {
-      canceled!(cancel, Vec::new());
+      if cancel.is_canceled() {
+        return Vec::new();
+      }
 
       let path = log_path.join(filename.as_str());
       let cancel = cancel.clone();
@@ -132,7 +142,9 @@ pub async fn get_stats_timestamps(
         let mut timestamps = Vec::new();
 
         for line in text.lines() {
-          canceled!(cancel, Vec::new());
+          if cancel.is_canceled() {
+            return Vec::new();
+          }
 
           if let Some(ts) = get_stats_timestamp(line, date) {
             timestamps.push(ts);
@@ -163,12 +175,16 @@ pub async fn get_stats_timestamps(
     join_all(futures).await
   };
 
-  canceled!(cancel, Vec::new());
+  if cancel.is_canceled() {
+    return Vec::new();
+  }
 
   // Flatten the results.
   let mut timestamps: Vec<i64> = results.into_iter().flat_map(|v| v.into_iter()).collect();
 
-  canceled!(cancel, Vec::new());
+  if cancel.is_canceled() {
+    return Vec::new();
+  }
 
   // Sort the timestamps so that the most recent is first.
   timestamps.sort_unstable_by_key(|&key| Reverse(key));
@@ -176,12 +192,7 @@ pub async fn get_stats_timestamps(
 }
 
 /// Get the stats for the specified avatar and timestamp.
-pub async fn get_stats(
-  log_path: PathBuf,
-  avatar: String,
-  ts: i64,
-  cancel: Arc<AtomicBool>,
-) -> StatsData {
+pub async fn get_stats(log_path: PathBuf, avatar: String, ts: i64, cancel: Cancel) -> StatsData {
   if !avatar.is_empty() {
     let filenames = get_log_filenames(&log_path, Some(&avatar), Some(ts));
 
@@ -192,7 +203,10 @@ pub async fn get_stats(
         if let Ok(text) = fs::read_to_string(path) {
           // Find the line with the specific date/time.
           for line in text.lines() {
-            canceled!(cancel, StatsData::default());
+            if cancel.is_canceled() {
+              return StatsData::default();
+            }
+
             if let Some(mut stats) = get_stats_text(line, ts, date) {
               // Include subsequent lines that do not start with a square bracket.
               let pos = util::offset(&text, stats).unwrap();
@@ -220,7 +234,7 @@ pub async fn find_log_entries(
   log_path: PathBuf,
   avatar: String,
   search: Search,
-  cancel: Arc<AtomicBool>,
+  cancel: Cancel,
 ) -> String {
   // Work on files from newest to oldest.
   let filenames = {
@@ -232,7 +246,10 @@ pub async fn find_log_entries(
   let mut results = Vec::new();
   let mut total_size: usize = 0;
   for filename in filenames {
-    canceled!(cancel, String::new());
+    if cancel.is_canceled() {
+      return String::new();
+    }
+
     let path = log_path.join(filename);
     if let Ok(text) = fs::read_to_string(path) {
       if text.is_empty() || !verify_log_text(&text) {
@@ -244,7 +261,10 @@ pub async fn find_log_entries(
 
       // Iterate through the lines in reverse order (newest to oldest).
       for line in text.lines().rev() {
-        canceled!(cancel, String::new());
+        if cancel.is_canceled() {
+          return String::new();
+        }
+
         if search.find_in(line).is_none() {
           continue;
         }
@@ -273,7 +293,10 @@ pub async fn find_log_entries(
       // Push all the matching lines to a new string.
       let mut concatenated = String::with_capacity(alloc_size);
       for (date, text) in lines {
-        canceled!(cancel, String::new());
+        if cancel.is_canceled() {
+          return String::new();
+        }
+
         concatenated.push_str(date);
         concatenated.push_str(text);
         concatenated.push('\n');
@@ -289,7 +312,10 @@ pub async fn find_log_entries(
   // Concatenate the results.
   let mut text = String::with_capacity(total_size);
   for result in results {
-    canceled!(cancel, String::new());
+    if cancel.is_canceled() {
+      return String::new();
+    }
+
     text.push_str(&result);
   }
 
