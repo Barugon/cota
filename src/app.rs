@@ -18,11 +18,7 @@ use eframe::{
   glow, Storage,
 };
 use futures::executor::ThreadPoolBuilder;
-use std::{
-  ffi::OsStr,
-  path::Path,
-  sync::{atomic::Ordering, Arc},
-};
+use std::{ffi::OsStr, path::Path, sync::Arc};
 
 macro_rules! cmd {
   ($key:literal) => {
@@ -104,7 +100,7 @@ enum Page {
 
 pub struct App {
   // State.
-  state: Arc<AppState>,
+  state: AppState,
   page: Page,
 
   // Tab pages.
@@ -147,7 +143,7 @@ impl App {
     let thread_pool = Arc::new(thread_pool);
 
     // State.
-    let state = Arc::new(AppState::default());
+    let state = AppState::default();
     let page = Page::Stats;
 
     // Tab pages.
@@ -156,7 +152,7 @@ impl App {
     let stats = Stats::new(ctx, log_path, state.clone(), thread_pool.clone());
     let chronometer = Chronometer::new(thread_pool);
     let experience = Experience::new();
-    let offline = Offline::new(Arc::clone(&state));
+    let offline = Offline::new(state.clone());
 
     // Dialog windows.
     let about_dlg = AboutDlg::new(state.clone());
@@ -185,7 +181,7 @@ impl App {
         modifiers,
       } = event
       {
-        if *pressed && !self.state.disable.load(Ordering::Relaxed) {
+        if *pressed && !self.state.is_disabled() {
           match key {
             Key::Escape if self.page == Page::Stats && !self.stats.filter().is_none() => {
               self.stats.set_filter(StatsFilter::None);
@@ -252,7 +248,7 @@ impl App {
       .resizable(false);
     file_dlg.open();
 
-    self.state.disable.store(true, Ordering::Relaxed);
+    self.state.set_disabled(true);
     self.file_dlg = Some(file_dlg);
   }
 
@@ -279,7 +275,7 @@ impl App {
       .resizable(false);
     file_dlg.open();
 
-    self.state.disable.store(true, Ordering::Relaxed);
+    self.state.set_disabled(true);
     self.file_dlg = Some(file_dlg);
   }
 
@@ -298,7 +294,7 @@ impl App {
       .resizable(false);
     file_dlg.open();
 
-    self.state.disable.store(true, Ordering::Relaxed);
+    self.state.set_disabled(true);
     self.file_dlg = Some(file_dlg);
   }
 }
@@ -311,7 +307,7 @@ impl eframe::App for App {
     }
 
     // Set the progress cursor if the app is busy.
-    if self.state.busy.load(Ordering::Relaxed) {
+    if self.state.is_busy() {
       ctx.output().cursor_icon = CursorIcon::Progress;
     }
 
@@ -319,7 +315,7 @@ impl eframe::App for App {
     let close_menu = self.handle_hotkeys(ctx, frame);
 
     // Top panel for the menu bar.
-    let enabled = !self.state.disable.load(Ordering::Relaxed);
+    let enabled = !self.state.is_disabled();
     top_panel(ctx, |ui| {
       ui.set_enabled(enabled);
       ui.horizontal_centered(|ui| {
@@ -425,7 +421,7 @@ impl eframe::App for App {
             }
           }
         }
-        self.state.disable.store(false, Ordering::Relaxed);
+        self.state.set_disabled(false);
         self.file_dlg = None;
       }
     }

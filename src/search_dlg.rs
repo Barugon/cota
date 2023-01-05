@@ -5,10 +5,9 @@ use eframe::{
   epaint::Color32,
 };
 use regex::Regex;
-use std::sync::{atomic::Ordering, Arc};
 
 pub struct SearchDlg {
-  state: Arc<AppState>,
+  state: AppState,
   title: String,
   text: String,
   error: String,
@@ -20,7 +19,7 @@ pub struct SearchDlg {
 
 // Dialog window for inputting search term.
 impl SearchDlg {
-  pub fn new(state: Arc<AppState>) -> Self {
+  pub fn new(state: AppState) -> Self {
     Self {
       state,
       title: String::new(),
@@ -101,7 +100,7 @@ impl SearchDlg {
 
   pub fn open(&mut self, title: String) {
     if !self.visible {
-      self.state.disable.store(true, Ordering::Relaxed);
+      self.state.set_disabled(true);
       self.title = title;
       self.search = None;
       self.visible = true;
@@ -138,7 +137,7 @@ impl SearchDlg {
         },
       };
 
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       self.title.clear();
       self.visible = false;
     }
@@ -146,7 +145,7 @@ impl SearchDlg {
 
   fn reject(&mut self) {
     if self.visible {
-      self.state.disable.store(false, Ordering::Relaxed);
+      self.state.set_disabled(false);
       self.title.clear();
       self.text.clear();
       self.visible = false;

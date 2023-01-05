@@ -10,7 +10,7 @@ use eframe::{
   epaint::Color32,
 };
 use egui_extras::RetainedImage;
-use std::{borrow::Cow, path::PathBuf, sync::Arc};
+use std::{borrow::Cow, path::PathBuf};
 
 pub struct Offline {
   items_dlg: ItemsDlg,
@@ -23,7 +23,7 @@ pub struct Offline {
 }
 
 impl Offline {
-  pub fn new(state: Arc<AppState>) -> Self {
+  pub fn new(state: AppState) -> Self {
     const LOAD_ICON: &[u8] = include_bytes!("res/load.png");
     const STORE_ICON: &[u8] = include_bytes!("res/store.png");
 

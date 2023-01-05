@@ -33,7 +33,7 @@ pub struct Stats {
   // State.
   locale: Locale,
   log_path: PathBuf,
-  state: Arc<AppState>,
+  state: AppState,
 
   // Collections.
   avatars: Vec<String>,
@@ -58,7 +58,7 @@ impl Stats {
   pub fn new(
     ctx: &Context,
     log_path: PathBuf,
-    state: Arc<AppState>,
+    state: AppState,
     thread_pool: Arc<ThreadPool>,
   ) -> Self {
     let resist_stats = HashMap::from([
@@ -190,11 +190,11 @@ impl Stats {
           self.request_stats(ui.ctx());
         }
         Message::Stats(stats) => {
-          self.state.busy.store(false, Ordering::Relaxed);
+          self.state.set_busy(false);
           self.stats = stats;
         }
         Message::Search(text, search) => {
-          self.state.busy.store(false, Ordering::Relaxed);
+          self.state.set_busy(false);
           self.log_dlg.set_text(text, search, ui.ctx());
         }
       }
@@ -451,7 +451,7 @@ impl Stats {
     self.channel.cancel_avatars = Some(cancel.clone());
 
     // Show the busy cursor.
-    self.state.busy.store(true, Ordering::Relaxed);
+    self.state.set_busy(true);
 
     // Setup the future.
     let tx = self.channel.tx.clone();
@@ -482,7 +482,7 @@ impl Stats {
       self.channel.cancel_dates = Some(cancel.clone());
 
       // Show the busy cursor.
-      self.state.busy.store(true, Ordering::Relaxed);
+      self.state.set_busy(true);
 
       // Setup the future.
       let log_path = self.log_path.clone();
@@ -501,7 +501,7 @@ impl Stats {
       return;
     }
 
-    self.state.busy.store(false, Ordering::Relaxed);
+    self.state.set_busy(false);
   }
 
   fn request_stats(&mut self, ctx: &Context) {
@@ -519,7 +519,7 @@ impl Stats {
         self.channel.cancel_stats = Some(cancel.clone());
 
         // Show the busy cursor.
-        self.state.busy.store(true, Ordering::Relaxed);
+        self.state.set_busy(true);
 
         // Setup the future.
         let tx = self.channel.tx.clone();
@@ -536,7 +536,7 @@ impl Stats {
       }
     }
 
-    self.state.busy.store(false, Ordering::Relaxed);
+    self.state.set_busy(false);
   }
 
   fn search_logs(&mut self, ctx: &Context, search: Search) {
@@ -549,7 +549,7 @@ impl Stats {
     self.log_dlg.open(&self.avatar, cancel.clone());
 
     // Show the busy cursor.
-    self.state.busy.store(true, Ordering::Relaxed);
+    self.state.set_busy(true);
 
     // Setup the future.
     let tx = self.channel.tx.clone();
