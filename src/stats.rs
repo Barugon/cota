@@ -4,7 +4,7 @@ use crate::{
   log_dlg::LogDlg,
   notes_dlg::NotesDlg,
   search_dlg::SearchDlg,
-  util::{self, AppState, Cancel, Search},
+  util::{self, AppState, Cancel, Search, Threads},
 };
 use eframe::{
   egui::{ComboBox, Context, Layout, RichText, Ui},
@@ -12,19 +12,18 @@ use eframe::{
   epaint::Color32,
 };
 use egui_extras::{Column, TableBuilder};
-use futures::{channel::mpsc, executor::ThreadPool};
+use futures::channel::mpsc;
 use num_format::Locale;
 use std::{
   collections::HashMap,
   path::{Path, PathBuf},
-  sync::Arc,
 };
 
 pub struct Stats {
   resist_stats: HashMap<&'static str, (Resist, f64)>,
 
   // Threading.
-  thread_pool: Arc<ThreadPool>,
+  threads: Threads,
   channel: Channel,
 
   // State.
@@ -52,12 +51,7 @@ pub struct Stats {
 }
 
 impl Stats {
-  pub fn new(
-    ctx: &Context,
-    log_path: PathBuf,
-    state: AppState,
-    thread_pool: Arc<ThreadPool>,
-  ) -> Self {
+  pub fn new(ctx: &Context, log_path: PathBuf, state: AppState, threads: Threads) -> Self {
     let resist_stats = HashMap::from([
       ("AirAttunement", (Resist::Air, 0.5)),
       ("AirResistance", (Resist::Air, 1.0)),
@@ -114,7 +108,7 @@ impl Stats {
 
     let mut stats = Stats {
       resist_stats,
-      thread_pool,
+      threads,
       channel,
       locale,
       log_path,
@@ -460,7 +454,7 @@ impl Stats {
     };
 
     // Execute the future on a pooled thread.
-    self.thread_pool.spawn_ok(future);
+    self.threads.spawn_ok(future);
   }
 
   fn request_dates(&mut self, ctx: &Context) {
@@ -484,8 +478,8 @@ impl Stats {
       // Setup the future.
       let log_path = self.log_path.clone();
       let avatar = self.avatar.clone();
-      let thread_pool = self.thread_pool.clone();
-      let future = log_data::get_stats_timestamps(log_path, avatar, cancel, Some(thread_pool));
+      let threads = self.threads.clone();
+      let future = log_data::get_stats_timestamps(log_path, avatar, cancel, Some(threads));
       let tx = self.channel.tx.clone();
       let ctx = ctx.clone();
       let future = async move {
@@ -494,7 +488,7 @@ impl Stats {
       };
 
       // Execute the future on a pooled thread.
-      self.thread_pool.spawn_ok(future);
+      self.threads.spawn_ok(future);
       return;
     }
 
@@ -528,7 +522,7 @@ impl Stats {
         };
 
         // Execute the future on a pooled thread.
-        self.thread_pool.spawn_ok(future);
+        self.threads.spawn_ok(future);
         return;
       }
     }
@@ -561,7 +555,7 @@ impl Stats {
     };
 
     // Execute the future on a pooled thread.
-    self.thread_pool.spawn_ok(future);
+    self.threads.spawn_ok(future);
   }
 }
 

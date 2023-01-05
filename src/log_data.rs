@@ -1,6 +1,6 @@
-use crate::util::{self, Cancel, Search};
+use crate::util::{self, Cancel, Search, Threads};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
-use futures::{channel::mpsc, executor::ThreadPool, future::join_all, StreamExt};
+use futures::{channel::mpsc, future::join_all, StreamExt};
 use regex::Regex;
 use std::{
   cmp::Reverse,
@@ -8,7 +8,6 @@ use std::{
   fs,
   path::{Path, PathBuf},
   str::SplitWhitespace,
-  sync::Arc,
 };
 
 /// Get the date portion of a log entry.
@@ -122,7 +121,7 @@ pub async fn get_stats_timestamps(
   log_path: PathBuf,
   avatar: String,
   cancel: Cancel,
-  thread_pool: Option<Arc<ThreadPool>>,
+  threads: Option<Threads>,
 ) -> Vec<i64> {
   // Collect the futures, one for each matching log file.
   let futures = {
@@ -158,12 +157,12 @@ pub async fn get_stats_timestamps(
     futures
   };
 
-  let results = if let Some(thread_pool) = thread_pool {
+  let results = if let Some(threads) = threads {
     // Process each future on a pooled thread.
     let (tx, rx) = mpsc::unbounded();
     for future in futures {
       let tx = tx.clone();
-      thread_pool.spawn_ok(async move {
+      threads.spawn_ok(async move {
         let result = future.await;
         tx.unbounded_send(result).unwrap();
       });
