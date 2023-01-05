@@ -6,7 +6,7 @@ use crate::{
   experience::Experience,
   offline::Offline,
   stats::{Stats, StatsFilter},
-  util::AppState,
+  util::{AppState, Threads},
 };
 use eframe::{
   egui::{
@@ -17,8 +17,7 @@ use eframe::{
   epaint::Color32,
   glow, Storage,
 };
-use futures::executor::ThreadPoolBuilder;
-use std::{ffi::OsStr, path::Path, sync::Arc};
+use std::{ffi::OsStr, path::Path};
 
 macro_rules! cmd {
   ($key:literal) => {
@@ -135,12 +134,7 @@ impl App {
     cc.egui_ctx.set_style(style);
 
     // Threading.
-    let num_threads = std::cmp::max(2, num_cpus::get());
-    let thread_pool = ThreadPoolBuilder::new()
-      .pool_size(num_threads)
-      .create()
-      .unwrap();
-    let thread_pool = Arc::new(thread_pool);
+    let threads = Threads::new();
 
     // State.
     let state = AppState::default();
@@ -149,8 +143,8 @@ impl App {
     // Tab pages.
     let ctx = &cc.egui_ctx;
     let log_path = config::get_log_path(cc.storage.unwrap()).unwrap_or_default();
-    let stats = Stats::new(ctx, log_path, state.clone(), thread_pool.clone());
-    let chronometer = Chronometer::new(thread_pool);
+    let stats = Stats::new(ctx, log_path, state.clone(), threads.clone());
+    let chronometer = Chronometer::new(threads);
     let experience = Experience::new();
     let offline = Offline::new(state.clone());
 

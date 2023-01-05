@@ -1,9 +1,10 @@
 use chrono::NaiveDateTime;
 use eframe::egui::{TextStyle, Ui};
+use futures::executor::{ThreadPool, ThreadPoolBuilder};
 use num_format::Locale;
 use regex::Regex;
 use std::{
-  ops::{Range, RangeInclusive},
+  ops::{Deref, Range, RangeInclusive},
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -94,6 +95,28 @@ impl Cancel {
   #[must_use]
   pub fn is_canceled(&self) -> bool {
     self.canceled.load(Ordering::Relaxed)
+  }
+}
+
+#[derive(Clone)]
+pub struct Threads {
+  pool: Arc<ThreadPool>,
+}
+
+impl Threads {
+  pub fn new() -> Self {
+    let count = std::cmp::max(2, num_cpus::get());
+    let pool = ThreadPoolBuilder::new().pool_size(count).create().unwrap();
+    let pool = Arc::new(pool);
+    Self { pool }
+  }
+}
+
+impl Deref for Threads {
+  type Target = ThreadPool;
+
+  fn deref(&self) -> &Self::Target {
+    self.pool.as_ref()
   }
 }
 
