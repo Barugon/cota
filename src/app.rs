@@ -19,13 +19,17 @@ use eframe::{
 };
 use std::{ffi::OsStr, path::Path};
 
+#[cfg(macos)]
 macro_rules! cmd {
   ($key:literal) => {
-    if cfg!(macos) {
-      concat!("⌘ + ", $key)
-    } else {
-      concat!("Ctrl + ", $key)
-    }
+    concat!("⌘ + ", $key)
+  };
+}
+
+#[cfg(not(macos))]
+macro_rules! cmd {
+  ($key:literal) => {
+    concat!("Ctrl + ", $key)
   };
 }
 
