@@ -20,14 +20,14 @@ use eframe::{
 use futures::executor::ThreadPoolBuilder;
 use std::{ffi::OsStr, path::Path};
 
-#[cfg(macos)]
+#[cfg(target_os = "macos")]
 macro_rules! cmd {
   ($key:literal) => {
     concat!("⌘ + ", $key)
   };
 }
 
-#[cfg(not(macos))]
+#[cfg(not(target_os = "macos"))]
 macro_rules! cmd {
   ($key:literal) => {
     concat!("Ctrl + ", $key)
