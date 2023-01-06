@@ -6,7 +6,7 @@ use crate::{
   experience::Experience,
   offline::Offline,
   stats::{Stats, StatsFilter},
-  util::{AppState, Threads},
+  util::AppState,
 };
 use eframe::{
   egui::{
@@ -17,6 +17,7 @@ use eframe::{
   epaint::Color32,
   glow, Storage,
 };
+use futures::executor::ThreadPoolBuilder;
 use std::{ffi::OsStr, path::Path};
 
 #[cfg(macos)]
@@ -138,7 +139,8 @@ impl App {
     cc.egui_ctx.set_style(style);
 
     // Threading.
-    let threads = Threads::new();
+    let count = std::cmp::max(2, num_cpus::get());
+    let threads = ThreadPoolBuilder::new().pool_size(count).create().unwrap();
 
     // State.
     let state = AppState::default();
