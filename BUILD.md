@@ -2,6 +2,8 @@
 
 ## Linux
 
+The purpose of this is to create an executable that will work across most distributions, even if they have an older version of glibc.
+
 ```bash
 cargo install cross
 ```
