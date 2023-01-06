@@ -1,19 +1,20 @@
-use crate::util::{Cancel, Threads};
+use crate::util::Cancel;
 use chrono::{DateTime, TimeZone, Utc};
 use eframe::{
   egui::{Context, Grid, Layout, RichText, Ui},
   emath::Align,
   epaint::Color32,
 };
+use futures::executor::ThreadPool;
 use std::time::Duration;
 
 pub struct Chronometer {
-  threads: Threads,
+  threads: ThreadPool,
   timer_cancel: Option<Cancel>,
 }
 
 impl Chronometer {
-  pub fn new(threads: Threads) -> Self {
+  pub fn new(threads: ThreadPool) -> Self {
     Self {
       threads,
       timer_cancel: None,

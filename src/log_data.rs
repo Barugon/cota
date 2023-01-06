@@ -1,6 +1,6 @@
-use crate::util::{self, Cancel, Search, Threads};
+use crate::util::{self, Cancel, Search};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
-use futures::{channel::mpsc, future::join_all, StreamExt};
+use futures::{channel::mpsc, executor::ThreadPool, future::join_all, StreamExt};
 use regex::Regex;
 use std::{
   cmp::Reverse,
@@ -121,7 +121,7 @@ pub async fn get_stats_timestamps(
   log_path: PathBuf,
   avatar: String,
   cancel: Cancel,
-  threads: Option<Threads>,
+  threads: Option<ThreadPool>,
 ) -> Vec<i64> {
   // Collect the futures, one for each matching log file.
   let futures = {

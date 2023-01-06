@@ -4,7 +4,7 @@ use crate::{
   log_dlg::LogDlg,
   notes_dlg::NotesDlg,
   search_dlg::SearchDlg,
-  util::{self, AppState, Cancel, Search, Threads},
+  util::{self, AppState, Cancel, Search},
 };
 use eframe::{
   egui::{ComboBox, Context, Layout, RichText, Ui},
@@ -12,7 +12,7 @@ use eframe::{
   epaint::Color32,
 };
 use egui_extras::{Column, TableBuilder};
-use futures::channel::mpsc;
+use futures::{channel::mpsc, executor::ThreadPool};
 use num_format::Locale;
 use std::{
   collections::HashMap,
@@ -23,7 +23,7 @@ pub struct Stats {
   resist_stats: HashMap<&'static str, (Resist, f64)>,
 
   // Threading.
-  threads: Threads,
+  threads: ThreadPool,
   channel: Channel,
 
   // State.
@@ -51,7 +51,7 @@ pub struct Stats {
 }
 
 impl Stats {
-  pub fn new(ctx: &Context, log_path: PathBuf, state: AppState, threads: Threads) -> Self {
+  pub fn new(ctx: &Context, log_path: PathBuf, state: AppState, threads: ThreadPool) -> Self {
     let resist_stats = HashMap::from([
       ("AirAttunement", (Resist::Air, 0.5)),
       ("AirResistance", (Resist::Air, 1.0)),
