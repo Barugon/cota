@@ -52,7 +52,7 @@ struct State {
   /// Show the "progress" cursor.
   busy: AtomicBool,
 
-  /// Enable/disable the main UI.
+  /// Disable the main UI.
   disabled: AtomicBool,
 }
 
