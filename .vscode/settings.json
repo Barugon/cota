@@ -1,5 +1,4 @@
 {
-  "editor.tabSize": 2,
   "cSpell.ignoreWords": [
     "ardoris",
     "avara",
@@ -43,5 +42,7 @@
     "vscroll",
     "westend",
     "winit"
-  ]
+  ],
+  "editor.tabSize": 2,
+  "task.autoDetect": "off"
 }
