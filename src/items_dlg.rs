@@ -65,24 +65,23 @@ impl ItemsDlg {
                 for item in items {
                   body.row(row_size, |mut row| {
                     row.col(|ui| {
-                      ui.label(RichText::from(&item.name).color(NAME_COLOR));
+                      ui.label(RichText::from(item.name()).color(NAME_COLOR));
                     });
                     row.col(|ui| {
-                      if !item.bag {
+                      if !item.is_container() {
                         // It's safe to adjust the stack size for all items (except containers) even for those
                         // that are equipped or have durability.
-                        let speed = (item.cnt as f64 / 100.0).max(1.0);
+                        let count = item.count_mut();
+                        let speed = (*count as f64 / 100.0).max(1.0);
                         let range = 1..=i16::MAX;
-                        let widget = DragValue::new(&mut item.cnt)
-                          .speed(speed)
-                          .clamp_range(range);
+                        let widget = DragValue::new(count).speed(speed).clamp_range(range);
                         if ui.add(widget).changed() {
                           modified = true;
                         }
                       }
                     });
                     row.col(|ui| {
-                      if let Some(dur) = &mut item.dur {
+                      if let Some(dur) = item.durability_mut() {
                         ui.set_enabled(dur.minor != dur.major);
                         if ui.button("Repair").clicked() {
                           // The actual maximum durability is unknown here, so just set the durability to a high
