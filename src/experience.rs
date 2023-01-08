@@ -1,4 +1,4 @@
-use crate::util::{self, Skill, SkillCategory, SkillGroup};
+use crate::util::{self, SkillInfo, SkillCategory, SkillInfoGroup};
 use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::{
   egui::{DragValue, Label, Layout, RichText, ScrollArea, Sense, Ui, Widget},
@@ -9,9 +9,9 @@ use egui_extras::{Column, TableBuilder};
 use num_format::{Locale, ToFormattedString};
 
 pub struct Experience {
-  adventurer: Vec<SkillGroup>,
-  producer: Vec<SkillGroup>,
-  selected: Skill,
+  adventurer: Vec<SkillInfoGroup>,
+  producer: Vec<SkillInfoGroup>,
+  selected: SkillInfo,
   current_level: usize,
   target_level: usize,
   locale: Locale,

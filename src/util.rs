@@ -185,26 +185,26 @@ pub enum SkillCategory {
 }
 
 #[derive(Clone, Default)]
-pub struct Skill {
+pub struct SkillInfo {
   pub name: &'static str,
   pub mul: f64,
   pub id: u64,
 }
 
 #[derive(Default)]
-pub struct SkillGroup {
+pub struct SkillInfoGroup {
   pub name: &'static str,
-  pub skills: Vec<Skill>,
+  pub skills: Vec<SkillInfo>,
 }
 
 /// Parse the CSV for adventurer or producer skills.
-pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillGroup> {
+pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
   let text = match category {
     SkillCategory::Adventurer => include_str!("res/adventurer_skills.csv"),
     SkillCategory::Producer => include_str!("res/producer_skills.csv"),
   };
   let mut skill_groups = Vec::new();
-  let mut skill_group = SkillGroup::default();
+  let mut skill_group = SkillInfoGroup::default();
   for line in text.lines() {
     let mut fields = line.split(',');
     if let Some(group) = fields.next() {
@@ -213,11 +213,11 @@ pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillGroup> {
           skill_groups.push(skill_group);
         }
 
-        skill_group = SkillGroup::default();
+        skill_group = SkillInfoGroup::default();
         skill_group.name = group;
       }
 
-      skill_group.skills.push(Skill {
+      skill_group.skills.push(SkillInfo {
         name: fields.next().unwrap(),
         mul: fields.next().unwrap().parse().unwrap(),
         id: fields.next().unwrap().parse().unwrap(),
