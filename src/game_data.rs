@@ -1,4 +1,4 @@
-use crate::util::{self, Skill, SkillCategory, SkillGroup};
+use crate::util::{self, SkillCategory, SkillInfo, SkillInfoGroup};
 use serde_json::Value;
 use std::{borrow::Cow, fs::File, io::Write, path::PathBuf, sync::RwLock};
 
@@ -268,13 +268,13 @@ impl GameData {
 }
 
 pub struct SkillLvl {
-  info: Skill,
+  info: SkillInfo,
   level: i32,
   comp: i32,
 }
 
 impl SkillLvl {
-  fn new(data: &GameData, info: Skill) -> Self {
+  fn new(data: &GameData, info: SkillInfo) -> Self {
     let level = data.get_skill_lvl(info.id, info.mul).unwrap_or(0);
     let comp = level;
     Self { info, level, comp }
@@ -288,7 +288,7 @@ impl SkillLvl {
     self.level = self.comp;
   }
 
-  pub fn info(&self) -> &Skill {
+  pub fn info(&self) -> &SkillInfo {
     &self.info
   }
 
@@ -311,7 +311,7 @@ pub struct SkillLvlGroup {
 }
 
 impl SkillLvlGroup {
-  fn new(data: &GameData, group: SkillGroup) -> Self {
+  fn new(data: &GameData, group: SkillInfoGroup) -> Self {
     let name = group.name;
     let mut skills = Vec::with_capacity(group.skills.len());
     for skill in group.skills {
