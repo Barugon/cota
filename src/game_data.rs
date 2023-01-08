@@ -280,6 +280,14 @@ impl SkillLvl {
     Self { info, level, comp }
   }
 
+  fn accept(&mut self) {
+    self.comp = self.level;
+  }
+
+  fn discard(&mut self) {
+    self.level = self.comp;
+  }
+
   pub fn info(&self) -> &Skill {
     &self.info
   }
@@ -331,13 +339,13 @@ impl SkillLvlGroup {
 
   pub fn accept(&mut self) {
     for skill in &mut self.skills {
-      skill.comp = skill.level;
+      skill.accept();
     }
   }
 
   pub fn discard(&mut self) {
     for skill in &mut self.skills {
-      skill.level = skill.comp;
+      skill.discard();
     }
   }
 }
