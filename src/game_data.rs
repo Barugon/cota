@@ -292,7 +292,7 @@ impl SkillLvl {
     &self.info
   }
 
-  pub fn is_modified(&self) -> bool {
+  pub fn changed(&self) -> bool {
     self.level != self.comp
   }
 
@@ -324,9 +324,9 @@ impl SkillLvlGroup {
     self.name
   }
 
-  pub fn is_modified(&self) -> bool {
+  pub fn changed(&self) -> bool {
     for skill in &self.skills {
-      if skill.is_modified() {
+      if skill.changed() {
         return true;
       }
     }

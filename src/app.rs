@@ -216,7 +216,7 @@ impl App {
               self.stats.set_filter(StatsFilter::Resists);
               handled = true;
             }
-            Key::R if modifiers.command_only() && self.offline.is_modified() => {
+            Key::R if modifiers.command_only() && self.offline.changed() => {
               self.offline.store();
               handled = true;
             }
@@ -253,7 +253,7 @@ impl App {
   }
 
   fn choose_load_path(&mut self, ctx: &Context, storage: &dyn Storage) {
-    if self.offline.is_modified() {
+    if self.offline.changed() {
       // Current save-game is modified, deal with that first.
       if let Some(file_name) = self.offline.file_name() {
         self.confirm_dlg.open(file_name, Hence::Load);
@@ -345,7 +345,7 @@ impl eframe::App for App {
                   self.choose_load_path(ctx, frame.storage_mut().unwrap());
                 }
 
-                let enabled = self.offline.is_modified();
+                let enabled = self.offline.changed();
                 ui.add_enabled_ui(enabled, |ui| {
                   if menu_item(ui, close_menu, "Store Save-game...", Some(cmd!("S"))) {
                     self.offline.store();
@@ -498,7 +498,7 @@ impl eframe::App for App {
   }
 
   fn on_close_event(&mut self) -> bool {
-    if !self.offline.is_modified() {
+    if !self.offline.changed() {
       return true;
     }
 
