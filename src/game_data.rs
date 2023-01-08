@@ -164,10 +164,11 @@ impl GameData {
   }
 
   pub fn get_skills(&self, category: SkillCategory) -> Vec<SkillLvlGroup> {
+    let sk2 = self.character.get(SK2).unwrap();
     let groups = util::parse_skill_group(category);
     let mut skills = Vec::with_capacity(groups.len());
     for group in groups {
-      skills.push(SkillLvlGroup::new(self, group));
+      skills.push(SkillLvlGroup::new(sk2, group));
     }
     skills
   }
@@ -214,10 +215,6 @@ impl GameData {
         val[PHP] = dur.major.into();
       }
     }
-  }
-
-  fn get_skill_lvl(&self, id: u64, mul: f64) -> Option<i32> {
-    get_skill_lvl(self.character.get(SK2).unwrap(), id, mul)
   }
 
   fn set_skill_lvl(&mut self, id: u64, lvl: i32, mul: f64) {
@@ -274,8 +271,8 @@ pub struct SkillLvl {
 }
 
 impl SkillLvl {
-  fn new(data: &GameData, info: SkillInfo) -> Self {
-    let level = data.get_skill_lvl(info.id, info.mul).unwrap_or(0);
+  fn new(sk2: &Value, info: SkillInfo) -> Self {
+    let level = get_skill_lvl(sk2, info.id, info.mul).unwrap_or(0);
     let comp = level;
     Self { info, level, comp }
   }
@@ -311,11 +308,11 @@ pub struct SkillLvlGroup {
 }
 
 impl SkillLvlGroup {
-  fn new(data: &GameData, group: SkillInfoGroup) -> Self {
+  fn new(sk2: &Value, group: SkillInfoGroup) -> Self {
     let name = group.name;
     let mut skills = Vec::with_capacity(group.skills.len());
     for skill in group.skills {
-      skills.push(SkillLvl::new(data, skill));
+      skills.push(SkillLvl::new(sk2, skill));
     }
     Self { name, skills }
   }
@@ -410,7 +407,7 @@ impl Item {
   }
 }
 
-pub fn get_skill_lvl(skills: &Value, id: u64, mul: f64) -> Option<i32> {
+fn get_skill_lvl(skills: &Value, id: u64, mul: f64) -> Option<i32> {
   let exp = (get_skill_exp(skills, id)? as f64 / mul) as i64;
   let idx = find_min(exp, &util::SKILL_EXP)?;
   Some(idx as i32 + 1)
