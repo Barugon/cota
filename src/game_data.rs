@@ -174,9 +174,10 @@ impl GameData {
   }
 
   pub fn set_skills(&mut self, skills: &Vec<SkillLvlGroup>) {
+    let sk2 = self.character.get_mut(SK2).unwrap();
     for group in skills {
       for skill in &group.skills {
-        self.set_skill_lvl(skill.info.id, skill.level, skill.info.mul);
+        set_skill_lvl(sk2, &self.date, skill.info.id, skill.level, skill.info.mul);
       }
     }
   }
@@ -215,36 +216,6 @@ impl GameData {
         val[PHP] = dur.major.into();
       }
     }
-  }
-
-  fn set_skill_lvl(&mut self, id: u64, lvl: i32, mul: f64) {
-    assert!((0..=200).contains(&lvl));
-    if lvl == 0 {
-      self.remove_skill(id)
-    } else {
-      let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * mul) as i64;
-      self.set_skill_exp(id, exp);
-    }
-  }
-
-  fn set_skill_exp(&mut self, id: u64, exp: i64) {
-    let key = format!("{}", id);
-    let skills = self.character.get_mut(SK2).unwrap();
-    if let Some(skill) = skills.get_mut(&key) {
-      skill[X] = exp.into();
-    } else {
-      skills[key] = serde_json::json!({
-        M: 0,
-        T: self.date,
-        X: exp,
-      });
-    }
-  }
-
-  fn remove_skill(&mut self, id: u64) {
-    let skills = self.character.get_mut(SK2).unwrap();
-    let skills = skills.as_object_mut().unwrap();
-    skills.remove(&format!("{}", id));
   }
 
   fn get_adv_exp(&self) -> i64 {
@@ -417,6 +388,34 @@ fn get_skill_exp(skills: &Value, id: u64) -> Option<i64> {
   let skill = skills.get(format!("{}", id))?;
   let exp = skill.get(X)?;
   exp.to_i64()
+}
+
+fn set_skill_lvl(sk2: &mut Value, date: &Value, id: u64, lvl: i32, mul: f64) {
+  assert!((0..=200).contains(&lvl));
+  if lvl == 0 {
+    remove_skill(sk2, id)
+  } else {
+    let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * mul) as i64;
+    set_skill_exp(sk2, date, id, exp);
+  }
+}
+
+fn set_skill_exp(sk2: &mut Value, date: &Value, id: u64, exp: i64) {
+  let key = format!("{}", id);
+  if let Some(skill) = sk2.get_mut(&key) {
+    skill[X] = exp.into();
+  } else {
+    sk2[key] = serde_json::json!({
+      M: 0,
+      T: date,
+      X: exp,
+    });
+  }
+}
+
+fn remove_skill(sk2: &mut Value, id: u64) {
+  let skills = sk2.as_object_mut().unwrap();
+  skills.remove(&format!("{}", id));
 }
 
 fn get_name(val: Option<&Value>) -> Option<String> {
