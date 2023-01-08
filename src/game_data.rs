@@ -268,17 +268,35 @@ impl Durability {
 pub struct Item {
   cnt_cmp: u64,
   dur_cmp: Option<Durability>,
-
-  pub id: String,
-  pub name: String,
-  pub cnt: u64,
-  pub dur: Option<Durability>,
-  pub bag: bool,
+  id: String,
+  name: String,
+  cnt: u64,
+  dur: Option<Durability>,
+  bag: bool,
 }
 
 impl Item {
   pub fn changed(&self) -> bool {
     self.cnt != self.cnt_cmp || self.dur != self.dur_cmp
+  }
+
+  pub fn name(&self) -> &str {
+    &self.name
+  }
+
+  pub fn count_mut(&mut self) -> &mut u64 {
+    &mut self.cnt
+  }
+
+  pub fn durability_mut(&mut self) -> Option<&mut Durability> {
+    if let Some(dur) = &mut self.dur {
+      return Some(dur);
+    }
+    None
+  }
+
+  pub fn is_container(&self) -> bool {
+    self.bag
   }
 
   pub fn accept(&mut self) {
