@@ -234,8 +234,8 @@ const MAX_GOLD: i32 = i32::MAX / 2;
 
 mod game_info {
   use crate::{
-    game_data::{GameData, Item},
-    util::{self, Skill, SkillCategory, SkillGroup},
+    game_data::{GameData, Item, SkillLvlGroup},
+    util::{self, SkillCategory},
   };
   use eframe::{
     egui::{CollapsingHeader, DragValue, Layout, RichText, ScrollArea, Ui},
@@ -244,36 +244,6 @@ mod game_info {
   };
   use egui_extras::{Column, TableBuilder};
   use std::{borrow::Cow, ffi::OsStr, path::PathBuf};
-
-  pub struct SkillLvl {
-    info: Skill,
-    level: i32,
-    comp: i32,
-  }
-
-  impl SkillLvl {
-    fn new(data: &GameData, info: Skill) -> Self {
-      let level = data.get_skill_lvl(info.id, info.mul).unwrap_or(0);
-      let comp = level;
-      Self { info, level, comp }
-    }
-  }
-
-  pub struct SkillLvlGroup {
-    name: &'static str,
-    skills: Vec<SkillLvl>,
-  }
-
-  impl SkillLvlGroup {
-    fn new(data: &GameData, group: SkillGroup) -> Self {
-      let name = group.name;
-      let mut skills = Vec::with_capacity(group.skills.len());
-      for skill in group.skills {
-        skills.push(SkillLvl::new(data, skill));
-      }
-      Self { name, skills }
-    }
-  }
 
   pub struct GameInfo {
     data: GameData,
@@ -290,24 +260,8 @@ mod game_info {
 
   impl GameInfo {
     pub fn new(data: GameData) -> Self {
-      let adv = {
-        let groups = util::parse_skill_group(SkillCategory::Adventurer);
-        let mut adv = Vec::with_capacity(groups.len());
-        for group in groups {
-          adv.push(SkillLvlGroup::new(&data, group));
-        }
-        adv
-      };
-
-      let prd = {
-        let groups = util::parse_skill_group(SkillCategory::Producer);
-        let mut prd = Vec::with_capacity(groups.len());
-        for group in groups {
-          prd.push(SkillLvlGroup::new(&data, group));
-        }
-        prd
-      };
-
+      let adv = data.get_skills(SkillCategory::Adventurer);
+      let prd = data.get_skills(SkillCategory::Producer);
       let items = data.get_inventory_items();
       let adv_lvl = data.get_adv_lvl();
       let prd_lvl = data.get_prd_lvl();
@@ -372,8 +326,8 @@ mod game_info {
             for skill_group in groups {
               // Use a single column in order to force the scroll area to fill the entire available width.
               ui.columns(1, |col| {
-                CollapsingHeader::new(skill_group.name)
-                  .id_source(format!("{}_offline", skill_group.name.to_lowercase()))
+                CollapsingHeader::new(skill_group.name())
+                  .id_source(format!("{}_offline", skill_group.name().to_lowercase()))
                   .show(&mut col[0], |ui| {
                     let spacing = ui.spacing().item_spacing;
                     let row_size = util::button_size(ui) + spacing[1] * 2.0;
@@ -398,26 +352,26 @@ mod game_info {
                         });
                       })
                       .body(|mut body| {
-                        for skill in &mut skill_group.skills {
+                        for skill in skill_group.skills_mut() {
                           body.row(row_size, |mut row| {
                             row.col(|ui| {
-                              let color = if skill.level > 0 {
+                              let color = if skill.level() > 0 {
                                 const NAME_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
                                 NAME_COLOR
                               } else {
                                 const SUBDUED_NAME_COLOR: Color32 = Color32::from_rgb(80, 120, 140);
                                 SUBDUED_NAME_COLOR
                               };
-                              ui.label(RichText::from(skill.info.name).color(color));
+                              ui.label(RichText::from(skill.info().name).color(color));
                             });
                             row.col(|ui| {
-                              let widget = DragValue::new(&mut skill.level).clamp_range(0..=200);
+                              let widget = DragValue::new(skill.level_mut()).clamp_range(0..=200);
                               if ui.add(widget).changed() {
                                 changed = true;
                               }
                             });
                             row.col(|ui| {
-                              ui.label(format!("{}", skill.info.id));
+                              ui.label(format!("{}", skill.info().id));
                             });
                           });
                         }
@@ -537,8 +491,8 @@ mod game_info {
       self.data.set_adv_lvl(self.adv_lvl);
       self.data.set_prd_lvl(self.prd_lvl);
       self.data.set_gold(self.gold);
-      update_json(&mut self.data, &self.adv);
-      update_json(&mut self.data, &self.prd);
+      self.data.set_skills(&self.adv);
+      self.data.set_skills(&self.prd);
     }
 
     fn gold_modified(&self) -> bool {
@@ -560,36 +514,22 @@ mod game_info {
 
   fn modified(groups: &Vec<SkillLvlGroup>) -> bool {
     for group in groups {
-      for skill in &group.skills {
-        if skill.level != skill.comp {
-          return true;
-        }
+      if group.is_modified() {
+        return true;
       }
     }
     false
   }
 
-  fn update_json(data: &mut GameData, groups: &Vec<SkillLvlGroup>) {
-    for group in groups {
-      for skill in &group.skills {
-        data.set_skill_lvl(skill.info.id, skill.level, skill.info.mul);
-      }
-    }
-  }
-
   fn accept_changes(groups: &mut Vec<SkillLvlGroup>) {
     for group in groups {
-      for skill in &mut group.skills {
-        skill.comp = skill.level;
-      }
+      group.accept();
     }
   }
 
   fn discard_changes(groups: &mut Vec<SkillLvlGroup>) {
     for group in groups {
-      for skill in &mut group.skills {
-        skill.level = skill.comp;
-      }
+      group.discard();
     }
   }
 }

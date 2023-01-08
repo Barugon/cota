@@ -1,4 +1,4 @@
-use crate::util;
+use crate::util::{self, Skill, SkillCategory, SkillGroup};
 use serde_json::Value;
 use std::{borrow::Cow, fs::File, io::Write, path::PathBuf, sync::RwLock};
 
@@ -139,20 +139,6 @@ impl GameData {
     self.gold[G] = gold.into();
   }
 
-  pub fn get_skill_lvl(&self, id: u64, mul: f64) -> Option<i32> {
-    get_skill_lvl(self.character.get(SK2).unwrap(), id, mul)
-  }
-
-  pub fn set_skill_lvl(&mut self, id: u64, lvl: i32, mul: f64) {
-    assert!((0..=200).contains(&lvl));
-    if lvl == 0 {
-      self.remove_skill(id)
-    } else {
-      let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * mul) as i64;
-      self.set_skill_exp(id, exp);
-    }
-  }
-
   pub fn get_adv_lvl(&self) -> i32 {
     let exp = self.get_adv_exp();
     find_min(exp, &util::LEVEL_EXP).unwrap() as i32 + 1
@@ -175,6 +161,23 @@ impl GameData {
 
   pub fn get_file_path(&self) -> PathBuf {
     self.path.read().unwrap().clone()
+  }
+
+  pub fn get_skills(&self, category: SkillCategory) -> Vec<SkillLvlGroup> {
+    let groups = util::parse_skill_group(category);
+    let mut skills = Vec::with_capacity(groups.len());
+    for group in groups {
+      skills.push(SkillLvlGroup::new(self, group));
+    }
+    skills
+  }
+
+  pub fn set_skills(&mut self, skills: &Vec<SkillLvlGroup>) {
+    for group in skills {
+      for skill in &group.skills {
+        self.set_skill_lvl(skill.info.id, skill.level, skill.info.mul);
+      }
+    }
   }
 
   pub fn get_inventory_items(&self) -> Vec<Item> {
@@ -213,6 +216,20 @@ impl GameData {
     }
   }
 
+  fn get_skill_lvl(&self, id: u64, mul: f64) -> Option<i32> {
+    get_skill_lvl(self.character.get(SK2).unwrap(), id, mul)
+  }
+
+  fn set_skill_lvl(&mut self, id: u64, lvl: i32, mul: f64) {
+    assert!((0..=200).contains(&lvl));
+    if lvl == 0 {
+      self.remove_skill(id)
+    } else {
+      let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * mul) as i64;
+      self.set_skill_exp(id, exp);
+    }
+  }
+
   fn set_skill_exp(&mut self, id: u64, exp: i64) {
     let key = format!("{}", id);
     let skills = self.character.get_mut(SK2).unwrap();
@@ -247,6 +264,81 @@ impl GameData {
 
   fn set_prd_exp(&mut self, exp: i64) {
     self.character[PE] = exp.into();
+  }
+}
+
+pub struct SkillLvl {
+  info: Skill,
+  level: i32,
+  comp: i32,
+}
+
+impl SkillLvl {
+  fn new(data: &GameData, info: Skill) -> Self {
+    let level = data.get_skill_lvl(info.id, info.mul).unwrap_or(0);
+    let comp = level;
+    Self { info, level, comp }
+  }
+
+  pub fn info(&self) -> &Skill {
+    &self.info
+  }
+
+  pub fn is_modified(&self) -> bool {
+    self.level != self.comp
+  }
+
+  pub fn level(&self) -> i32 {
+    self.level
+  }
+
+  pub fn level_mut(&mut self) -> &mut i32 {
+    &mut self.level
+  }
+}
+
+pub struct SkillLvlGroup {
+  name: &'static str,
+  skills: Vec<SkillLvl>,
+}
+
+impl SkillLvlGroup {
+  fn new(data: &GameData, group: SkillGroup) -> Self {
+    let name = group.name;
+    let mut skills = Vec::with_capacity(group.skills.len());
+    for skill in group.skills {
+      skills.push(SkillLvl::new(data, skill));
+    }
+    Self { name, skills }
+  }
+
+  pub fn name(&self) -> &str {
+    self.name
+  }
+
+  pub fn is_modified(&self) -> bool {
+    for skill in &self.skills {
+      if skill.is_modified() {
+        return true;
+      }
+    }
+    false
+  }
+
+  pub fn skills_mut(&mut self) -> &mut Vec<SkillLvl> {
+    &mut self.skills
+  }
+
+  pub fn accept(&mut self) {
+    for skill in &mut self.skills {
+      skill.comp = skill.level;
+    }
+  }
+
+  pub fn discard(&mut self) {
+    for skill in &mut self.skills {
+      skill.level = skill.comp;
+    }
   }
 }
 
