@@ -18,7 +18,7 @@ pub struct Offline {
   store_image: RetainedImage,
   game: Option<GameInfo>,
   error: Option<Cow<'static, str>>,
-  modified: bool,
+  changed: bool,
   load_request: bool,
 }
 
@@ -31,7 +31,7 @@ impl Offline {
     let store_image = RetainedImage::from_image_bytes("store_image", STORE_ICON).unwrap();
     let game = None;
     let error = None;
-    let modified = false;
+    let changed = false;
     let load_request = false;
 
     Offline {
@@ -40,7 +40,7 @@ impl Offline {
       store_image,
       game,
       error,
-      modified,
+      changed,
       load_request,
     }
   }
@@ -48,7 +48,7 @@ impl Offline {
   pub fn show(&mut self, ui: &mut Ui) {
     if let Some(game) = &mut self.game {
       if self.items_dlg.show(game.items_mut(), ui.ctx()) {
-        self.modified = game.modified();
+        self.changed = game.changed();
       }
     }
 
@@ -59,7 +59,7 @@ impl Offline {
       {
         self.load_request = true;
       }
-      ui.add_enabled_ui(self.is_modified(), |ui| {
+      ui.add_enabled_ui(self.changed(), |ui| {
         if image_button(&self.store_image, ui)
           .on_hover_text_at_pointer("Store Save-game")
           .clicked()
@@ -89,7 +89,7 @@ impl Offline {
           let widget = DragValue::new(&mut level).clamp_range(util::LVL_RANGE);
           if ui.add(widget).changed() {
             game.set_adv_level(level);
-            self.modified = game.modified();
+            self.changed = game.changed();
           }
         } else {
           ui.add_enabled_ui(false, |ui| {
@@ -103,7 +103,7 @@ impl Offline {
           let widget = DragValue::new(&mut level).clamp_range(util::LVL_RANGE);
           if ui.add(widget).changed() {
             game.set_prd_level(level);
-            self.modified = game.modified();
+            self.changed = game.changed();
           }
         } else {
           ui.add_enabled_ui(false, |ui| {
@@ -119,7 +119,7 @@ impl Offline {
           let widget = DragValue::new(&mut gold).speed(speed).clamp_range(range);
           if ui.add(widget).changed() {
             game.set_gold(gold);
-            self.modified = game.modified();
+            self.changed = game.changed();
           }
         } else {
           ui.add_enabled_ui(false, |ui| {
@@ -133,7 +133,7 @@ impl Offline {
 
     if let Some(game) = &mut self.game {
       if game.show_skills(ui) {
-        self.modified = game.modified();
+        self.changed = game.changed();
       }
     }
   }
@@ -144,11 +144,11 @@ impl Offline {
         ui.label(WidgetText::from(error.as_ref()).color(Color32::LIGHT_RED));
       } else if let Some(game) = self.game.as_ref() {
         let file_name = game.get_file_name();
-        let modified = if self.is_modified() { "*" } else { "" };
+        let changed = if self.changed() { "*" } else { "" };
         ui.label(format!(
           "Editing {} - {}{}",
           game.avatar_name(),
-          modified,
+          changed,
           file_name
         ));
       }
@@ -156,7 +156,7 @@ impl Offline {
   }
 
   pub fn load(&mut self, path: PathBuf) -> bool {
-    self.modified = false;
+    self.changed = false;
     match GameData::load(path) {
       Ok(game) => {
         self.game = Some(GameInfo::new(game));
@@ -175,8 +175,8 @@ impl Offline {
     self.game.is_some()
   }
 
-  pub fn is_modified(&self) -> bool {
-    self.modified
+  pub fn changed(&self) -> bool {
+    self.changed
   }
 
   pub fn store(&mut self) {
@@ -184,7 +184,7 @@ impl Offline {
     if let Err(err) = game.store() {
       self.error = Some(err);
     } else {
-      self.modified = false;
+      self.changed = false;
     }
   }
 
@@ -193,14 +193,14 @@ impl Offline {
     if let Err(err) = game.store_as(path) {
       self.error = Some(err);
     } else {
-      self.modified = false;
+      self.changed = false;
     }
   }
 
   pub fn discard(&mut self) {
     let Some(game) = &mut self.game else { return };
     game.discard_changes();
-    self.modified = false;
+    self.changed = false;
   }
 
   pub fn file_name(&self) -> Option<String> {
@@ -442,13 +442,13 @@ mod game_info {
       result
     }
 
-    pub fn modified(&self) -> bool {
+    pub fn changed(&self) -> bool {
       self.adv_lvl != self.adv_lvl_cmp
         || self.prd_lvl != self.prd_lvl_cmp
-        || self.gold_modified()
-        || self.items_modified()
-        || modified(&self.adv)
-        || modified(&self.prd)
+        || self.gold_changed()
+        || self.items_changed()
+        || changed(&self.adv)
+        || changed(&self.prd)
     }
 
     pub fn discard_changes(&mut self) {
@@ -473,7 +473,7 @@ mod game_info {
 
     fn accept_changes(&mut self) {
       // Since gold can be larger than the editor maximum, we need to check here.
-      if self.gold_modified() {
+      if self.gold_changed() {
         self.gold_cmp = self.gold;
       }
 
@@ -495,14 +495,14 @@ mod game_info {
       self.data.set_skills(&self.prd);
     }
 
-    fn gold_modified(&self) -> bool {
+    fn gold_changed(&self) -> bool {
       if self.gold != self.gold_cmp {
         return self.gold_cmp < self.gold || self.gold != super::MAX_GOLD;
       }
       false
     }
 
-    fn items_modified(&self) -> bool {
+    fn items_changed(&self) -> bool {
       for item in &self.items {
         if item.changed() {
           return true;
@@ -512,9 +512,9 @@ mod game_info {
     }
   }
 
-  fn modified(groups: &Vec<SkillLvlGroup>) -> bool {
+  fn changed(groups: &Vec<SkillLvlGroup>) -> bool {
     for group in groups {
-      if group.is_modified() {
+      if group.changed() {
         return true;
       }
     }
