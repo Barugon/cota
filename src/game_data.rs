@@ -306,13 +306,13 @@ impl SkillLvlGroup {
   }
 
   pub fn accept(&mut self) {
-    for skill in &mut self.skills {
+    for skill in self.skills_mut() {
       skill.accept();
     }
   }
 
   pub fn discard(&mut self) {
-    for skill in &mut self.skills {
+    for skill in self.skills_mut() {
       skill.discard();
     }
   }
