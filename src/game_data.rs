@@ -2,7 +2,7 @@ use crate::util::{self, SkillCategory, SkillInfo, SkillInfoGroup};
 use serde_json::Value;
 use std::{borrow::Cow, fs::File, io::Write, path::PathBuf, sync::RwLock};
 
-// UserKnowledge contains virtue.
+// NOTE: UserKnowledge contains virtue.
 
 /// Structure to load and modify a SotA save-game file.
 pub struct GameData {
