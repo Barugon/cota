@@ -191,6 +191,7 @@ impl Stats {
       }
     }
 
+    // Tool bar.
     ui.horizontal(|ui| {
       // Layout right to left so that the avatar combo-box can fill the remaining space.
       ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -252,6 +253,7 @@ impl Stats {
       });
     });
 
+    // Stats.
     ui.add_enabled_ui(!self.stats.is_empty(), |ui| {
       const NAME_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
       let spacing = ui.spacing().item_spacing;

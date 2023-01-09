@@ -462,6 +462,8 @@ impl eframe::App for App {
     // Central panel for the tab pages.
     central_panel(ctx, |ui| {
       ui.set_enabled(enabled);
+
+      // Tab control.
       ui.horizontal(|ui| {
         let button = ui.selectable_value(&mut self.page, Page::Stats, "Stats");
         if button.clicked() {
@@ -483,7 +485,10 @@ impl eframe::App for App {
           self.chronometer.stop_timer();
         }
       });
+
       ui.separator();
+
+      // Tab pages.
       match self.page {
         Page::Stats => self.stats.show(ui, frame),
         Page::Chronometer => self.chronometer.show(ui),

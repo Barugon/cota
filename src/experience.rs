@@ -32,6 +32,7 @@ impl Experience {
   pub fn show(&mut self, ui: &mut Ui) {
     const LABEL_COLOR: Color32 = Color32::from_rgb(154, 187, 154);
 
+    // Tool bar.
     ui.horizontal(|ui| {
       ui.label(RichText::from("Current Level").color(LABEL_COLOR));
       let widget = DragValue::new(&mut self.current_level).clamp_range(util::LVL_RANGE);
