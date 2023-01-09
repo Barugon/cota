@@ -52,6 +52,7 @@ impl Offline {
       }
     }
 
+    // Tool bar.
     ui.horizontal(|ui| {
       if image_button(&self.load_image, ui)
         .on_hover_text_at_pointer("Load Save-game")
@@ -131,6 +132,7 @@ impl Offline {
 
     ui.separator();
 
+    // Skills.
     if let Some(game) = &mut self.game {
       if game.show_skills(ui) {
         self.changed = game.changed();
