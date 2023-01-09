@@ -186,21 +186,9 @@ impl GameData {
     let items_val = self.inventory.get(IN).and_then(|v| v.as_object()).unwrap();
     let mut items = Vec::with_capacity(items_val.len());
     for (key, val) in items_val {
-      let Some(val) = val.get(IN) else { continue };
-      let Some(name) = get_item_name(val)  else { continue };
-      let Some(cnt) = val.get(QN).and_then(|v| v.as_u64()) else { continue };
-      let dur = Durability::new(val);
-      let bag = val.get(BAG).is_some();
-
-      items.push(Item {
-        cnt_cmp: cnt,
-        dur_cmp: dur.clone(),
-        id: key.into(),
-        name,
-        cnt,
-        dur,
-        bag,
-      });
+      if let Some(item) = Item::new(val, key) {
+        items.push(item);
+      }
     }
     items
   }
@@ -334,16 +322,34 @@ impl Durability {
 
 #[derive(Clone)]
 pub struct Item {
-  cnt_cmp: u64,
-  dur_cmp: Option<Durability>,
   id: String,
   name: String,
+  cnt_cmp: u64,
   cnt: u64,
+  dur_cmp: Option<Durability>,
   dur: Option<Durability>,
   bag: bool,
 }
 
 impl Item {
+  fn new(val: &Value, id: &str) -> Option<Self> {
+    let val = val.get(IN)?;
+    let name = get_item_name(val)?;
+    let cnt = val.get(QN).and_then(|v| v.as_u64())?;
+    let dur = Durability::new(val);
+    let bag = val.get(BAG).is_some();
+
+    Some(Item {
+      id: id.into(),
+      name,
+      cnt_cmp: cnt,
+      cnt,
+      dur_cmp: dur.clone(),
+      dur,
+      bag,
+    })
+  }
+
   pub fn changed(&self) -> bool {
     self.cnt != self.cnt_cmp || self.dur != self.dur_cmp
   }
