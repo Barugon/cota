@@ -177,7 +177,7 @@ impl GameData {
     let sk2 = self.character.get_mut(SK2).unwrap();
     for group in skills {
       for skill in &group.skills {
-        set_skill_lvl(sk2, &self.date, skill.info.id, skill.level, skill.info.mul);
+        set_skill_lvl(sk2, &self.date, skill);
       }
     }
   }
@@ -187,7 +187,7 @@ impl GameData {
     let mut items = Vec::with_capacity(items_val.len());
     for (key, val) in items_val {
       let Some(val) = val.get(IN) else { continue };
-      let Some(name) = get_name(val.get(AN))  else { continue };
+      let Some(name) = get_item_name(val)  else { continue };
       let Some(cnt) = val.get(QN).and_then(|v| v.as_u64()) else { continue };
       let dur = Durability::new(val);
       let bag = val.get(BAG).is_some();
@@ -243,7 +243,7 @@ pub struct SkillLvl {
 
 impl SkillLvl {
   fn new(sk2: &Value, info: SkillInfo) -> Self {
-    let level = get_skill_lvl(sk2, info.id, info.mul).unwrap_or(0);
+    let level = get_skill_lvl(sk2, &info).unwrap_or(0);
     let comp = level;
     Self { info, level, comp }
   }
@@ -378,38 +378,30 @@ impl Item {
   }
 }
 
-fn get_skill_lvl(skills: &Value, id: u64, mul: f64) -> Option<i32> {
-  let exp = (get_skill_exp(skills, id)? as f64 / mul) as i64;
+fn get_skill_lvl(sk2: &Value, info: &SkillInfo) -> Option<i32> {
+  let exp = sk2.get(format!("{}", info.id))?.get(X)?;
+  let exp = (exp.to_i64()? as f64 / info.mul) as i64;
   let idx = find_min(exp, &util::SKILL_EXP)?;
   Some(idx as i32 + 1)
 }
 
-fn get_skill_exp(skills: &Value, id: u64) -> Option<i64> {
-  let skill = skills.get(format!("{}", id))?;
-  let exp = skill.get(X)?;
-  exp.to_i64()
-}
-
-fn set_skill_lvl(sk2: &mut Value, date: &Value, id: u64, lvl: i32, mul: f64) {
+fn set_skill_lvl(sk2: &mut Value, date: &Value, skill: &SkillLvl) {
+  let lvl = skill.level();
   assert!((0..=200).contains(&lvl));
   if lvl == 0 {
-    remove_skill(sk2, id)
+    remove_skill(sk2, skill.info().id)
   } else {
-    let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * mul) as i64;
-    set_skill_exp(sk2, date, id, exp);
-  }
-}
-
-fn set_skill_exp(sk2: &mut Value, date: &Value, id: u64, exp: i64) {
-  let key = format!("{}", id);
-  if let Some(skill) = sk2.get_mut(&key) {
-    skill[X] = exp.into();
-  } else {
-    sk2[key] = serde_json::json!({
-      M: 0,
-      T: date,
-      X: exp,
-    });
+    let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * skill.info().mul) as i64;
+    let key = format!("{}", skill.info().id);
+    if let Some(skill) = sk2.get_mut(&key) {
+      skill[X] = exp.into();
+    } else {
+      sk2[key] = serde_json::json!({
+        M: 0,
+        T: date,
+        X: exp,
+      });
+    }
   }
 }
 
@@ -418,8 +410,8 @@ fn remove_skill(sk2: &mut Value, id: u64) {
   skills.remove(&format!("{}", id));
 }
 
-fn get_name(val: Option<&Value>) -> Option<String> {
-  let text = val?.as_str()?;
+fn get_item_name(val: &Value) -> Option<String> {
+  let text = val.get(AN)?.as_str()?;
   let pos = text.rfind('/')?;
   Some(text[pos + 1..].into())
 }
