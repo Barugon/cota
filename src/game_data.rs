@@ -566,5 +566,5 @@ fn find_date(val: &Value) -> Result<Value, Cow<'static, str>> {
     }
   }
 
-  Err(Cow::from("Unable to parse the date/time"))
+  Err(Cow::from("Unable to find a save date"))
 }
