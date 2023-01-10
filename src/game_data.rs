@@ -71,7 +71,7 @@ impl GameData {
           return Err(Cow::from("Error reading skills"));
         }
 
-        // Get the UserGold json.
+        // Get the UserGold JSON.
         let Some(gold) = get_json(&text, "UserGold", USER_ID) else { return Err(Cow::from("Unable to find user gold")) };
         if !gold.is_object() {
           return Err(Cow::from("Error reading user gold"));
