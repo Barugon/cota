@@ -532,7 +532,7 @@ fn get_json(text: &str, collection: &str, id: &str) -> Result<Value, Cow<'static
     }
   }
 
-  Err(Cow::from(format!("Unable to find '{}'", collection)))
+  Err(Cow::from(format!("Unable to find '{}' collection", collection)))
 }
 
 fn set_json(
@@ -554,7 +554,7 @@ fn set_json(
     return Ok(result);
   }
 
-  Err(Cow::from(format!("Unable to set '{}'", collection)))
+  Err(Cow::from(format!("Unable to set '{}' collection", collection)))
 }
 
 fn find_date(val: &Value) -> Result<Value, Cow<'static, str>> {
