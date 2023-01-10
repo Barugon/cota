@@ -469,8 +469,7 @@ mod game_info {
     }
 
     pub fn get_file_name(&self) -> String {
-      let path = self.get_file_path();
-      path.file_name().unwrap().to_string_lossy().into()
+      self.data.get_file_name()
     }
 
     fn accept_changes(&mut self) {
