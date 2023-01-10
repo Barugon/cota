@@ -162,6 +162,11 @@ impl GameData {
     self.path.read().unwrap().clone()
   }
 
+  pub fn get_file_name(&self) -> String {
+    let path = self.path.read().unwrap();
+    path.file_name().unwrap().to_string_lossy().into()
+  }
+
   pub fn get_skills(&self, category: SkillCategory) -> Vec<SkillLvlGroup> {
     let sk2 = self.character.get(SK2).unwrap();
     let groups = util::parse_skill_group(category);
