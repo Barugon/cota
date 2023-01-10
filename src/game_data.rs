@@ -1,6 +1,6 @@
 use crate::util::{self, SkillCategory, SkillInfo, SkillInfoGroup};
 use serde_json::Value;
-use std::{borrow::Cow, fs::File, io::Write, path::PathBuf, sync::RwLock};
+use std::{borrow::Cow, fs::File, io::Write, ops::Range, path::PathBuf, sync::RwLock};
 
 // NOTE: UserKnowledge contains virtue.
 
@@ -35,25 +35,19 @@ impl GameData {
     match std::fs::read_to_string(&path) {
       Ok(text) => {
         // Get the avatar ID.
-        let Some(avatar) = get_avatar_id(&text) else { return Err(Cow::from("Unable to determine the current avatar")) };
+        let avatar = get_avatar_id(&text)?;
 
         // Get the avatar name.
-        let Some(name) = get_avatar_name(&text, &avatar) else { return Err(Cow::from("Unable to get the avatar name")) };
+        let name = get_avatar_name(&text, &avatar)?;
 
         // Get the backpack ID.
-        let Some(backpack) = get_backpack_id(&text, &avatar) else { return Err(Cow::from("Unable to find the avatar's backpack")) };
+        let backpack = get_backpack_id(&text, &avatar)?;
 
         // Get the ItemStore JSON.
-        let Some(inventory) = get_json(&text, "ItemStore", &backpack) else { return Err(Cow::from("Unable to find inventory")) };
-        if !inventory.is_object() {
-          return Err(Cow::from("Error reading inventory"));
-        }
+        let inventory = get_json(&text, "ItemStore", &backpack)?;
 
         // Get the CharacterSheet JSON.
-        let Some(character) = get_json(&text, "CharacterSheet", &avatar) else { return Err(Cow::from("Unable to find character sheet")) };
-        if !character.is_object() {
-          return Err(Cow::from("Error reading character sheet"));
-        }
+        let character = get_json(&text, "CharacterSheet", &avatar)?;
 
         // Make sure adventurer experience is there.
         if character.get(AE).and_then(|exp| exp.to_i64()).is_none() {
@@ -65,20 +59,14 @@ impl GameData {
           return Err(Cow::from("Unable to parse producer experience"));
         }
 
-        // Get the skills value.
-        let Some(skills) = character.get(SK2) else { return Err(Cow::from("Unable to find skills")) };
-        if !skills.is_object() {
-          return Err(Cow::from("Error reading skills"));
-        }
+        // Find a save date.
+        let date = match character.get(SK2) {
+          Some(val) if val.is_object() => find_date(val)?,
+          _ => return Err(Cow::from("Error reading skills")),
+        };
 
         // Get the UserGold JSON.
-        let Some(gold) = get_json(&text, "UserGold", USER_ID) else { return Err(Cow::from("Unable to find user gold")) };
-        if !gold.is_object() {
-          return Err(Cow::from("Error reading user gold"));
-        }
-
-        // Find a date.
-        let Some(date) = find_date(skills) else { return Err(Cow::from("Unable to parse the date/time")) };
+        let gold = get_json(&text, "UserGold", USER_ID)?;
 
         Ok(GameData {
           path: RwLock::new(path),
@@ -102,13 +90,13 @@ impl GameData {
 
   pub fn store_as(&self, path: PathBuf) -> Result<(), Cow<'static, str>> {
     // Set CharacterSheet.
-    let Some(text) = set_json(&self.text, "CharacterSheet", &self.avatar, &self.character) else { return Err(Cow::from("Unable to set CharacterSheet")) };
+    let text = set_json(&self.text, "CharacterSheet", &self.avatar, &self.character)?;
 
     // Set ItemStore.
-    let Some(text) = set_json(&text, "ItemStore", &self.backpack, &self.inventory) else { return Err(Cow::from("Unable to set ItemStore")) };
+    let text = set_json(&text, "ItemStore", &self.backpack, &self.inventory)?;
 
     // Set UserGold.
-    let Some(text) = set_json(&text, "UserGold", USER_ID, &self.gold) else { return Err(Cow::from("Unable to set UserGold")) };
+    let text = set_json(&text, "UserGold", USER_ID, &self.gold)?;
 
     // Create the save-game file and store the data.
     match File::create(&path) {
@@ -131,6 +119,7 @@ impl GameData {
   pub fn get_gold(&self) -> Option<i32> {
     let gold = self.gold.get(G)?;
     let gold = gold.to_i64()?;
+
     Some(gold as i32)
   }
 
@@ -174,6 +163,7 @@ impl GameData {
     for group in groups {
       skills.push(SkillLvlGroup::new(sk2, group));
     }
+
     skills
   }
 
@@ -194,6 +184,7 @@ impl GameData {
         items.push(item);
       }
     }
+
     items
   }
 
@@ -221,6 +212,7 @@ impl SkillLvl {
   fn new(sk2: &Value, info: SkillInfo) -> Self {
     let level = get_skill_lvl(sk2, &info).unwrap_or(0);
     let comp = level;
+
     Self { info, level, comp }
   }
 
@@ -261,6 +253,7 @@ impl SkillLvlGroup {
     for skill in group.skills {
       skills.push(SkillLvl::new(sk2, skill));
     }
+
     Self { name, skills }
   }
 
@@ -274,6 +267,7 @@ impl SkillLvlGroup {
         return true;
       }
     }
+
     false
   }
 
@@ -304,6 +298,7 @@ impl Durability {
   fn new(val: &Value) -> Option<Self> {
     let minor = val.get(HP)?.as_f64()?;
     let major = val.get(PHP)?.as_f64()?;
+
     Some(Durability { minor, major })
   }
 }
@@ -354,6 +349,7 @@ impl Item {
     if let Some(dur) = &mut self.dur {
       return Some(dur);
     }
+
     None
   }
 
@@ -376,6 +372,7 @@ fn get_skill_lvl(sk2: &Value, info: &SkillInfo) -> Option<i32> {
   let exp = sk2.get(format!("{}", info.id))?.get(X)?;
   let exp = (exp.to_i64()? as f64 / info.mul) as i64;
   let idx = find_min(exp, &util::SKILL_EXP)?;
+
   Some(idx as i32 + 1)
 }
 
@@ -409,6 +406,7 @@ fn remove_skill(sk2: &mut Value, id: u64) {
 fn get_item_name(val: &Value) -> Option<String> {
   let text = val.get(AN)?.as_str()?;
   let pos = text.rfind('/')?;
+
   Some(text[pos + 1..].into())
 }
 
@@ -457,37 +455,40 @@ fn find_min<T: Ord>(value: T, values: &[T]) -> Option<usize> {
   }
 }
 
-fn get_avatar_id(text: &str) -> Option<String> {
+fn get_avatar_id(text: &str) -> Result<String, Cow<'static, str>> {
   // Get the User json.
   let json = get_json(text, "User", USER_ID)?;
 
   // Get the avatar ID.
   if let Some(Value::String(id)) = json.get(DC) {
-    return Some(id.clone());
+    return Ok(id.clone());
   }
-  None
+
+  Err(Cow::from("Unable to determine the current avatar"))
 }
 
-fn get_avatar_name(text: &str, avatar: &str) -> Option<String> {
+fn get_avatar_name(text: &str, avatar: &str) -> Result<String, Cow<'static, str>> {
   // Get the CharacterName json.
   let json = get_json(text, "CharacterName", avatar)?;
 
   // Get the avatar name.
   if let Some(Value::String(name)) = json.get(FN) {
-    return Some(name.clone());
+    return Ok(name.clone());
   }
-  None
+
+  Err(Cow::from("Unable to get the avatar name"))
 }
 
-fn get_backpack_id(text: &str, avatar: &str) -> Option<String> {
+fn get_backpack_id(text: &str, avatar: &str) -> Result<String, Cow<'static, str>> {
   // Get the Character json.
   let json = get_json(text, "Character", avatar)?;
 
   // Get the backpack ID.
   if let Some(Value::String(id)) = json.get(MAINBP) {
-    return Some(id.clone());
+    return Ok(id.clone());
   }
-  None
+
+  Err(Cow::from("Unable to find the avatar's backpack"))
 }
 
 fn collection_tag(collection: &str) -> String {
@@ -502,66 +503,68 @@ const fn record_end() -> &'static str {
   "</record>"
 }
 
-fn get_json(text: &str, collection: &str, id: &str) -> Option<Value> {
-  // Find the collection tag.
-  let find = collection_tag(collection);
-  let pos = text.find(&find)?;
-  let text = &text[pos + find.len()..];
-
-  // From that point, find the record tag.
-  let find = record_tag(id);
-  let pos = text.find(&find)?;
-  let text = &text[pos + find.len()..];
-
-  // Find the record end tag.
-  let pos = text.find(record_end())?;
-  let text = &text[..pos];
-
-  // Parse the JSON text.
-  match serde_json::from_str(text) {
-    Ok(json) => Some(json),
-    Err(err) => {
-      println!("{:?}", err);
-      None
-    }
-  }
-}
-
-fn set_json(text: &str, collection: &str, id: &str, val: &Value) -> Option<String> {
+fn get_json_range(text: &str, collection: &str, id: &str) -> Option<Range<usize>> {
   // Find the collection tag.
   let find = collection_tag(collection);
   let start = text.find(&find)? + find.len();
-  let slice = &text[start..];
+  let text = &text[start..];
 
   // From that point, find the record tag.
   let find = record_tag(id);
-  let pos = slice.find(&find)? + find.len();
-  let slice = &slice[pos..];
+  let pos = text.find(&find)? + find.len();
+  let text = &text[pos..];
   let start = start + pos;
 
   // Find the record end tag.
-  let pos = slice.find(record_end())?;
+  let pos = text.find(record_end())?;
   let end = start + pos;
 
-  // Convert the value to JSON text.
-  let json = val.to_string();
-
-  // Concatenate the XML with the new JSON.
-  let parts = [&text[..start], &json, &text[end..]];
-  let mut result = String::with_capacity(parts[0].len() + parts[1].len() + parts[2].len());
-  result.push_str(parts[0]);
-  result.push_str(parts[1]);
-  result.push_str(parts[2]);
-  Some(result)
+  Some(start..end)
 }
 
-fn find_date(val: &Value) -> Option<Value> {
+fn get_json(text: &str, collection: &str, id: &str) -> Result<Value, Cow<'static, str>> {
+  if let Some(range) = get_json_range(text, collection, id) {
+    let text = &text[range];
+    match serde_json::from_str::<Value>(text) {
+      Ok(val) if val.is_object() => return Ok(val),
+      Err(err) => return Err(Cow::from(format!("{:?}", err))),
+      _ => (),
+    }
+  }
+
+  Err(Cow::from(format!("Unable to find '{}'", collection)))
+}
+
+fn set_json(
+  text: &str,
+  collection: &str,
+  id: &str,
+  val: &Value,
+) -> Result<String, Cow<'static, str>> {
+  if let Some(range) = get_json_range(text, collection, id) {
+    // Convert the value to JSON text.
+    let json = val.to_string();
+
+    // Concatenate the XML with the new JSON.
+    let parts = [&text[..range.start], &json, &text[range.end..]];
+    let mut result = String::with_capacity(parts[0].len() + parts[1].len() + parts[2].len());
+    result.push_str(parts[0]);
+    result.push_str(parts[1]);
+    result.push_str(parts[2]);
+    return Ok(result);
+  }
+
+  Err(Cow::from(format!("Unable to set '{}'", collection)))
+}
+
+fn find_date(val: &Value) -> Result<Value, Cow<'static, str>> {
   if let Value::Object(obj) = val {
     for (_, val) in obj {
       if let Some(val) = val.get(T) {
-        return Some(val.clone());
+        return Ok(val.clone());
       }
     }
   }
-  None
+
+  Err(Cow::from("Unable to parse the date/time"))
 }
