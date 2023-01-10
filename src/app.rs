@@ -216,7 +216,7 @@ impl App {
               self.stats.set_filter(StatsFilter::Resists);
               handled = true;
             }
-            Key::R if modifiers.command_only() && self.offline.changed() => {
+            Key::S if modifiers.command_only() && self.offline.changed() => {
               self.offline.store();
               handled = true;
             }
