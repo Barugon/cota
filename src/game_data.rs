@@ -397,7 +397,7 @@ fn set_skill_lvl(sk2: &mut Value, date: &Value, skill: &SkillLvl) {
   if lvl == 0 {
     remove_skill(sk2, skill.info().id)
   } else {
-    let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * skill.info().mul) as i64;
+    let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * skill.info().mul).ceil() as i64;
     let key = format!("{}", skill.info().id);
     if let Some(skill) = sk2.get_mut(&key) {
       // Set the skill's experience.
