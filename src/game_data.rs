@@ -40,12 +40,6 @@ impl GameData {
         // Get the avatar name.
         let Some(name) = get_avatar_name(&text, &avatar) else { return Err(Cow::from("Unable to get the avatar name")) };
 
-        // Get the CharacterSheet JSON.
-        let Some(character) = get_json(&text, "CharacterSheet", &avatar) else { return Err(Cow::from("Unable to find character sheet")) };
-        if !character.is_object() {
-          return Err(Cow::from("Error reading character sheet"));
-        }
-
         // Get the backpack ID.
         let Some(backpack) = get_backpack_id(&text, &avatar) else { return Err(Cow::from("Unable to find the avatar's backpack")) };
 
@@ -55,10 +49,10 @@ impl GameData {
           return Err(Cow::from("Error reading inventory"));
         }
 
-        // Get the UserGold json.
-        let Some(gold) = get_json(&text, "UserGold", USER_ID) else { return Err(Cow::from("Unable to find user gold")) };
-        if !gold.is_object() {
-          return Err(Cow::from("Error reading user gold"));
+        // Get the CharacterSheet JSON.
+        let Some(character) = get_json(&text, "CharacterSheet", &avatar) else { return Err(Cow::from("Unable to find character sheet")) };
+        if !character.is_object() {
+          return Err(Cow::from("Error reading character sheet"));
         }
 
         // Make sure adventurer experience is there.
@@ -75,6 +69,12 @@ impl GameData {
         let Some(skills) = character.get(SK2) else { return Err(Cow::from("Unable to find skills")) };
         if !skills.is_object() {
           return Err(Cow::from("Error reading skills"));
+        }
+
+        // Get the UserGold json.
+        let Some(gold) = get_json(&text, "UserGold", USER_ID) else { return Err(Cow::from("Unable to find user gold")) };
+        if !gold.is_object() {
+          return Err(Cow::from("Error reading user gold"));
         }
 
         // Find a date.
