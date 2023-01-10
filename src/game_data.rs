@@ -139,23 +139,23 @@ impl GameData {
   }
 
   pub fn get_adv_lvl(&self) -> i32 {
-    let exp = self.get_adv_exp();
+    let exp = self.character.get(AE).unwrap().to_i64().unwrap();
     find_min(exp, &util::LEVEL_EXP).unwrap() as i32 + 1
   }
 
   pub fn set_adv_lvl(&mut self, lvl: i32) {
     assert!(util::LVL_RANGE.contains(&lvl));
-    self.set_adv_exp(util::LEVEL_EXP[lvl as usize - 1]);
+    self.character[AE] = util::LEVEL_EXP[lvl as usize - 1].into();
   }
 
   pub fn get_prd_lvl(&self) -> i32 {
-    let exp = self.get_prd_exp();
+    let exp = self.character.get(PE).unwrap().to_i64().unwrap();
     find_min(exp, &util::LEVEL_EXP).unwrap() as i32 + 1
   }
 
   pub fn set_prd_lvl(&mut self, lvl: i32) {
     assert!(util::LVL_RANGE.contains(&lvl));
-    self.set_prd_exp(util::LEVEL_EXP[lvl as usize - 1]);
+    self.character[PE] = util::LEVEL_EXP[lvl as usize - 1].into();
   }
 
   pub fn get_file_path(&self) -> PathBuf {
@@ -203,22 +203,6 @@ impl GameData {
         val[PHP] = dur.major.into();
       }
     }
-  }
-
-  fn get_adv_exp(&self) -> i64 {
-    self.character.get(AE).unwrap().to_i64().unwrap()
-  }
-
-  fn set_adv_exp(&mut self, exp: i64) {
-    self.character[AE] = exp.into();
-  }
-
-  fn get_prd_exp(&self) -> i64 {
-    self.character.get(PE).unwrap().to_i64().unwrap()
-  }
-
-  fn set_prd_exp(&mut self, exp: i64) {
-    self.character[PE] = exp.into();
   }
 }
 
