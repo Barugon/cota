@@ -97,8 +97,7 @@ impl GameData {
   }
 
   pub fn store(&self) -> Result<(), Cow<'static, str>> {
-    let path = self.path.read().unwrap().clone();
-    self.store_as(path)
+    self.store_as(self.get_file_path())
   }
 
   pub fn store_as(&self, path: PathBuf) -> Result<(), Cow<'static, str>> {
