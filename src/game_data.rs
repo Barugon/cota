@@ -106,9 +106,9 @@ impl GameData {
           *self.path.write().unwrap() = path;
           Ok(())
         }
-        Err(err) => Err(Cow::from(format!("Unable to store file: {}", err))),
+        Err(err) => Err(Cow::from(err.to_string())),
       },
-      Err(err) => Err(Cow::from(format!("Unable to store file: {}", err))),
+      Err(err) => Err(Cow::from(err.to_string())),
     }
   }
 
@@ -527,12 +527,13 @@ fn get_json(text: &str, collection: &str, id: &str) -> Result<Value, Cow<'static
     let text = &text[range];
     match serde_json::from_str::<Value>(text) {
       Ok(val) if val.is_object() => return Ok(val),
-      Err(err) => return Err(Cow::from(format!("{:?}", err))),
+      Err(err) => return Err(Cow::from(err.to_string())),
       _ => (),
     }
   }
 
-  Err(Cow::from(format!("Unable to find '{}' collection", collection)))
+  let err = format!("Unable to find collection '{}'", collection);
+  Err(Cow::from(err))
 }
 
 fn set_json(
@@ -554,7 +555,8 @@ fn set_json(
     return Ok(result);
   }
 
-  Err(Cow::from(format!("Unable to set '{}' collection", collection)))
+  let err = format!("Unable to set collection '{}'", collection);
+  Err(Cow::from(err))
 }
 
 fn find_date(val: &Value) -> Result<Value, Cow<'static, str>> {
