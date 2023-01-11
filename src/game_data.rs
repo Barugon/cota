@@ -532,7 +532,7 @@ fn get_json(text: &str, collection: &str, id: &str) -> Result<Value, Cow<'static
     }
   }
 
-  let err = format!("Unable to find collection '{}'", collection);
+  let err = format!("Unable to get '{}' collection", collection);
   Err(Cow::from(err))
 }
 
@@ -555,7 +555,7 @@ fn set_json(
     return Ok(result);
   }
 
-  let err = format!("Unable to set collection '{}'", collection);
+  let err = format!("Unable to set '{}' collection", collection);
   Err(Cow::from(err))
 }
 
