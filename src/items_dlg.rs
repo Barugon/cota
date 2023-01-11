@@ -38,7 +38,7 @@ impl ItemsDlg {
         .anchor(Align2::CENTER_TOP, [0.0, 0.0])
         .default_size(available.size())
         .show(ctx, |ui| {
-          // This scope is here only to constrain the set_max_height call.
+          // This scope is here to constrain the set_max_height call.
           ui.scope(|ui| {
             ui.set_max_height(available.height() * 0.8);
             let spacing = ui.spacing().item_spacing;
@@ -69,8 +69,8 @@ impl ItemsDlg {
                     });
                     row.col(|ui| {
                       if !item.is_container() {
-                        // It's safe to adjust the stack size for all items (except containers) even for those
-                        // that are equipped or have durability.
+                        // It's safe to adjust the count (stack size) for all items (except containers) even for
+                        // those that are equipped or have durability.
                         let count = item.count_mut();
                         let speed = (*count as f64 / 100.0).max(1.0);
                         let range = 1..=i16::MAX;
