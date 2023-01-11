@@ -38,8 +38,8 @@ impl ItemsDlg {
         .anchor(Align2::CENTER_TOP, [0.0, 0.0])
         .default_size(available.size())
         .show(ctx, |ui| {
-          // This add_visible_ui is here only to constrain the set_max_height call.
-          ui.add_visible_ui(true, |ui| {
+          // This scope is here only to constrain the set_max_height call.
+          ui.scope(|ui| {
             ui.set_max_height(available.height() * 0.8);
             let spacing = ui.spacing().item_spacing;
             let row_size = util::button_size(ui) + spacing[1] * 2.0;
