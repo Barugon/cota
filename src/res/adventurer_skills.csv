@@ -139,53 +139,53 @@ Life,Life Reach,4,90,777,40,0,0
 Life,Purify,1,83,81,10,0,0
 Life,Purify Burst,3,85,83,40,0,0
 Life,Resurrection,4,88,85,40,84,40
-Light Armor,Acrobatics,1,99
-Light Armor,Dodge,1,91
-Light Armor,Escape,1,93
-Light Armor,Evasion,1,92
-Light Armor,Flurry,1,96
-Light Armor,Light Armor Specialization,20,2510
-Light Armor,Sprint,1,97
-Light Armor,Swiftness,4,95
-Moon,Animal Charm,1,358
-Moon,Celestial Blessing,1,103
-Moon,Cocoon of Night,1,1351
-Moon,Fireflies,1,2811
-Moon,Lunar Magic Specialization,20,2511
-Moon,Meteor Shower,1,2812
-Moon,Moon Beams,1,312
-Moon,Moon Eater,4,110
-Moon,Moon Worship,4,109
-Moon,Night Step,1,359
-Moon,Night Vision,1,102
-Moon,Shadow Form,1,104
-Moon,Shooting Star,1,3766
-Moon,Summon Will-O-Wisp,1,108
-Moon,Sun Warding,20,3753
-Moon,Vanish,1,101
-Polearms,Bec de Faucon,4,3323
-Polearms,Defensive Positions,4,120
-Polearms,Leg Sweep,1,117
-Polearms,Polearm Combat,1,472
-Polearms,Polearm Specialization,20,2512
-Polearms,Pull,1,115
-Polearms,Puncture,1,113
-Polearms,Push,1,111
-Polearms,Reach,4,114
-Polearms,Skewer,1,118
-Polearms,Spinning Attack,1,116
-Ranged,Aimed Shot,1,121
-Ranged,Ammo Scavenger,4,129
-Ranged,Blinding Shot,1,124
-Ranged,Disabling Shot,1,122
-Ranged,Draw Strength,4,130
-Ranged,Eagle Eye,4,127
-Ranged,Multi Shot,1,125
-Ranged,Piercing Shot,1,123
-Ranged,Range,4,128
-Ranged,Ranged Combat,1,473
-Ranged,Ranged Specialization,20,2513
-Ranged,Rapid Fire,1,126
+Light Armor,Acrobatics,1,99,95,40,0,0
+Light Armor,Dodge,1,91,0,0,0,0
+Light Armor,Escape,1,93,91,10,0,0
+Light Armor,Evasion,1,92,91,10,0,0
+Light Armor,Flurry,1,96,92,40,0,0
+Light Armor,Light Armor Specialization,20,2510,99,80,0,0
+Light Armor,Sprint,1,97,92,40,0,0
+Light Armor,Swiftness,4,95,91,10,0,0
+Moon,Animal Charm,1,358,102,10,0,0
+Moon,Celestial Blessing,1,103,102,10,0,0
+Moon,Cocoon of Night,1,1351,101,40,0,0
+Moon,Fireflies,1,2811,102,10,0,0
+Moon,Lunar Magic Specialization,20,2511,110,80,0,0
+Moon,Meteor Shower,1,2812,2811,40,0,0
+Moon,Moon Beams,1,312,358,40,0,0
+Moon,Moon Eater,4,110,109,40,0,0
+Moon,Moon Worship,4,109,102,10,0,0
+Moon,Night Step,1,359,104,40,0,0
+Moon,Night Vision,1,102,0,0,0,0
+Moon,Shadow Form,1,104,101,40,0,0
+Moon,Shooting Star,1,3766,2811,40,0,0
+Moon,Summon Will-O-Wisp,1,108,312,40,103,40
+Moon,Sun Warding,20,3753,0,0,0,0
+Moon,Vanish,1,101,102,10,0,0
+Polearms,Bec de Faucon,4,3323,114,40,0,0
+Polearms,Defensive Positions,4,120,114,40,0,0
+Polearms,Leg Sweep,1,117,115,40,116,40
+Polearms,Polearm Combat,1,472,0,0,0,0
+Polearms,Polearm Specialization,20,2512,3323,80,0,0
+Polearms,Pull,1,115,111,40,0,0
+Polearms,Puncture,1,113,472,10,0,0
+Polearms,Push,1,111,472,10,0,0
+Polearms,Reach,4,114,472,10,0,0
+Polearms,Skewer,1,118,117,40,0,0
+Polearms,Spinning Attack,1,116,113,40,0,0
+Ranged,Aimed Shot,1,121,473,10,0,0
+Ranged,Ammo Scavenger,4,129,473,10,0,0
+Ranged,Blinding Shot,1,124,122,40,0,0
+Ranged,Disabling Shot,1,122,473,10,0,0
+Ranged,Draw Strength,4,130,128,40,0,0
+Ranged,Eagle Eye,4,127,129,40,0,0
+Ranged,Multi Shot,1,125,126,40,0,0
+Ranged,Piercing Shot,1,123,121,40,0,0
+Ranged,Range,4,128,127,40,0,0
+Ranged,Ranged Combat,1,473,0,0,0,0
+Ranged,Ranged Specialization,20,2513,128,80,0,0
+Ranged,Rapid Fire,1,126,124,40,123,40
 Shield,Angles,4,137
 Shield,Bolster Balance,1,133
 Shield,Charge,1,135
