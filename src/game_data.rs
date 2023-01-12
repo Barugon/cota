@@ -202,9 +202,10 @@ impl GameData {
   }
 }
 
+#[derive(Clone)]
 pub struct SkillLvl {
-  info: SkillInfo,
-  level: i32,
+  pub info: SkillInfo,
+  pub level: i32,
   comp: i32,
 }
 
@@ -224,26 +225,14 @@ impl SkillLvl {
     self.level = self.comp;
   }
 
-  pub fn info(&self) -> &SkillInfo {
-    &self.info
-  }
-
   pub fn changed(&self) -> bool {
     self.level != self.comp
-  }
-
-  pub fn level(&self) -> i32 {
-    self.level
-  }
-
-  pub fn level_mut(&mut self) -> &mut i32 {
-    &mut self.level
   }
 }
 
 pub struct SkillLvlGroup {
-  name: &'static str,
-  skills: Vec<SkillLvl>,
+  pub name: &'static str,
+  pub skills: Vec<SkillLvl>,
 }
 
 impl SkillLvlGroup {
@@ -257,10 +246,6 @@ impl SkillLvlGroup {
     Self { name, skills }
   }
 
-  pub fn name(&self) -> &str {
-    self.name
-  }
-
   pub fn changed(&self) -> bool {
     for skill in &self.skills {
       if skill.changed() {
@@ -271,18 +256,14 @@ impl SkillLvlGroup {
     false
   }
 
-  pub fn skills_mut(&mut self) -> &mut Vec<SkillLvl> {
-    &mut self.skills
-  }
-
   pub fn accept(&mut self) {
-    for skill in self.skills_mut() {
+    for skill in &mut self.skills {
       skill.accept();
     }
   }
 
   pub fn discard(&mut self) {
-    for skill in self.skills_mut() {
+    for skill in &mut self.skills {
       skill.discard();
     }
   }
@@ -377,13 +358,12 @@ fn get_skill_lvl(sk2: &Value, info: &SkillInfo) -> Option<i32> {
 }
 
 fn set_skill_lvl(sk2: &mut Value, date: &Value, skill: &SkillLvl) {
-  let lvl = skill.level();
-  assert!((0..=200).contains(&lvl));
-  if lvl == 0 {
-    remove_skill(sk2, skill.info().id)
+  assert!((0..=200).contains(&skill.level));
+  if skill.level == 0 {
+    remove_skill(sk2, skill.info.id)
   } else {
-    let exp = (util::SKILL_EXP[lvl as usize - 1] as f64 * skill.info().mul).ceil() as i64;
-    let key = format!("{}", skill.info().id);
+    let exp = (util::SKILL_EXP[skill.level as usize - 1] as f64 * skill.info.mul).ceil() as i64;
+    let key = format!("{}", skill.info.id);
     if let Some(skill) = sk2.get_mut(&key) {
       // Set the skill's experience.
       skill[X] = exp.into();
@@ -398,7 +378,7 @@ fn set_skill_lvl(sk2: &mut Value, date: &Value, skill: &SkillLvl) {
   }
 }
 
-fn remove_skill(sk2: &mut Value, id: u64) {
+fn remove_skill(sk2: &mut Value, id: u32) {
   let skills = sk2.as_object_mut().unwrap();
   skills.remove(&format!("{}", id));
 }

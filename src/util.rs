@@ -185,16 +185,32 @@ pub enum SkillCategory {
 }
 
 #[derive(Clone, Default)]
+pub struct Requires {
+  pub id: u32,
+  pub lvl: i32,
+}
+
+#[derive(Clone, Default)]
 pub struct SkillInfo {
   pub name: &'static str,
   pub mul: f64,
-  pub id: u64,
+  pub id: u32,
+  // Some skills have two requirements.
+  pub reqs: [Requires; 2],
 }
 
-#[derive(Default)]
 pub struct SkillInfoGroup {
   pub name: &'static str,
   pub skills: Vec<SkillInfo>,
+}
+
+impl SkillInfoGroup {
+  fn new(name: &'static str) -> Self {
+    Self {
+      name,
+      skills: Vec::new(),
+    }
+  }
 }
 
 /// Parse the CSV for adventurer or producer skills.
@@ -204,23 +220,36 @@ pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
     SkillCategory::Producer => include_str!("res/producer_skills.csv"),
   };
   let mut skill_groups = Vec::new();
-  let mut skill_group = SkillInfoGroup::default();
-  for line in text.lines() {
+  let mut skill_group = SkillInfoGroup::new(Default::default());
+  let mut lines = text.lines();
+
+  // Skip the header.
+  lines.next();
+  for line in lines {
     let mut fields = line.split(',');
     if let Some(group) = fields.next() {
       if group != skill_group.name {
         if !skill_group.name.is_empty() {
           skill_groups.push(skill_group);
         }
-
-        skill_group = SkillInfoGroup::default();
-        skill_group.name = group;
+        skill_group = SkillInfoGroup::new(group);
       }
 
+      const ZERO: &str = "0";
       skill_group.skills.push(SkillInfo {
         name: fields.next().unwrap(),
         mul: fields.next().unwrap().parse().unwrap(),
         id: fields.next().unwrap().parse().unwrap(),
+        reqs: [
+          Requires {
+            id: fields.next().unwrap_or(ZERO).parse().unwrap(),
+            lvl: fields.next().unwrap_or(ZERO).parse().unwrap(),
+          },
+          Requires {
+            id: fields.next().unwrap_or(ZERO).parse().unwrap(),
+            lvl: fields.next().unwrap_or(ZERO).parse().unwrap(),
+          },
+        ],
       });
     }
   }
