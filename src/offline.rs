@@ -236,7 +236,7 @@ const MAX_GOLD: i32 = i32::MAX / 2;
 
 mod game_info {
   use crate::{
-    game_data::{GameData, Item, SkillLvlGroup},
+    game_data::{GameData, Item, SkillLvl, SkillLvlGroup},
     util::{self, SkillCategory},
   };
   use eframe::{
@@ -245,12 +245,90 @@ mod game_info {
     epaint::Color32,
   };
   use egui_extras::{Column, TableBuilder};
-  use std::{borrow::Cow, ffi::OsStr, path::PathBuf};
+  use std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+    ffi::OsStr,
+    path::PathBuf,
+  };
+
+  struct SkillsIdx {
+    cat: SkillCategory,
+    group_idx: usize,
+    skill_idx: usize,
+  }
+
+  struct Skills {
+    adv: Vec<SkillLvlGroup>,
+    prd: Vec<SkillLvlGroup>,
+    map: HashMap<u32, SkillsIdx>,
+    tree: HashMap<u32, HashSet<u32>>,
+  }
+
+  impl Skills {
+    fn new(data: &GameData) -> Self {
+      let adv = data.get_skills(SkillCategory::Adventurer);
+      let prd = data.get_skills(SkillCategory::Producer);
+      let mut map = HashMap::new();
+      let mut tree: HashMap<u32, HashSet<u32>> = HashMap::new();
+      for cat in [SkillCategory::Adventurer, SkillCategory::Producer] {
+        let vec = match cat {
+          SkillCategory::Adventurer => &adv,
+          SkillCategory::Producer => &prd,
+        };
+
+        for (group_idx, group) in vec.iter().enumerate() {
+          for (skill_idx, skill) in group.skills.iter().enumerate() {
+            map.insert(
+              skill.info.id,
+              SkillsIdx {
+                cat,
+                group_idx,
+                skill_idx,
+              },
+            );
+
+            for req in &skill.info.reqs {
+              let set = if let Some(set) = tree.get_mut(&req.id) {
+                set
+              } else {
+                tree.insert(req.id, HashSet::new());
+                tree.get_mut(&req.id).unwrap()
+              };
+              set.insert(skill.info.id);
+            }
+          }
+        }
+      }
+
+      Self {
+        adv,
+        prd,
+        map,
+        tree,
+      }
+    }
+
+    fn get(&self, id: u32) -> &SkillLvl {
+      let idx = self.map.get(&id).unwrap();
+      match idx.cat {
+        SkillCategory::Adventurer => &self.adv[idx.group_idx].skills[idx.skill_idx],
+        SkillCategory::Producer => &self.prd[idx.group_idx].skills[idx.skill_idx],
+      }
+    }
+
+    fn get_mut(&mut self, id: u32) -> &mut SkillLvl {
+      let idx = self.map.get(&id).unwrap();
+      match idx.cat {
+        SkillCategory::Adventurer => &mut self.adv[idx.group_idx].skills[idx.skill_idx],
+        SkillCategory::Producer => &mut self.prd[idx.group_idx].skills[idx.skill_idx],
+      }
+    }
+  }
 
   pub struct GameInfo {
     data: GameData,
-    adv: Vec<SkillLvlGroup>,
-    prd: Vec<SkillLvlGroup>,
+    skills: Skills,
     items: Vec<Item>,
     adv_lvl_cmp: i32,
     adv_lvl: i32,
@@ -262,8 +340,7 @@ mod game_info {
 
   impl GameInfo {
     pub fn new(data: GameData) -> Self {
-      let adv = data.get_skills(SkillCategory::Adventurer);
-      let prd = data.get_skills(SkillCategory::Producer);
+      let skills = Skills::new(&data);
       let items = data.get_inventory_items();
       let adv_lvl = data.get_adv_lvl();
       let prd_lvl = data.get_prd_lvl();
@@ -271,8 +348,7 @@ mod game_info {
 
       GameInfo {
         data,
-        adv,
-        prd,
+        skills,
         items,
         adv_lvl_cmp: adv_lvl,
         adv_lvl,
@@ -315,11 +391,11 @@ mod game_info {
 
     fn show_skill_category(&mut self, ui: &mut Ui, category: SkillCategory) -> bool {
       let (scroll_id, groups) = match category {
-        SkillCategory::Adventurer => ("offline_adventurer_skills", &mut self.adv),
-        SkillCategory::Producer => ("offline_producer_skills", &mut self.prd),
+        SkillCategory::Adventurer => ("offline_adventurer_skills", &mut self.skills.adv),
+        SkillCategory::Producer => ("offline_producer_skills", &mut self.skills.prd),
       };
 
-      let mut changed = false;
+      let mut changed = None;
       ui.vertical(|ui| {
         ScrollArea::vertical()
           .id_source(scroll_id)
@@ -328,8 +404,8 @@ mod game_info {
             for skill_group in groups {
               // Use a single column in order to force the scroll area to fill the entire available width.
               ui.columns(1, |col| {
-                CollapsingHeader::new(skill_group.name())
-                  .id_source(format!("{}_offline", skill_group.name().to_lowercase()))
+                CollapsingHeader::new(skill_group.name)
+                  .id_source(format!("{}_offline", skill_group.name.to_lowercase()))
                   .show(&mut col[0], |ui| {
                     let spacing = ui.spacing().item_spacing;
                     let row_size = util::button_size(ui) + spacing[1] * 2.0;
@@ -354,26 +430,26 @@ mod game_info {
                         });
                       })
                       .body(|mut body| {
-                        for skill in skill_group.skills_mut() {
+                        for skill in &mut skill_group.skills {
                           body.row(row_size, |mut row| {
                             row.col(|ui| {
-                              let color = if skill.level() > 0 {
+                              let color = if skill.level > 0 {
                                 const NAME_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
                                 NAME_COLOR
                               } else {
                                 const SUBDUED_NAME_COLOR: Color32 = Color32::from_rgb(80, 120, 140);
                                 SUBDUED_NAME_COLOR
                               };
-                              ui.label(RichText::from(skill.info().name).color(color));
+                              ui.label(RichText::from(skill.info.name).color(color));
                             });
                             row.col(|ui| {
-                              let widget = DragValue::new(skill.level_mut()).clamp_range(0..=200);
+                              let widget = DragValue::new(&mut skill.level).clamp_range(0..=200);
                               if ui.add(widget).changed() {
-                                changed = true;
+                                changed = Some(skill.info.id);
                               }
                             });
                             row.col(|ui| {
-                              ui.label(format!("{}", skill.info().id));
+                              ui.label(format!("{}", skill.info.id));
                             });
                           });
                         }
@@ -384,7 +460,19 @@ mod game_info {
           });
       });
 
-      changed
+      if let Some(id) = changed.take() {
+        let min = self.get_skill_min_level(id);
+        let skill = self.skills.get_mut(id);
+        if min > skill.level {
+          skill.level = min;
+        }
+
+        // Clone the skill so that we can borrow self as mutable again.
+        let skill = skill.clone();
+        self.check_skill_requirements(&skill);
+        return true;
+      }
+      false
     }
 
     pub fn avatar_name(&self) -> &str {
@@ -449,8 +537,8 @@ mod game_info {
         || self.prd_lvl != self.prd_lvl_cmp
         || self.gold_changed()
         || self.items_changed()
-        || changed(&self.adv)
-        || changed(&self.prd)
+        || changed(&self.skills.adv)
+        || changed(&self.skills.prd)
     }
 
     pub fn discard_changes(&mut self) {
@@ -460,8 +548,8 @@ mod game_info {
       self.adv_lvl = self.adv_lvl_cmp;
       self.prd_lvl = self.prd_lvl_cmp;
       self.gold = self.gold_cmp;
-      discard_changes(&mut self.adv);
-      discard_changes(&mut self.prd);
+      discard_changes(&mut self.skills.adv);
+      discard_changes(&mut self.skills.prd);
     }
 
     pub fn get_file_path(&self) -> PathBuf {
@@ -483,8 +571,8 @@ mod game_info {
       }
       self.adv_lvl_cmp = self.adv_lvl;
       self.prd_lvl_cmp = self.prd_lvl;
-      accept_changes(&mut self.adv);
-      accept_changes(&mut self.prd);
+      accept_changes(&mut self.skills.adv);
+      accept_changes(&mut self.skills.prd);
     }
 
     fn update_json(&mut self) {
@@ -492,8 +580,8 @@ mod game_info {
       self.data.set_adv_lvl(self.adv_lvl);
       self.data.set_prd_lvl(self.prd_lvl);
       self.data.set_gold(self.gold);
-      self.data.set_skills(&self.adv);
-      self.data.set_skills(&self.prd);
+      self.data.set_skills(&self.skills.adv);
+      self.data.set_skills(&self.skills.prd);
     }
 
     fn gold_changed(&self) -> bool {
@@ -510,6 +598,45 @@ mod game_info {
         }
       }
       false
+    }
+
+    fn get_skill_min_level(&self, id: u32) -> i32 {
+      let mut min = 0;
+      if let Some(set) = self.skills.tree.get(&id) {
+        for child_id in set {
+          let skill = self.skills.get(*child_id);
+          for req in &skill.info.reqs {
+            if req.id == id && skill.level > 0 && req.lvl > min {
+              min = req.lvl;
+            }
+          }
+        }
+      }
+      min
+    }
+
+    fn check_skill_requirements(&mut self, skill: &SkillLvl) {
+      if skill.level == 0 {
+        return;
+      }
+
+      for req in &skill.info.reqs {
+        if req.id == 0 {
+          continue;
+        }
+
+        let req_skill = self.skills.get_mut(req.id);
+        if req_skill.level < req.lvl {
+          let enabling = req_skill.level == 0;
+          req_skill.level = req.lvl;
+
+          if enabling {
+            // We need to clone the required skill here so that we can recurse with mutable self.
+            let skill = req_skill.clone();
+            self.check_skill_requirements(&skill);
+          }
+        }
+      }
     }
   }
 
