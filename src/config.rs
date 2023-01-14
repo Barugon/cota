@@ -1,8 +1,5 @@
 use eframe::Storage;
-use std::{
-  env,
-  path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
 const LOG_PATH_KEY: &str = "log_path";
 const SAVE_PATH_KEY: &str = "save_path";
@@ -71,16 +68,22 @@ pub fn set_notes(storage: &mut dyn Storage, avatar: &str, notes: String) {
 
 fn get_default_log_path() -> Option<PathBuf> {
   if let Some(path) = get_sota_config_path() {
-    return Some(path.join("ChatLogs"));
+    let path = path.join("ChatLogs");
+    if path.is_dir() {
+      return Some(path);
+    }
   }
-  env::current_dir().ok()
+  dirs::home_dir()
 }
 
 fn get_default_save_path() -> Option<PathBuf> {
   if let Some(path) = get_sota_config_path() {
-    return Some(path.join("SavedGames"));
+    let path = path.join("ChatLogs");
+    if path.is_dir() {
+      return Some(path);
+    }
   }
-  env::current_dir().ok()
+  dirs::home_dir()
 }
 
 fn get_value(storage: &dyn Storage, key: &str) -> Option<String> {
