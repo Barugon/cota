@@ -270,7 +270,7 @@ mod game_info {
       let adv = data.get_skills(SkillCategory::Adventurer);
       let prd = data.get_skills(SkillCategory::Producer);
       let mut map = HashMap::new();
-      let mut tree: HashMap<u32, HashSet<u32>> = HashMap::new();
+      let mut tree = HashMap::new();
       for cat in [SkillCategory::Adventurer, SkillCategory::Producer] {
         let vec = match cat {
           SkillCategory::Adventurer => &adv,
