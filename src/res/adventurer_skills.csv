@@ -186,93 +186,93 @@ Ranged,Range,4,128,127,40,0,0
 Ranged,Ranged Combat,1,473,0,0,0,0
 Ranged,Ranged Specialization,20,2513,128,80,0,0
 Ranged,Rapid Fire,1,126,124,40,123,40
-Shield,Angles,4,137
-Shield,Bolster Balance,1,133
-Shield,Charge,1,135
-Shield,Deflect,1,131
-Shield,Dig In,1,134
-Shield,Redirection,4,138
-Shield,Shield Bash,1,132
-Shield,Shield Preservation,4,139
-Shield,Shield Specialization,20,2514
-Shield,Stand your ground,4,140
-Shield,Testudo,1,136
-Subterfuge,Armor Weak Points,4,119
-Subterfuge,Backstab,4,2557
-Subterfuge,Camouflage,1,94
-Subterfuge,Distract,2,522
-Subterfuge,Engage Opponent,1,521
-Subterfuge,Opportunity Strike,2,1359
-Subterfuge,Pick Pockets,2,518
-Subterfuge,Poison Weapon,2,517
-Subterfuge,Pugilism,1,3231
-Subterfuge,Safe Fall,5,934
-Subterfuge,Sap,2,516
-Subterfuge,Silent Movement,2,98
-Subterfuge,Sneak Attack,2,100
-Subterfuge,Subterfuge Specialization,20,2515
-Subterfuge,Train Dexterity,10,153
-Subterfuge,Trip,1,158
-Sun,Blind,1,144
-Sun,Dazzling Rays,1,313
-Sun,Elysian Illumination,1,1352
-Sun,Enlightenment,1,143
-Sun,Light,1,142
-Sun,Moon Warding,20,3752
-Sun,Reveal Hidden,1,146
-Sun,Searing Ray,1,141
-Sun,Solar Flare,1,3783
-Sun,Summon Phoenix,1,148
-Sun,Sun Eater,4,150
-Sun,Sun Magic Specialization,20,2516
-Sun,Sun Worship,4,149
-Tactics,Armor Preservation,4,155
-Tactics,Berserker's Stance,1,306
-Tactics,Defensive Stance,1,71
-Tactics,Elixir Extension,4,3554
-Tactics,Fortify Defenses,1,1358
-Tactics,Healthy,5,151
-Tactics,Heavy Lifter,4,156
-Tactics,Magic Warding,20,3751
-Tactics,Mounted Cary Capacity Focus,10,5776
-Tactics,Mounted Gallop Speed,10,5774
-Tactics,Mounted Proficiency,10,5773
-Tactics,Mounted Speed Focus,10,5879
-Tactics,Offhand Attack,1,152
-Tactics,Offhand Defense,4,157
-Tactics,Offhand Power,4,160
-Tactics,Parry,1,11
-Tactics,Passive Stance,1,307
-Tactics,Reckless Stance,1,305
-Tactics,Tactics Specialization,20,2517
-Tactics,Train Strength,10,154
-Tactics,Weapon Preservation,4,159
-Taming,Collar Recovery,1,476
-Taming,Combat Training,1,433
-Taming,Concentration,1,435
-Taming,Frenzy,1,6351
-Taming,Heal Creature,1,531
-Taming,Obedience,1,432
-Taming,Pet Attack Precision Training,1,3563
-Taming,Pet Hide Toughness Training,1,3561
-Taming,Pet Speed Training,1,3560
-Taming,Pet Strength Training,1,3562
-Taming,Pet Taunting Training,1,3564
-Taming,Refresh,1,436
-Taming,Resurrect Creature,1,530
-Taming,Summoning,1,437
-Taming,Tame Creature,1,430
-Taming,Taming Specialization,20,2520
-Water,Blue Blooded,4,170
-Water,Cone of Cold,4,13308
-Water,Douse,1,162
-Water,Fire Warding,20,3750
-Water,Ice Arrow,1,165
-Water,Ice Field,1,167
-Water,Ice Fist,1,161
-Water,Icy Breath,4,169
-Water,Shield of Ice,1,164
-Water,Soothing Rain,1,163
-Water,Summon Ice Elemental,1,168
-Water,Summon Water Elemental,1,166
-Water,Water Specialization,20,2518
+Shield,Angles,4,137,131,10,0,0
+Shield,Bolster Balance,1,133,131,10,0,0
+Shield,Charge,1,135,132,40,0,0
+Shield,Deflect,1,131,0,0,0,0
+Shield,Dig In,1,134,133,40,0,0
+Shield,Redirection,4,138,137,40,0,0
+Shield,Shield Bash,1,132,133,40,0,0
+Shield,Shield Preservation,4,139,137,40,0,0
+Shield,Shield Specialization,20,2514,140,80,0,0
+Shield,Stand your ground,4,140,138,40,139,40
+Shield,Testudo,1,136,134,40,0,0
+Subterfuge,Armor Weak Points,4,119,153,40,0,0
+Subterfuge,Backstab,4,2557,118,40,0,0
+Subterfuge,Camouflage,1,94,522,10,0,0
+Subterfuge,Distract,2,522,0,0,0,0
+Subterfuge,Engage Opponent,1,521,522,10,0,0
+Subterfuge,Opportunity Strike,2,1359,516,40,0,0
+Subterfuge,Pick Pockets,2,518,98,40,0,0
+Subterfuge,Poison Weapon,2,517,158,40,0,0
+Subterfuge,Pugilism,1,3231,521,40,0,0
+Subterfuge,Safe Fall,5,934,153,40,0,0
+Subterfuge,Sap,2,516,98,40,0,0
+Subterfuge,Silent Movement,2,98,94,40,0,0
+Subterfuge,Sneak Attack,2,100,98,40,0,0
+Subterfuge,Subterfuge Specialization,20,2515,153,80,0,0
+Subterfuge,Train Dexterity,10,153,522,10,0,0
+Subterfuge,Trip,1,158,522,10,0,0
+Sun,Blind,1,144,142,10,0,0
+Sun,Dazzling Rays,1,313,144,40,0,0
+Sun,Elysian Illumination,1,1352,146,40,0,0
+Sun,Enlightenment,1,143,142,10,0,0
+Sun,Light,1,142,0,0,0,0
+Sun,Moon Warding,20,3752,0,0,0,0
+Sun,Reveal Hidden,1,146,141,40,143,40
+Sun,Searing Ray,1,141,142,10,0,0
+Sun,Solar Flare,1,3783,146,40,0,0
+Sun,Summon Phoenix,1,148,146,40,0,0
+Sun,Sun Eater,4,150,149,40,0,0
+Sun,Sun Magic Specialization,20,2516,150,80,0,0
+Sun,Sun Worship,4,149,142,20,0,0
+Tactics,Armor Preservation,4,155,151,10,0,0
+Tactics,Berserker's Stance,1,306,305,40,0,0
+Tactics,Defensive Stance,1,71,151,10,0,0
+Tactics,Elixir Extension,4,3554,159,10,0,0
+Tactics,Fortify Defenses,1,1358,306,40,307,40
+Tactics,Healthy,5,151,0,0,0,0
+Tactics,Heavy Lifter,4,156,154,40,0,0
+Tactics,Magic Warding,20,3751,154,80,0,0
+Tactics,Mounted Cary Capacity Focus,10,5776,5774,10,0,0
+Tactics,Mounted Gallop Speed,10,5774,5773,10,0,0
+Tactics,Mounted Proficiency,10,5773,151,10,0,0
+Tactics,Mounted Speed Focus,10,5879,5774,10,0,0
+Tactics,Offhand Attack,1,152,11,40,0,0
+Tactics,Offhand Defense,4,157,152,40,0,0
+Tactics,Offhand Power,4,160,157,40,0,0
+Tactics,Parry,1,11,151,10,0,0
+Tactics,Passive Stance,1,307,71,40,0,0
+Tactics,Reckless Stance,1,305,151,10,0,0
+Tactics,Tactics Specialization,20,2517,156,80,0,0
+Tactics,Train Strength,10,154,151,10,0,0
+Tactics,Weapon Preservation,4,159,155,40,0,0
+Taming,Collar Recovery,1,476,430,20,0,0
+Taming,Combat Training,1,433,432,40,0,0
+Taming,Concentration,1,435,476,40,0,0
+Taming,Frenzy,1,6351,437,20,0,0
+Taming,Heal Creature,1,531,430,20,0,0
+Taming,Obedience,1,432,430,20,0,0
+Taming,Pet Attack Precision Training,1,3563,3560,40,0,0
+Taming,Pet Hide Toughness Training,1,3561,3562,40,0,0
+Taming,Pet Speed Training,1,3560,432,40,0,0
+Taming,Pet Strength Training,1,3562,432,40,0,0
+Taming,Pet Taunting Training,1,3564,433,40,0,0
+Taming,Refresh,1,436,476,40,0,0
+Taming,Resurrect Creature,1,530,531,40,0,0
+Taming,Summoning,1,437,430,10,0,0
+Taming,Tame Creature,1,430,0,0,0,0
+Taming,Taming Specialization,20,2520,433,80,0,0
+Water,Blue Blooded,4,170,169,40,0,0
+Water,Cone of Cold,4,13308,167,40,0,0
+Water,Douse,1,162,161,10,0,0
+Water,Fire Warding,20,3750,0,0,0,0
+Water,Ice Arrow,1,165,161,10,0,0
+Water,Ice Field,1,167,165,40,0,0
+Water,Ice Fist,1,161,0,0,0,0
+Water,Icy Breath,4,169,161,10,0,0
+Water,Shield of Ice,1,164,162,40,0,0
+Water,Soothing Rain,1,163,162,40,0,0
+Water,Summon Ice Elemental,1,168,166,40,164,40
+Water,Summon Water Elemental,1,166,167,40,0,0
+Water,Water Magic Specialization,20,2518,170,80,0,0
