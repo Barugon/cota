@@ -45,5 +45,6 @@
     "winit"
   ],
   "editor.tabSize": 2,
+  "rainbow_csv.enable_auto_csv_lint": false,
   "task.autoDetect": "off"
 }
