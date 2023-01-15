@@ -237,11 +237,7 @@ pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
       let mut reqs = Vec::new();
       while let Some(id) = fields.next() {
         let id = id.parse().unwrap();
-        let lvl = if let Some(lvl) = fields.next() {
-          lvl.parse().unwrap()
-        } else {
-          break;
-        };
+        let lvl = fields.next().unwrap().parse().unwrap();
         reqs.push(Requires { id, lvl });
       }
 
