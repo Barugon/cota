@@ -1,5 +1,4 @@
 .vscode/launch.json
 Cargo.lock
-changes.md
 Dockerfile
 target
