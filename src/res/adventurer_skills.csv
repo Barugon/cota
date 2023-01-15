@@ -7,8 +7,8 @@ Air,Dash,1,6,1,20,0,0
 Air,Discharge,1,221,1,10,0,0
 Air,Earth Warding,20,3758,0,0,0,0
 Air,Gust,0.5,1,0,0,0,0
-Air,Lightning,1,2,221,40,0,0
 Air,Lightning Storm,2,13310,3,40,0,0
+Air,Lightning,1,2,221,40,0,0
 Air,Rapid Discharge,2,8,1,20,0,0
 Air,Shield of Air,1,515,5,40,0,0
 Air,Summon Air Elemental,2,4,3,40,0,0
@@ -136,8 +136,8 @@ Life,Healing Touch,1,81,0,0,0,0
 Life,Life Magic Specialization,20,2509,89,80,0,0
 Life,Life Power,4,89,777,40,0,0
 Life,Life Reach,4,90,777,40,0,0
-Life,Purify,1,83,81,10,0,0
 Life,Purify Burst,3,85,83,40,0,0
+Life,Purify,1,83,81,10,0,0
 Life,Resurrection,4,88,85,40,84,40
 Light Armor,Acrobatics,1,99,95,40,0,0
 Light Armor,Dodge,1,91,0,0,0,0
@@ -191,6 +191,7 @@ Shield,Bolster Balance,1,133,131,10,0,0
 Shield,Charge,1,135,132,40,0,0
 Shield,Deflect,1,131,0,0,0,0
 Shield,Dig In,1,134,133,40,0,0
+Shield,Ranged Defense,4,3515,140,80,0,0
 Shield,Redirection,4,138,137,40,0,0
 Shield,Shield Bash,1,132,133,40,0,0
 Shield,Shield Preservation,4,139,137,40,0,0
