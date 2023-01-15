@@ -1,44 +1,43 @@
-GROUP,NAME,XP_MUL,ID,REQ_ID_1,REQ_LVL_1,REQ_ID_2,REQ_LVL_2
-Agriculture,Harvest Plants,1,857
-Agriculture,Sow Seed Bonus,1,860
+Agriculture,Harvest Plants,1,857,885,10
+Agriculture,Sow Seed Bonus,1,860,885,10
 Agriculture,Water Plants,1,855
 Alchemy,Alchemy,1,2021
-Alchemy,Alchemy Mastery,2,2079
-Alchemy,Armor Enchantment,2,2065
-Alchemy,Enchantment,1,2050
-Alchemy,Weapon Enchantment,2,2064
+Alchemy,Alchemy Mastery,2,2079,2065,100
+Alchemy,Armor Enchantment,2,2065,2065,50
+Alchemy,Enchantment,1,2050,2021,40
+Alchemy,Weapon Enchantment,2,2064,2065,50
 Blacksmithing,Blacksmithing,1,2020
-Blacksmithing,Blacksmithing Masterwork,1,2059
-Blacksmithing,Blacksmithing Mastery,2,2080
-Blacksmithing,Blacksmithing Repair,1,2030
-Blacksmithing,Blacksmithing Salvage,1,2031
-Blacksmithing,Masterwork Blade,1,2045
-Blacksmithing,Masterwork Chain Armor,1,2046
-Blacksmithing,Masterwork Plate Armor,1,2047
-Blacksmithing,Masterwork Shield,1,2062
-Butchery,Batching Materials - Butchery,1,2066
+Blacksmithing,Blacksmithing Masterwork,1,2059,2020,40
+Blacksmithing,Blacksmithing Mastery,2,2080,2059,100
+Blacksmithing,Blacksmithing Repair,1,2030,2020,40
+Blacksmithing,Blacksmithing Salvage,1,2031,2020,40
+Blacksmithing,Masterwork Blade Weapon,1,2045,2059,50
+Blacksmithing,Masterwork Chain Armor,1,2046,2059,50
+Blacksmithing,Masterwork Plate Armor,1,2047,2059,50
+Blacksmithing,Masterwork Shield,1,2062,2059,50
+Butchery,Batching Materials - Butchery,1,2066,2025,40
 Butchery,Butchery,1,2025
-Butchery,Efficient Refine - Butchery,2,2071
-Butchery,Swift Refine - Butchery,1,2002
+Butchery,Efficient Refine - Butchery,2,2071,2066,40,2002,40
+Butchery,Swift Refine Materials - Butchery,1,2002,2025,40
 Carpentry,Carpentry,1,2023
-Carpentry,Carpentry Masterwork,1,2060
-Carpentry,Carpentry Mastery,2,2081
-Carpentry,Carpentry Repair,1,2032
-Carpentry,Carpentry Salvage,1,2033
-Carpentry,Masterwork Bludgeon Weapon,1,2052
-Carpentry,Masterwork Polearm Weapon,1,2053
-Carpentry,Masterwork Ranged Weapon,1,2054
+Carpentry,Carpentry Masterwork,1,2060,2023,40
+Carpentry,Carpentry Mastery,2,2081,2060,100
+Carpentry,Carpentry Repair,1,2032,2023,40
+Carpentry,Carpentry Salvage,1,2033,2023,40
+Carpentry,Masterwork Bludgeon Weapon,1,2052,2060,50
+Carpentry,Masterwork Polearm Weapon,1,2053,2060,50
+Carpentry,Masterwork Ranged Weapon,1,2054,2060,50
 Cooking,Cooking,1,2024
 Field Dressing,Field Dressing,1,2037
-Field Dressing,Meticulous Collection - Field Dressing,2,2013
-Field Dressing,Survey - Field Dressing,1,2008
-Field Dressing,Swift Gathering - Field Dressing,1,2003
-Fishing,Bait Recovery,1,2043
-Fishing,Fetid Water Fishing,1,2076
+Field Dressing,Meticulous Collection - Field Dressing,2,2013,2008,40,2003,40
+Field Dressing,Survey - Field Dressing,1,2008,2037,40
+Field Dressing,Swift Gathering - Field Dressing,1,2003,2037,40
+Fishing,Bait Recovery,1,2043,2042,40
+Fishing,Fetid Water Fishing,1,2076,2042,80
 Fishing,Fishing,1,2042
-Fishing,Freshwater Fishing,1,2044
-Fishing,Lava Fishing,1,2078
-Fishing,Saltwater Fishing,1,2077
+Fishing,Freshwater Fishing,1,2044,2042,80
+Fishing,Lava Fishing,1,2078,2044,80,2076,80,2077,80
+Fishing,Saltwater Fishing,1,2077,2042,80
 Foraging,Foraging,1,2039
 Foraging,Meticulous Collection - Foraging,2,2014
 Foraging,Survey - Foraging,2,2009

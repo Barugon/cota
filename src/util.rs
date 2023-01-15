@@ -195,8 +195,7 @@ pub struct SkillInfo {
   pub name: &'static str,
   pub mul: f64,
   pub id: u32,
-  // Some skills have two requirements.
-  pub reqs: [Requires; 2],
+  pub reqs: Vec<Requires>,
 }
 
 pub struct SkillInfoGroup {
@@ -221,11 +220,8 @@ pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
   };
   let mut skill_groups = Vec::new();
   let mut skill_group = SkillInfoGroup::new(Default::default());
-  let mut lines = text.lines();
 
-  // Skip the header.
-  lines.next();
-  for line in lines {
+  for line in text.lines() {
     let mut fields = line.split(',');
     if let Some(group) = fields.next() {
       if group != skill_group.name {
@@ -235,21 +231,25 @@ pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
         skill_group = SkillInfoGroup::new(group);
       }
 
-      const ZERO: &str = "0";
+      let name = fields.next().unwrap();
+      let mul = fields.next().unwrap().parse().unwrap();
+      let id = fields.next().unwrap().parse().unwrap();
+      let mut reqs = Vec::new();
+      while let Some(id) = fields.next() {
+        let id = id.parse().unwrap();
+        let lvl = if let Some(lvl) = fields.next() {
+          lvl.parse().unwrap()
+        } else {
+          break;
+        };
+        reqs.push(Requires { id, lvl });
+      }
+
       skill_group.skills.push(SkillInfo {
-        name: fields.next().unwrap(),
-        mul: fields.next().unwrap().parse().unwrap(),
-        id: fields.next().unwrap().parse().unwrap(),
-        reqs: [
-          Requires {
-            id: fields.next().unwrap_or(ZERO).parse().unwrap(),
-            lvl: fields.next().unwrap_or(ZERO).parse().unwrap(),
-          },
-          Requires {
-            id: fields.next().unwrap_or(ZERO).parse().unwrap(),
-            lvl: fields.next().unwrap_or(ZERO).parse().unwrap(),
-          },
-        ],
+        name,
+        mul,
+        id,
+        reqs,
       });
     }
   }

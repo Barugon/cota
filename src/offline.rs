@@ -621,10 +621,6 @@ mod game_info {
       }
 
       for req in &skill.info.reqs {
-        if req.id == 0 {
-          continue;
-        }
-
         let req_skill = self.skills.get_mut(req.id);
         if req_skill.level < req.lvl {
           let enabling = req_skill.level == 0;
