@@ -78,7 +78,7 @@ fn get_default_log_path() -> Option<PathBuf> {
 
 fn get_default_save_path() -> Option<PathBuf> {
   if let Some(path) = get_sota_config_path() {
-    let path = path.join("ChatLogs");
+    let path = path.join("SavedGames");
     if path.is_dir() {
       return Some(path);
     }
