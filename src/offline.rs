@@ -605,9 +605,11 @@ mod game_info {
       if let Some(set) = self.skills.tree.get(&id) {
         for child_id in set {
           let skill = self.skills.get(*child_id);
-          for req in &skill.info.reqs {
-            if req.id == id && skill.level > 0 && req.lvl > min {
-              min = req.lvl;
+          if skill.level > 0 {
+            for req in &skill.info.reqs {
+              if req.id == id && req.lvl > min {
+                min = req.lvl;
+              }
             }
           }
         }
