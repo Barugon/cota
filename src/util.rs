@@ -244,12 +244,7 @@ pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
         tmp_reqs.push(Requires { id, lvl });
       }
 
-      let mut reqs = Vec::with_capacity(tmp_reqs.len());
-      for req in &tmp_reqs {
-        reqs.push(req.clone());
-      }
-
-      // Reset the temporary requirements while leaving the allocated memory.
+      let reqs = tmp_reqs.clone();
       tmp_reqs.clear();
 
       skill_group.skills.push(SkillInfo {
