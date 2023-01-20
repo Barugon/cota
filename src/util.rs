@@ -213,7 +213,7 @@ impl SkillInfoGroup {
 }
 
 /// Parse the CSV for adventurer or producer skills.
-pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
+pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
   let text = match category {
     SkillCategory::Adventurer => include_str!("res/adventurer_skills.csv"),
     SkillCategory::Producer => include_str!("res/producer_skills.csv"),
@@ -221,7 +221,7 @@ pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
   let mut skill_groups = Vec::new();
   let mut skill_group = SkillInfoGroup::new(Default::default());
 
-  // Temporary vector to hold skill requirements in order to keep memory use and allocations low.
+  // Temporary vector to hold skill requirements in order to keep memory use and reallocations low.
   let mut tmp_reqs = Vec::new();
 
   for line in text.lines() {
