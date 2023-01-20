@@ -221,6 +221,9 @@ pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
   let mut skill_groups = Vec::new();
   let mut skill_group = SkillInfoGroup::new(Default::default());
 
+  // Temporary vector to hold skill requirements in order to keep memory use and allocations low.
+  let mut tmp_reqs = Vec::new();
+
   for line in text.lines() {
     let mut fields = line.split(',');
     if let Some(group) = fields.next() {
@@ -234,12 +237,20 @@ pub fn parse_skill_group(category: SkillCategory) -> Vec<SkillInfoGroup> {
       let name = fields.next().unwrap();
       let mul = fields.next().unwrap().parse().unwrap();
       let id = fields.next().unwrap().parse().unwrap();
-      let mut reqs = Vec::new();
+
       while let Some(id) = fields.next() {
         let id = id.parse().unwrap();
         let lvl = fields.next().unwrap().parse().unwrap();
-        reqs.push(Requires { id, lvl });
+        tmp_reqs.push(Requires { id, lvl });
       }
+
+      let mut reqs = Vec::with_capacity(tmp_reqs.len());
+      for req in &tmp_reqs {
+        reqs.push(req.clone());
+      }
+
+      // Reset the temporary requirements while leaving the allocated memory.
+      tmp_reqs.clear();
 
       skill_group.skills.push(SkillInfo {
         name,
