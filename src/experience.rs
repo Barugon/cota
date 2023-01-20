@@ -20,8 +20,8 @@ pub struct Experience {
 impl Experience {
   pub fn new() -> Self {
     Experience {
-      adventurer: util::parse_skill_group(SkillCategory::Adventurer),
-      producer: util::parse_skill_group(SkillCategory::Producer),
+      adventurer: util::parse_skill_info_groups(SkillCategory::Adventurer),
+      producer: util::parse_skill_info_groups(SkillCategory::Producer),
       selected: Default::default(),
       current_level: 1,
       target_level: 1,

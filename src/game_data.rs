@@ -158,7 +158,7 @@ impl GameData {
 
   pub fn get_skills(&self, category: SkillCategory) -> Vec<SkillLvlGroup> {
     let sk2 = self.character.get(SK2).unwrap();
-    let groups = util::parse_skill_group(category);
+    let groups = util::parse_skill_info_groups(category);
     let mut skills = Vec::with_capacity(groups.len());
     for group in groups {
       skills.push(SkillLvlGroup::new(sk2, group));
