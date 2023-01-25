@@ -44,10 +44,10 @@ impl GameData {
         let backpack = get_backpack_id(&text, &avatar)?;
 
         // Get the ItemStore JSON.
-        let inventory = get_json(&text, "ItemStore", &backpack)?;
+        let inventory = get_json(&text, ITEM_STORE, &backpack)?;
 
         // Get the CharacterSheet JSON.
-        let character = get_json(&text, "CharacterSheet", &avatar)?;
+        let character = get_json(&text, CHARACTER_SHEET, &avatar)?;
 
         // Make sure adventurer experience is there.
         if character.get(AE).and_then(|exp| exp.to_i64()).is_none() {
@@ -66,7 +66,7 @@ impl GameData {
         };
 
         // Get the UserGold JSON.
-        let gold = get_json(&text, "UserGold", USER_ID)?;
+        let gold = get_json(&text, USER_GOLD, USER_ID)?;
 
         Ok(GameData {
           path: RwLock::new(path),
@@ -90,13 +90,13 @@ impl GameData {
 
   pub fn store_as(&self, path: PathBuf) -> Result<(), Cow<'static, str>> {
     // Set CharacterSheet.
-    let text = set_json(&self.text, "CharacterSheet", &self.avatar, &self.character)?;
+    let text = set_json(&self.text, CHARACTER_SHEET, &self.avatar, &self.character)?;
 
     // Set ItemStore.
-    let text = set_json(&text, "ItemStore", &self.backpack, &self.inventory)?;
+    let text = set_json(&text, ITEM_STORE, &self.backpack, &self.inventory)?;
 
     // Set UserGold.
-    let text = set_json(&text, "UserGold", USER_ID, &self.gold)?;
+    let text = set_json(&text, USER_GOLD, USER_ID, &self.gold)?;
 
     // Create the save-game file and store the data.
     match File::create(&path) {
@@ -405,6 +405,9 @@ impl ToI64 for Value {
 }
 
 const USER_ID: &str = "000000000000000000000001";
+const CHARACTER_SHEET: &str = "CharacterSheet";
+const ITEM_STORE: &str = "ItemStore";
+const USER_GOLD: &str = "UserGold";
 const MAINBP: &str = "mainbp";
 const BAG: &str = "bag";
 const PHP: &str = "php";
