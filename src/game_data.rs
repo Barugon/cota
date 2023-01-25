@@ -408,7 +408,6 @@ const USER_ID: &str = "000000000000000000000001";
 const CHARACTER_SHEET: &str = "CharacterSheet";
 const ITEM_STORE: &str = "ItemStore";
 const USER_GOLD: &str = "UserGold";
-const MAINBP: &str = "mainbp";
 const BAG: &str = "bag";
 const PHP: &str = "php";
 const SK2: &str = "sk2";
@@ -467,7 +466,7 @@ fn get_backpack_id(text: &str, avatar: &str) -> Result<String, Cow<'static, str>
   let json = get_json(text, "Character", avatar)?;
 
   // Get the backpack ID.
-  if let Some(Value::String(id)) = json.get(MAINBP) {
+  if let Some(Value::String(id)) = json.get("mainbp") {
     return Ok(id.clone());
   }
 
