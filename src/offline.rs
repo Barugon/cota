@@ -461,6 +461,7 @@ mod game_info {
       });
 
       if let Some(id) = changed.take() {
+        // Make sure this skill meets the minimum level for skills that require it.
         let min = self.get_skill_min_level(id);
         let skill = self.skills.get_mut(id);
         if min > skill.level {
@@ -473,6 +474,14 @@ mod game_info {
         return true;
       }
       false
+    }
+
+    pub fn get_file_path(&self) -> PathBuf {
+      self.data.get_file_path()
+    }
+
+    pub fn get_file_name(&self) -> String {
+      self.data.get_file_name()
     }
 
     pub fn avatar_name(&self) -> &str {
@@ -550,14 +559,6 @@ mod game_info {
       self.gold = self.gold_cmp;
       discard_changes(&mut self.skills.adv);
       discard_changes(&mut self.skills.prd);
-    }
-
-    pub fn get_file_path(&self) -> PathBuf {
-      self.data.get_file_path()
-    }
-
-    pub fn get_file_name(&self) -> String {
-      self.data.get_file_name()
     }
 
     fn accept_changes(&mut self) {
