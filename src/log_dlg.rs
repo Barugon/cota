@@ -95,7 +95,7 @@ impl LogDlg {
   pub fn open(&mut self, avatar: &str, cancel: Cancel) {
     if !self.visible {
       self.state.set_disabled(false);
-      self.title = format!("🗊  Search Results ({})", avatar);
+      self.title = format!("🗊  Search Results ({avatar})");
       self.status = RichText::from("Processing...").color(Color32::from_rgb(229, 187, 123));
       self.cancel = Some(cancel);
       self.visible = true;

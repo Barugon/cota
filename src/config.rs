@@ -33,7 +33,7 @@ pub fn set_log_path(storage: &mut dyn Storage, folder: &Path) {
   if let Some(folder) = folder.to_str() {
     set_value(storage, LOG_PATH_KEY, folder.to_owned());
   } else {
-    println!("Unable to convert path to string: {:?}", folder);
+    println!("Unable to convert path to string: {folder:?}");
   }
 }
 
@@ -41,7 +41,7 @@ pub fn set_save_path(storage: &mut dyn Storage, folder: &Path) {
   if let Some(folder) = folder.to_str() {
     set_value(storage, SAVE_PATH_KEY, folder.to_owned());
   } else {
-    println!("Unable to convert path to string: {:?}", folder);
+    println!("Unable to convert path to string: {folder:?}");
   }
 }
 
@@ -57,12 +57,12 @@ pub fn get_notes(storage: &dyn Storage, avatar: &str) -> Option<String> {
   if avatar.is_empty() {
     return None;
   }
-  get_value(storage, format!("{} {}", avatar, NOTES_KEY).as_str())
+  get_value(storage, format!("{avatar} {NOTES_KEY}").as_str())
 }
 
 pub fn set_notes(storage: &mut dyn Storage, avatar: &str, notes: String) {
   if !avatar.is_empty() {
-    set_value(storage, format!("{} {}", avatar, NOTES_KEY).as_str(), notes);
+    set_value(storage, format!("{avatar} {NOTES_KEY}").as_str(), notes);
   }
 }
 

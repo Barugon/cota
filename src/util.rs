@@ -330,7 +330,7 @@ pub fn replace_decimal(text: &str) -> String {
 
 /// Nicely format a f64 for display.
 pub fn f64_to_string(value: f64, locale: Locale) -> String {
-  format!("{:.6}", value)
+  format!("{value:.6}")
     .trim_end_matches('0')
     .trim_end_matches('.')
     .replacen('.', locale.decimal(), 1)

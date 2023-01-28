@@ -131,7 +131,7 @@ impl SearchDlg {
             Some(util::Search::Regex(regex))
           }
           Err(err) => {
-            self.text = format!("{:?}", err);
+            self.text = format!("{err:?}");
             return;
           }
         },

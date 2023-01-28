@@ -91,7 +91,7 @@ impl NotesDlg {
   pub fn open(&mut self, avatar: &str, text: String) {
     if !self.visible {
       self.state.set_disabled(true);
-      self.title = format!("📓  Notes for {}", avatar);
+      self.title = format!("📓  Notes for {avatar}");
       self.text = text;
       self.result = None;
       self.visible = true;
