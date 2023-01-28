@@ -225,11 +225,11 @@ fn get_countdown_text(prefix: &str, sec: i32) -> String {
     if min >= 60 {
       let hour = min / 60;
       let min = min % 60;
-      return format!("{}{:02}h {:02}m {:02}s", prefix, hour, min, sec);
+      return format!("{prefix}{hour:02}h {min:02}m {sec:02}s");
     }
-    return format!("{}{:02}m {:02}s", prefix, min, sec);
+    return format!("{prefix}{min:02}m {sec:02}s");
   }
-  format!("{}{:02}s", prefix, sec)
+  format!("{prefix}{sec:02}s")
 }
 
 /// SotA epoch (date/time of lunar cataclysm).

@@ -80,7 +80,7 @@ impl GameData {
           date,
         })
       }
-      Err(err) => Err(Cow::from(format!("Unable to load file: {}", err))),
+      Err(err) => Err(Cow::from(format!("Unable to load file: {err}"))),
     }
   }
 
@@ -380,7 +380,7 @@ fn set_skill_lvl(sk2: &mut Value, date: &Value, skill: &SkillLvl) {
 
 fn remove_skill(sk2: &mut Value, id: u32) {
   let skills = sk2.as_object_mut().unwrap();
-  skills.remove(&format!("{}", id));
+  skills.remove(&format!("{id}"));
 }
 
 fn get_item_name(val: &Value) -> Option<String> {
@@ -474,11 +474,11 @@ fn get_backpack_id(text: &str, avatar: &str) -> Result<String, Cow<'static, str>
 }
 
 fn collection_tag(collection: &str) -> String {
-  format!(r#"<collection name="{}">"#, collection)
+  format!(r#"<collection name="{collection}">"#)
 }
 
 fn record_tag(id: &str) -> String {
-  format!(r#"<record Id="{}">"#, id)
+  format!(r#"<record Id="{id}">"#)
 }
 
 const fn record_end() -> &'static str {
@@ -514,7 +514,7 @@ fn get_json(text: &str, collection: &str, id: &str) -> Result<Value, Cow<'static
     }
   }
 
-  let err = format!("Unable to get '{}' collection", collection);
+  let err = format!("Unable to get '{collection}' collection");
   Err(Cow::from(err))
 }
 
@@ -537,7 +537,7 @@ fn set_json(
     return Ok(result);
   }
 
-  let err = format!("Unable to set '{}' collection", collection);
+  let err = format!("Unable to set '{collection}' collection");
   Err(Cow::from(err))
 }
 

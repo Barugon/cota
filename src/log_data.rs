@@ -340,7 +340,7 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> 
   };
 
   let regex = ok!(
-    Regex::new(&format!("^{}{}{}.txt$", FILENAME_START, name, date)),
+    Regex::new(&format!("^{FILENAME_START}{name}{date}.txt$")),
     filenames
   );
 
