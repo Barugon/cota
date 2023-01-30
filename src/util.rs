@@ -10,8 +10,8 @@ use std::{
   },
 };
 
-pub const FAIL_ERR: &str = "Should return Ok";
-pub const NONE_ERR: &str = "Should return Some";
+pub const FAIL_ERR: &str = "Should always be Ok";
+pub const NONE_ERR: &str = "Should always be Some";
 
 pub const APP_ICON: &[u8] = include_bytes!("res/icon.png");
 pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
