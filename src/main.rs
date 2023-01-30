@@ -20,10 +20,10 @@ mod search_dlg;
 mod stats;
 
 use app::App;
-use util::{APP_ICON, APP_TITLE};
+use util::{APP_ICON, APP_TITLE, FAIL_ERR};
 
 fn main() {
-  let icon = image::load_from_memory(APP_ICON).unwrap();
+  let icon = image::load_from_memory(APP_ICON).expect(FAIL_ERR);
   let options = eframe::NativeOptions {
     resizable: false,
     initial_window_size: Some(App::inner_window_size()),

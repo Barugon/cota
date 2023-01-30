@@ -2,7 +2,7 @@ use self::game_info::GameInfo;
 use crate::{
   game_data::GameData,
   items_dlg::ItemsDlg,
-  util::{self, AppState},
+  util::{self, AppState, FAIL_ERR},
 };
 use eframe::{
   egui::{Button, DragValue, ImageButton, Response, RichText, Ui, WidgetText},
@@ -27,8 +27,8 @@ impl Offline {
     const LOAD_ICON: &[u8] = include_bytes!("res/load.png");
     const STORE_ICON: &[u8] = include_bytes!("res/store.png");
 
-    let load_image = RetainedImage::from_image_bytes("load_image", LOAD_ICON).unwrap();
-    let store_image = RetainedImage::from_image_bytes("store_image", STORE_ICON).unwrap();
+    let load_image = RetainedImage::from_image_bytes("load_image", LOAD_ICON).expect(FAIL_ERR);
+    let store_image = RetainedImage::from_image_bytes("store_image", STORE_ICON).expect(FAIL_ERR);
     let game = None;
     let error = None;
     let changed = false;
@@ -237,7 +237,7 @@ const MAX_GOLD: i32 = i32::MAX / 2;
 mod game_info {
   use crate::{
     game_data::{GameData, Item, SkillLvl, SkillLvlGroup},
-    util::{self, SkillCategory},
+    util::{self, SkillCategory, NONE_ERR},
   };
   use eframe::{
     egui::{CollapsingHeader, DragValue, Layout, RichText, ScrollArea, Ui},
@@ -293,7 +293,7 @@ mod game_info {
                 set
               } else {
                 tree.insert(req.id, HashSet::new());
-                tree.get_mut(&req.id).unwrap()
+                tree.get_mut(&req.id).expect(NONE_ERR)
               };
               set.insert(skill.info.id);
             }
@@ -310,7 +310,7 @@ mod game_info {
     }
 
     fn get(&self, id: u32) -> &SkillLvl {
-      let idx = self.map.get(&id).unwrap();
+      let idx = self.map.get(&id).expect(NONE_ERR);
       match idx.cat {
         SkillCategory::Adventurer => &self.adv[idx.group_idx].skills[idx.skill_idx],
         SkillCategory::Producer => &self.prd[idx.group_idx].skills[idx.skill_idx],
@@ -318,7 +318,7 @@ mod game_info {
     }
 
     fn get_mut(&mut self, id: u32) -> &mut SkillLvl {
-      let idx = self.map.get(&id).unwrap();
+      let idx = self.map.get(&id).expect(NONE_ERR);
       match idx.cat {
         SkillCategory::Adventurer => &mut self.adv[idx.group_idx].skills[idx.skill_idx],
         SkillCategory::Producer => &mut self.prd[idx.group_idx].skills[idx.skill_idx],

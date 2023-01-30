@@ -10,6 +10,9 @@ use std::{
   },
 };
 
+pub const FAIL_ERR: &str = "Should return Ok";
+pub const NONE_ERR: &str = "Should return Some";
+
 pub const APP_ICON: &[u8] = include_bytes!("res/icon.png");
 pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
 pub const APP_TITLE: &str = env!("CARGO_PKG_DESCRIPTION");
@@ -234,13 +237,13 @@ pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
         skill_group = SkillInfoGroup::new(group);
       }
 
-      let name = fields.next().unwrap();
-      let mul = fields.next().unwrap().parse().unwrap();
-      let id = fields.next().unwrap().parse().unwrap();
+      let name = fields.next().expect(NONE_ERR);
+      let mul = fields.next().expect(NONE_ERR).parse().expect(FAIL_ERR);
+      let id = fields.next().expect(NONE_ERR).parse().expect(FAIL_ERR);
 
       while let Some(id) = fields.next() {
-        let id = id.parse().unwrap();
-        let lvl = fields.next().unwrap().parse().unwrap();
+        let id = id.parse().expect(FAIL_ERR);
+        let lvl = fields.next().expect(NONE_ERR).parse().expect(FAIL_ERR);
         tmp_reqs.push(Requires { id, lvl });
       }
 
@@ -380,7 +383,7 @@ mod tests {
     let result = find_ignore_case(text, "TSCHÜSS");
     assert!(result.is_some());
 
-    let range = result.unwrap();
+    let range = result.expect(NONE_ERR);
     assert!(range.start == 10);
 
     let len = "tschüß".len();
@@ -390,7 +393,7 @@ mod tests {
     let result = find_ignore_case(text, "tschüß");
     assert!(result.is_some());
 
-    let range = result.unwrap();
+    let range = result.expect(NONE_ERR);
     assert!(range.start == 4);
 
     let len = "TSCHÜSS".len();
@@ -400,7 +403,7 @@ mod tests {
     let result = find_ignore_case(text, "ghİj");
     assert!(result.is_some());
 
-    let range = result.unwrap();
+    let range = result.expect(NONE_ERR);
     assert!(range.start == 6);
 
     let len = "ghi\u{307}j".len();
@@ -410,14 +413,14 @@ mod tests {
     let result = find_ignore_case(text, "abc");
     assert!(result.is_some());
 
-    let range = result.unwrap();
+    let range = result.expect(NONE_ERR);
     assert!(range.start == 0 && range.end == 3);
 
     let text = "cbA cBa abC";
     let result = find_ignore_case(text, "abc");
     assert!(result.is_some());
 
-    let range = result.unwrap();
+    let range = result.expect(NONE_ERR);
     assert!(range.start == 8 && range.end == 11);
   }
 }

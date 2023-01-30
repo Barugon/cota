@@ -6,7 +6,7 @@ use crate::{
   experience::Experience,
   offline::Offline,
   stats::{Stats, StatsFilter},
-  util::AppState,
+  util::{AppState, FAIL_ERR, NONE_ERR},
 };
 use eframe::{
   egui::{
@@ -140,7 +140,10 @@ impl App {
 
     // Threading.
     let count = std::cmp::max(2, num_cpus::get());
-    let threads = ThreadPoolBuilder::new().pool_size(count).create().unwrap();
+    let threads = ThreadPoolBuilder::new()
+      .pool_size(count)
+      .create()
+      .expect(FAIL_ERR);
 
     // State.
     let state = AppState::default();
@@ -148,7 +151,8 @@ impl App {
 
     // Tab pages.
     let ctx = &cc.egui_ctx;
-    let log_path = config::get_log_path(cc.storage.unwrap()).unwrap_or_default();
+    let storage = cc.storage.expect(NONE_ERR);
+    let log_path = config::get_log_path(storage).unwrap_or_default();
     let stats = Stats::new(ctx, log_path, state.clone(), threads.clone());
     let chronometer = Chronometer::new(threads);
     let experience = Experience::new();
@@ -303,7 +307,8 @@ impl eframe::App for App {
   fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
     // Process load request from the offline page.
     if self.offline.load_request() {
-      self.choose_load_path(ctx, frame.storage_mut().unwrap());
+      let storage = frame.storage_mut().expect(NONE_ERR);
+      self.choose_load_path(ctx, storage);
     }
 
     // Set the progress cursor if the app is busy.
@@ -342,7 +347,8 @@ impl eframe::App for App {
               }
               Page::Offline => {
                 if menu_item(ui, close_menu, "Load Save-game...", None) {
-                  self.choose_load_path(ctx, frame.storage_mut().unwrap());
+                  let storage = frame.storage_mut().expect(NONE_ERR);
+                  self.choose_load_path(ctx, storage);
                 }
 
                 let enabled = self.offline.changed();
@@ -408,13 +414,15 @@ impl eframe::App for App {
           if let Some(path) = file_dlg.path() {
             match file_dlg.dialog_type() {
               egui_file::DialogType::SelectFolder => {
-                config::set_log_path(frame.storage_mut().unwrap(), &path);
+                let storage = frame.storage_mut().expect(NONE_ERR);
+                config::set_log_path(storage, &path);
                 self.stats.set_log_path(ctx, path);
               }
               egui_file::DialogType::OpenFile => {
                 let folder = path.with_file_name(String::default());
                 if self.offline.load(path) {
-                  config::set_save_path(frame.storage_mut().unwrap(), &folder);
+                  let storage = frame.storage_mut().expect(NONE_ERR);
+                  config::set_save_path(storage, &folder);
                 }
               }
               egui_file::DialogType::SaveFile => self.offline.store_as(path),
@@ -433,7 +441,10 @@ impl eframe::App for App {
         _ => (),
       }
       match self.confirm_dlg.take_hence() {
-        Some(Hence::Load) => self.choose_load_path(ctx, frame.storage_mut().unwrap()),
+        Some(Hence::Load) => {
+          let storage = frame.storage_mut().expect(NONE_ERR);
+          self.choose_load_path(ctx, storage)
+        }
         Some(Hence::Exit) => frame.close(),
         None => (),
       }

@@ -234,7 +234,7 @@ fn get_countdown_text(prefix: &str, sec: i32) -> String {
 
 /// SotA epoch (date/time of lunar cataclysm).
 fn epoch() -> DateTime<Utc> {
-  Utc.with_ymd_and_hms(1997, 9, 2, 0, 0, 0).unwrap()
+  Utc.with_ymd_and_hms(1997, 9, 2, 0, 0, 0).unwrap() // LocalResult does not have expect.
 }
 
 /// Number of seconds in an hour (one in-game day).
@@ -279,7 +279,7 @@ fn get_rift_countdowns(now: DateTime<Utc>) -> [i32; RIFT_COUNT] {
 /// Get the current Lost Vale countdown as seconds.
 fn get_lost_vale_countdown(now: DateTime<Utc>) -> i32 {
   // Get the number of seconds since 2018/02/23 13:00:00 UTC (first sighting).
-  let delta_secs = (now - Utc.with_ymd_and_hms(2018, 2, 23, 13, 0, 0).unwrap()).num_seconds();
+  let delta_secs = (now - Utc.with_ymd_and_hms(2018, 2, 23, 13, 0, 0).unwrap()).num_seconds(); // LocalResult does not have expect.
 
   // Calculate the time window using the original 28 hour duration (one in-game month).
   let win = delta_secs % (28 * HOUR_SECS);
