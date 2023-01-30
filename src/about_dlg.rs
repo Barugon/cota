@@ -15,7 +15,8 @@ pub struct AboutDlg {
 impl AboutDlg {
   pub fn new(state: AppState) -> Self {
     let logo_id = format!("{}_logo", util::APP_NAME);
-    let logo = RetainedImage::from_image_bytes(logo_id, util::APP_ICON).unwrap();
+    let logo =
+      RetainedImage::from_image_bytes(logo_id, util::APP_ICON).expect("Unable to decode app icon");
     let visible = false;
 
     Self {

@@ -1,4 +1,4 @@
-use crate::util::{self, Cancel, Search};
+use crate::util::{self, Cancel, Search, FAIL_ERR, NONE_ERR};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{channel::mpsc, executor::ThreadPool, future::join_all, StreamExt};
 use regex::Regex;
@@ -27,7 +27,7 @@ pub fn get_log_text(line: &str) -> &str {
 
     // Check if a chat timestamp was output.
     if let Some(time) = get_log_date(text.trim_start()) {
-      let pos = util::offset(text, time).unwrap() + time.len();
+      let pos = util::offset(text, time).expect(NONE_ERR) + time.len();
       return &text[pos..];
     }
     return text;
@@ -164,7 +164,7 @@ pub async fn get_stats_timestamps(
       let tx = tx.clone();
       threads.spawn_ok(async move {
         let result = future.await;
-        tx.unbounded_send(result).unwrap();
+        tx.unbounded_send(result).expect(FAIL_ERR);
       });
     }
     drop(tx);
@@ -208,13 +208,13 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, ts: i64, cancel: Cance
 
             if let Some(mut stats) = get_stats_text(line, ts, date) {
               // Include subsequent lines that do not start with a square bracket.
-              let pos = util::offset(&text, stats).unwrap();
+              let pos = util::offset(&text, stats).expect(NONE_ERR);
               let sub = &text[pos + stats.len()..];
               for line in sub.lines() {
                 if line.starts_with('[') {
                   break;
                 }
-                stats = &text[pos..util::offset(&text, line).unwrap()];
+                stats = &text[pos..util::offset(&text, line).expect(NONE_ERR)];
               }
 
               return StatsData::new(stats.into());

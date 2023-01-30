@@ -4,7 +4,7 @@ use crate::{
   log_dlg::LogDlg,
   notes_dlg::NotesDlg,
   search_dlg::SearchDlg,
-  util::{self, AppState, Cancel, Search},
+  util::{self, AppState, Cancel, Search, FAIL_ERR, NONE_ERR},
 };
 use eframe::{
   egui::{ComboBox, Context, Layout, RichText, Ui},
@@ -144,7 +144,7 @@ impl Stats {
     if !self.notes_dlg.show(ui.ctx()) {
       if let Some(text) = self.notes_dlg.take_text() {
         if !self.avatar.is_empty() {
-          config::set_notes(frame.storage_mut().unwrap(), &self.avatar, text);
+          config::set_notes(frame.storage_mut().expect(NONE_ERR), &self.avatar, text);
         }
       }
     }
@@ -160,14 +160,14 @@ impl Stats {
 
           // Determine the current avatar.
           if let Some(first) = self.avatars.first() {
-            if let Some(avatar) = config::get_avatar(frame.storage().unwrap()) {
+            if let Some(avatar) = config::get_avatar(frame.storage().expect(NONE_ERR)) {
               if self.avatars.binary_search(&avatar).is_ok() {
                 self.avatar = avatar;
               }
             }
 
             if self.avatar.is_empty() {
-              config::set_avatar(frame.storage_mut().unwrap(), first.clone());
+              config::set_avatar(frame.storage_mut().expect(NONE_ERR), first.clone());
               self.avatar = first.clone();
             }
           }
@@ -198,7 +198,7 @@ impl Stats {
         // Notes button.
         ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
           if ui.button("Notes").clicked() {
-            let text = config::get_notes(frame.storage().unwrap(), &self.avatar);
+            let text = config::get_notes(frame.storage().expect(NONE_ERR), &self.avatar);
             let text = text.unwrap_or_default();
             self.notes_dlg.open(&self.avatar, text);
           }
@@ -240,7 +240,7 @@ impl Stats {
                   .clicked()
                   && self.avatar != *avatar
                 {
-                  config::set_avatar(frame.storage_mut().unwrap(), avatar.clone());
+                  config::set_avatar(frame.storage_mut().expect(NONE_ERR), avatar.clone());
                   self.avatar = avatar.clone();
                   avatar_changed = true;
                 }
@@ -451,7 +451,8 @@ impl Stats {
     let ctx = ctx.clone();
     let future = log_data::get_avatars(self.log_path.clone(), cancel);
     let future = async move {
-      tx.unbounded_send(Message::Avatars(future.await)).unwrap();
+      tx.unbounded_send(Message::Avatars(future.await))
+        .expect(FAIL_ERR);
       ctx.request_repaint();
     };
 
@@ -485,7 +486,8 @@ impl Stats {
       let tx = self.channel.tx.clone();
       let ctx = ctx.clone();
       let future = async move {
-        tx.unbounded_send(Message::Dates(future.await)).unwrap();
+        tx.unbounded_send(Message::Dates(future.await))
+          .expect(FAIL_ERR);
         ctx.request_repaint();
       };
 
@@ -519,7 +521,8 @@ impl Stats {
         let ctx = ctx.clone();
         let future = log_data::get_stats(self.log_path.clone(), self.avatar.clone(), date, cancel);
         let future = async move {
-          tx.unbounded_send(Message::Stats(future.await)).unwrap();
+          tx.unbounded_send(Message::Stats(future.await))
+            .expect(FAIL_ERR);
           ctx.request_repaint();
         };
 
@@ -552,7 +555,7 @@ impl Stats {
     let future = log_data::find_log_entries(log_path, avatar, search.clone(), cancel);
     let future = async move {
       tx.unbounded_send(Message::Search(future.await, search))
-        .unwrap();
+        .expect(FAIL_ERR);
       ctx.request_repaint();
     };
 
