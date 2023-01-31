@@ -1,4 +1,7 @@
-use crate::util::{self, SkillInfo, SkillCategory, SkillInfoGroup};
+use crate::util::{
+  button_size, get_locale, parse_skill_info_groups, scroll_bar_size, SkillCategory, SkillInfo,
+  SkillInfoGroup, LVL_RANGE, SKILL_EXP,
+};
 use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::{
   egui::{DragValue, Label, Layout, RichText, ScrollArea, Sense, Ui, Widget},
@@ -20,12 +23,12 @@ pub struct Experience {
 impl Experience {
   pub fn new() -> Self {
     Experience {
-      adventurer: util::parse_skill_info_groups(SkillCategory::Adventurer),
-      producer: util::parse_skill_info_groups(SkillCategory::Producer),
+      adventurer: parse_skill_info_groups(SkillCategory::Adventurer),
+      producer: parse_skill_info_groups(SkillCategory::Producer),
       selected: Default::default(),
       current_level: 1,
       target_level: 1,
-      locale: util::get_locale(),
+      locale: get_locale(),
     }
   }
 
@@ -35,11 +38,11 @@ impl Experience {
     // Tool bar.
     ui.horizontal(|ui| {
       ui.label(RichText::from("Current Level").color(LABEL_COLOR));
-      let widget = DragValue::new(&mut self.current_level).clamp_range(util::LVL_RANGE);
+      let widget = DragValue::new(&mut self.current_level).clamp_range(LVL_RANGE);
       ui.add(widget);
 
       ui.label(RichText::from("Target Level").color(LABEL_COLOR));
-      let widget = DragValue::new(&mut self.target_level).clamp_range(util::LVL_RANGE);
+      let widget = DragValue::new(&mut self.target_level).clamp_range(LVL_RANGE);
       ui.add(widget);
 
       ui.label(RichText::from("Experience").color(LABEL_COLOR));
@@ -105,8 +108,8 @@ impl Experience {
             ui.columns(1, |col| {
               let response = col[0].collapsing(skill_group.name, |ui| {
                 let spacing = ui.spacing().item_spacing;
-                let row_size = util::button_size(ui) + spacing[1];
-                let available_width = ui.available_width() - util::scroll_bar_size(ui);
+                let row_size = button_size(ui) + spacing[1];
+                let available_width = ui.available_width() - scroll_bar_size(ui);
                 TableBuilder::new(ui)
                   .cell_layout(Layout::left_to_right(Align::Center))
                   .striped(true)
@@ -178,7 +181,7 @@ impl Experience {
     if self.selected.name.is_empty() {
       return None;
     }
-    let val = util::SKILL_EXP[self.target_level - 1] - util::SKILL_EXP[self.current_level - 1];
+    let val = SKILL_EXP[self.target_level - 1] - SKILL_EXP[self.current_level - 1];
     Some((val as f64 * self.selected.mul).ceil() as i64)
   }
 }

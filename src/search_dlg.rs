@@ -1,4 +1,4 @@
-use crate::util::{self, AppState};
+use crate::util::{AppState, Search};
 use eframe::{
   egui::{Context, Key, Layout, RichText, Window},
   emath::{Align, Align2},
@@ -11,7 +11,7 @@ pub struct SearchDlg {
   title: String,
   text: String,
   error: String,
-  search: Option<util::Search>,
+  search: Option<Search>,
   search_type: SearchType,
   visible: bool,
   focus: bool,
@@ -108,7 +108,7 @@ impl SearchDlg {
     }
   }
 
-  pub fn take_search_term(&mut self) -> Option<util::Search> {
+  pub fn take_search_term(&mut self) -> Option<Search> {
     self.search.take()
   }
 
@@ -123,12 +123,12 @@ impl SearchDlg {
           let ignore_case = self.search_type == SearchType::NoCase;
           let mut find = String::new();
           std::mem::swap(&mut find, &mut self.text);
-          Some(util::Search::String { find, ignore_case })
+          Some(Search::String { find, ignore_case })
         }
         SearchType::Regex => match Regex::new(&self.text) {
           Ok(regex) => {
             self.text.clear();
-            Some(util::Search::Regex(regex))
+            Some(Search::Regex(regex))
           }
           Err(err) => {
             self.text = format!("{err:?}");

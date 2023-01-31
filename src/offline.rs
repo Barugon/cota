@@ -2,7 +2,7 @@ use self::game_info::GameInfo;
 use crate::{
   game_data::GameData,
   items_dlg::ItemsDlg,
-  util::{self, AppState, FAIL_ERR},
+  util::{AppState, FAIL_ERR, LVL_RANGE},
 };
 use eframe::{
   egui::{Button, DragValue, ImageButton, Response, RichText, Ui, WidgetText},
@@ -87,7 +87,7 @@ impl Offline {
         ui.label(RichText::from("Adv Lvl").color(LABEL_COLOR));
         if let Some(game) = &mut self.game {
           let mut level = game.adv_level();
-          let widget = DragValue::new(&mut level).clamp_range(util::LVL_RANGE);
+          let widget = DragValue::new(&mut level).clamp_range(LVL_RANGE);
           if ui.add(widget).changed() {
             game.set_adv_level(level);
             self.changed = game.changed();
@@ -101,7 +101,7 @@ impl Offline {
         ui.label(RichText::from("Prd Lvl").color(LABEL_COLOR));
         if let Some(game) = &mut self.game {
           let mut level = game.prd_level();
-          let widget = DragValue::new(&mut level).clamp_range(util::LVL_RANGE);
+          let widget = DragValue::new(&mut level).clamp_range(LVL_RANGE);
           if ui.add(widget).changed() {
             game.set_prd_level(level);
             self.changed = game.changed();
@@ -237,7 +237,7 @@ const MAX_GOLD: i32 = i32::MAX / 2;
 mod game_info {
   use crate::{
     game_data::{GameData, Item, SkillLvl, SkillLvlGroup},
-    util::{self, SkillCategory, NONE_ERR},
+    util::{button_size, SkillCategory, NONE_ERR},
   };
   use eframe::{
     egui::{CollapsingHeader, DragValue, Layout, RichText, ScrollArea, Ui},
@@ -408,7 +408,7 @@ mod game_info {
                   .id_source(format!("{}_offline", skill_group.name.to_lowercase()))
                   .show(&mut col[0], |ui| {
                     let spacing = ui.spacing().item_spacing;
-                    let row_size = util::button_size(ui) + spacing[1] * 2.0;
+                    let row_size = button_size(ui) + spacing[1] * 2.0;
                     let available_width = ui.available_width();
                     TableBuilder::new(ui)
                       .cell_layout(Layout::left_to_right(Align::Center))
