@@ -1,6 +1,6 @@
 use crate::{
   game_data::Item,
-  util::{self, AppState},
+  util::{button_size, scroll_bar_size, AppState},
 };
 use eframe::{
   egui::{Context, DragValue, Key, Layout, RichText, Window},
@@ -42,8 +42,8 @@ impl ItemsDlg {
           ui.scope(|ui| {
             ui.set_max_height(available.height() * 0.8);
             let spacing = ui.spacing().item_spacing;
-            let row_size = util::button_size(ui) + spacing[1] * 2.0;
-            let available_width = ui.available_width() - util::scroll_bar_size(ui);
+            let row_size = button_size(ui) + spacing[1] * 2.0;
+            let available_width = ui.available_width() - scroll_bar_size(ui);
             TableBuilder::new(ui)
               .cell_layout(Layout::left_to_right(Align::Center))
               .striped(true)

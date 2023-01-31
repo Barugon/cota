@@ -1,4 +1,4 @@
-use crate::util::{self, AppState};
+use crate::util::{AppState, APP_AUTHORS, APP_ICON, APP_NAME, APP_TITLE, APP_VERSION};
 use eframe::{
   egui::{Context, Key, RichText, Window},
   emath::Align2,
@@ -14,9 +14,9 @@ pub struct AboutDlg {
 
 impl AboutDlg {
   pub fn new(state: AppState) -> Self {
-    let logo_id = format!("{}_logo", util::APP_NAME);
+    let logo_id = format!("{APP_NAME}_logo");
     let logo =
-      RetainedImage::from_image_bytes(logo_id, util::APP_ICON).expect("Unable to decode app icon");
+      RetainedImage::from_image_bytes(logo_id, APP_ICON).expect("Unable to decode app icon");
     let visible = false;
 
     Self {
@@ -33,7 +33,7 @@ impl AboutDlg {
       let available = ctx.available_rect();
       let mut open = true;
 
-      Window::new(RichText::from(format!("👍  About {}", util::APP_NAME)).strong())
+      Window::new(RichText::from(format!("👍  About {APP_NAME}")).strong())
         .open(&mut open)
         .collapsible(false)
         .current_pos([0.0, 24.0])
@@ -45,13 +45,9 @@ impl AboutDlg {
           ui.vertical_centered(|ui| {
             self.logo.show_scaled(ui, 0.5);
             ui.add_space(4.0);
-            ui.label(
-              RichText::new(util::APP_TITLE)
-                .heading()
-                .color(Color32::GOLD),
-            );
-            ui.label(format!("Version {}", util::APP_VERSION));
-            ui.label(format!("Copyright © 2022 {}", util::APP_AUTHORS));
+            ui.label(RichText::new(APP_TITLE).heading().color(Color32::GOLD));
+            ui.label(format!("Version {APP_VERSION}"));
+            ui.label(format!("Copyright © 2022 {APP_AUTHORS}"));
           });
           ui.add_space(8.0);
           ui.separator();

@@ -1,4 +1,7 @@
-use crate::util::{self, SkillCategory, SkillInfo, SkillInfoGroup, FAIL_ERR, NONE_ERR};
+use crate::util::{
+  parse_skill_info_groups, SkillCategory, SkillInfo, SkillInfoGroup, FAIL_ERR, LEVEL_EXP,
+  LVL_RANGE, NONE_ERR, SKILL_EXP,
+};
 use serde_json::Value;
 use std::{borrow::Cow, fs::File, io::Write, ops::Range, path::PathBuf, sync::RwLock};
 
@@ -134,12 +137,12 @@ impl GameData {
       .expect(NONE_ERR)
       .to_i64()
       .expect(NONE_ERR);
-    find_min(exp, &util::LEVEL_EXP).expect(NONE_ERR) as i32 + 1
+    find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1
   }
 
   pub fn set_adv_lvl(&mut self, lvl: i32) {
-    assert!(util::LVL_RANGE.contains(&lvl));
-    self.character[AE] = util::LEVEL_EXP[lvl as usize - 1].into();
+    assert!(LVL_RANGE.contains(&lvl));
+    self.character[AE] = LEVEL_EXP[lvl as usize - 1].into();
   }
 
   pub fn get_prd_lvl(&self) -> i32 {
@@ -149,12 +152,12 @@ impl GameData {
       .expect(NONE_ERR)
       .to_i64()
       .expect(NONE_ERR);
-    find_min(exp, &util::LEVEL_EXP).expect(NONE_ERR) as i32 + 1
+    find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1
   }
 
   pub fn set_prd_lvl(&mut self, lvl: i32) {
-    assert!(util::LVL_RANGE.contains(&lvl));
-    self.character[PE] = util::LEVEL_EXP[lvl as usize - 1].into();
+    assert!(LVL_RANGE.contains(&lvl));
+    self.character[PE] = LEVEL_EXP[lvl as usize - 1].into();
   }
 
   pub fn get_file_path(&self) -> PathBuf {
@@ -168,7 +171,7 @@ impl GameData {
 
   pub fn get_skills(&self, category: SkillCategory) -> Vec<SkillLvlGroup> {
     let sk2 = self.character.get(SK2).expect(NONE_ERR);
-    let groups = util::parse_skill_info_groups(category);
+    let groups = parse_skill_info_groups(category);
     let mut skills = Vec::with_capacity(groups.len());
     for group in groups {
       skills.push(SkillLvlGroup::new(sk2, group));
@@ -366,7 +369,7 @@ impl Item {
 fn get_skill_lvl(sk2: &Value, info: &SkillInfo) -> Option<i32> {
   let exp = sk2.get(format!("{}", info.id))?.get(X)?;
   let exp = (exp.to_i64()? as f64 / info.mul) as i64;
-  let idx = find_min(exp, &util::SKILL_EXP)?;
+  let idx = find_min(exp, &SKILL_EXP)?;
 
   Some(idx as i32 + 1)
 }
@@ -376,7 +379,7 @@ fn set_skill_lvl(sk2: &mut Value, date: &Value, skill: &SkillLvl) {
   if skill.level == 0 {
     remove_skill(sk2, skill.info.id)
   } else {
-    let exp = (util::SKILL_EXP[skill.level as usize - 1] as f64 * skill.info.mul).ceil() as i64;
+    let exp = (SKILL_EXP[skill.level as usize - 1] as f64 * skill.info.mul).ceil() as i64;
     let key = format!("{}", skill.info.id);
     if let Some(skill) = sk2.get_mut(&key) {
       // Set the skill's experience.
