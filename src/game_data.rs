@@ -120,10 +120,7 @@ impl GameData {
   }
 
   pub fn get_gold(&self) -> Option<i32> {
-    let gold = self.gold.get(G)?;
-    let gold = gold.to_i64()?;
-
-    Some(gold as i32)
+    Some(self.gold.get(G)?.to_i64()? as i32)
   }
 
   pub fn set_gold(&mut self, gold: i32) {
@@ -131,12 +128,8 @@ impl GameData {
   }
 
   pub fn get_adv_lvl(&self) -> i32 {
-    let exp = self
-      .character
-      .get(AE)
-      .expect(NONE_ERR)
-      .to_i64()
-      .expect(NONE_ERR);
+    let ae = self.character.get(AE).expect(NONE_ERR);
+    let exp = ae.to_i64().expect(NONE_ERR);
     find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1
   }
 
@@ -146,12 +139,8 @@ impl GameData {
   }
 
   pub fn get_prd_lvl(&self) -> i32 {
-    let exp = self
-      .character
-      .get(PE)
-      .expect(NONE_ERR)
-      .to_i64()
-      .expect(NONE_ERR);
+    let pe = self.character.get(PE).expect(NONE_ERR);
+    let exp = pe.to_i64().expect(NONE_ERR);
     find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1
   }
 
@@ -190,13 +179,10 @@ impl GameData {
   }
 
   pub fn get_inventory_items(&self) -> Vec<Item> {
-    let items_val = self
-      .inventory
-      .get(IN)
-      .and_then(|v| v.as_object())
-      .expect(NONE_ERR);
-    let mut items = Vec::with_capacity(items_val.len());
-    for (key, val) in items_val {
+    let inv = self.inventory.get(IN).expect(NONE_ERR);
+    let items_map = inv.as_object().expect(NONE_ERR);
+    let mut items = Vec::with_capacity(items_map.len());
+    for (key, val) in items_map {
       if let Some(item) = Item::new(val, key) {
         items.push(item);
       }
@@ -206,9 +192,9 @@ impl GameData {
   }
 
   pub fn set_inventory_items(&mut self, items: &Vec<Item>) {
-    let items_val = self.inventory.get_mut(IN).expect(NONE_ERR);
+    let inv = self.inventory.get_mut(IN).expect(NONE_ERR);
     for item in items {
-      let val = items_val.get_mut(&item.id).expect(NONE_ERR);
+      let val = inv.get_mut(&item.id).expect(NONE_ERR);
       let val = val.get_mut(IN).expect(NONE_ERR);
       val[QN] = item.cnt.into();
       if let Some(dur) = &item.dur {
@@ -218,6 +204,26 @@ impl GameData {
     }
   }
 }
+
+const USER_ID: &str = "000000000000000000000001";
+const CHARACTER_SHEET: &str = "CharacterSheet";
+const ITEM_STORE: &str = "ItemStore";
+const USER_GOLD: &str = "UserGold";
+const BAG: &str = "bag";
+const PHP: &str = "php";
+const SK2: &str = "sk2";
+const AE: &str = "ae";
+const AN: &str = "an";
+const DC: &str = "dc";
+const FN: &str = "fn";
+const HP: &str = "hp";
+const IN: &str = "in";
+const PE: &str = "pe";
+const QN: &str = "qn";
+const G: &str = "g";
+const M: &str = "m";
+const T: &str = "t";
+const X: &str = "x";
 
 #[derive(Clone)]
 pub struct SkillLvl {
@@ -420,26 +426,6 @@ impl ToI64 for Value {
     }
   }
 }
-
-const USER_ID: &str = "000000000000000000000001";
-const CHARACTER_SHEET: &str = "CharacterSheet";
-const ITEM_STORE: &str = "ItemStore";
-const USER_GOLD: &str = "UserGold";
-const BAG: &str = "bag";
-const PHP: &str = "php";
-const SK2: &str = "sk2";
-const AE: &str = "ae";
-const AN: &str = "an";
-const DC: &str = "dc";
-const FN: &str = "fn";
-const HP: &str = "hp";
-const IN: &str = "in";
-const PE: &str = "pe";
-const QN: &str = "qn";
-const G: &str = "g";
-const M: &str = "m";
-const T: &str = "t";
-const X: &str = "x";
 
 fn find_min<T: Ord>(value: T, values: &[T]) -> Option<usize> {
   match values.binary_search(&value) {
