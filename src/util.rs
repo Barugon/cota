@@ -33,8 +33,8 @@ macro_rules! ok {
   ($res:expr) => {
     match $res {
       Ok(val) => val,
-      Err(_) => {
-        debugln!("{}", _err);
+      Err(err) => {
+        println!("{}", err);
         return;
       }
     }
@@ -42,8 +42,8 @@ macro_rules! ok {
   ($res:expr, $ret:expr) => {
     match $res {
       Ok(val) => val,
-      Err(_err) => {
-        debugln!("{}", _err);
+      Err(err) => {
+        println!("{}", err);
         return $ret;
       }
     }
