@@ -334,7 +334,8 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> 
 
   // The date text is either a specific date or, if not specified, regex to match the date.
   let date = if let Some(ts) = ts {
-    format!("_{}", timestamp_to_file_date(ts))
+    let date = timestamp_to_file_date(ts);
+    format!("_{date}")
   } else {
     String::from(r"_\d{4}-\d{2}-\d{2}")
   };
@@ -404,8 +405,7 @@ fn timestamp_to_file_date(ts: i64) -> String {
 
 /// Get a NaiveDate from a log filename.
 fn get_log_file_date(path: &Path) -> Option<NaiveDate> {
-  let filename = path.file_stem()?;
-  let filename = filename.to_str()?;
+  let filename = path.file_stem()?.to_str()?;
   let pos = filename.rfind('_')?;
   let text = &filename[pos + 1..];
   NaiveDate::parse_from_str(text, "%Y-%m-%d").ok()
