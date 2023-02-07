@@ -454,8 +454,8 @@ impl Stats {
     let ctx = ctx.clone();
     let future = log_data::get_avatars(self.log_path.clone(), cancel);
     let future = async move {
-      tx.unbounded_send(Message::Avatars(future.await))
-        .expect(FAIL_ERR);
+      let msg = Message::Avatars(future.await);
+      tx.unbounded_send(msg).expect(FAIL_ERR);
       ctx.request_repaint();
     };
 
@@ -489,8 +489,8 @@ impl Stats {
       let tx = self.channel.tx.clone();
       let ctx = ctx.clone();
       let future = async move {
-        tx.unbounded_send(Message::Dates(future.await))
-          .expect(FAIL_ERR);
+        let msg = Message::Dates(future.await);
+        tx.unbounded_send(msg).expect(FAIL_ERR);
         ctx.request_repaint();
       };
 
@@ -524,8 +524,8 @@ impl Stats {
         let ctx = ctx.clone();
         let future = log_data::get_stats(self.log_path.clone(), self.avatar.clone(), date, cancel);
         let future = async move {
-          tx.unbounded_send(Message::Stats(future.await))
-            .expect(FAIL_ERR);
+          let msg = Message::Stats(future.await);
+          tx.unbounded_send(msg).expect(FAIL_ERR);
           ctx.request_repaint();
         };
 
@@ -557,8 +557,8 @@ impl Stats {
     let avatar = self.avatar.clone();
     let future = log_data::find_log_entries(log_path, avatar, search.clone(), cancel);
     let future = async move {
-      tx.unbounded_send(Message::Search(future.await, search))
-        .expect(FAIL_ERR);
+      let msg = Message::Search(future.await, search);
+      tx.unbounded_send(msg).expect(FAIL_ERR);
       ctx.request_repaint();
     };
 
