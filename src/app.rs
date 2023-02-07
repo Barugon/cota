@@ -242,10 +242,11 @@ impl App {
       return path.extension() == Some(OsStr::new("txt"));
     });
 
+    let available = ctx.available_rect().size();
     let mut file_dlg = egui_file::FileDialog::select_folder(path)
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
-      .default_size(ctx.available_rect().size())
+      .default_size([available.x, available.y * 0.5])
       .filter(filter)
       .show_new_folder(false)
       .show_rename(false)
@@ -270,10 +271,11 @@ impl App {
       return path.extension() == Some(OsStr::new("sota"));
     });
 
+    let available = ctx.available_rect().size();
     let mut file_dlg = egui_file::FileDialog::open_file(Some(path))
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
-      .default_size(ctx.available_rect().size())
+      .default_size([available.x, available.y * 0.5])
       .filter(filter)
       .show_new_folder(false)
       .resizable(false);
@@ -289,10 +291,11 @@ impl App {
       return path.extension() == Some(OsStr::new("sota"));
     });
 
+    let available = ctx.available_rect().size();
     let mut file_dlg = egui_file::FileDialog::save_file(Some(path))
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
-      .default_size(ctx.available_rect().size())
+      .default_size([available.x, available.y * 0.5])
       .filter(filter)
       .show_new_folder(false)
       .resizable(false);
