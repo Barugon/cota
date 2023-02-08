@@ -73,7 +73,7 @@ impl LogDlg {
                 TextEdit::multiline(&mut text).layouter(&mut |ui: &Ui, _text: &str, wrap: f32| {
                   let mut layout_job = layout_job.clone();
                   layout_job.wrap.max_width = wrap;
-                  ui.fonts().layout_job(layout_job)
+                  ui.fonts(|fonts| fonts.layout_job(layout_job))
                 }),
               );
             });
@@ -132,7 +132,7 @@ impl LogDlg {
   }
 
   fn handle_hotkeys(&mut self, ctx: &Context) {
-    if ctx.input().key_pressed(Key::Escape) {
+    if ctx.input(|state| state.key_pressed(Key::Escape)) {
       self.close();
     }
   }

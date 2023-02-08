@@ -114,9 +114,9 @@ impl ConfirmDlg {
   }
 
   fn handle_hotkeys(&mut self, ctx: &Context) {
-    if ctx.input().key_pressed(Key::Enter) {
+    if ctx.input(|state| state.key_pressed(Key::Enter)) {
       self.close(Some(Choice::Save));
-    } else if ctx.input().key_pressed(Key::Escape) {
+    } else if ctx.input(|state| state.key_pressed(Key::Escape)) {
       self.close(None);
     }
   }
