@@ -10,9 +10,9 @@ version = "4.4.0"
 chrono = {git = "https://github.com/chronotope/chrono.git"}
 clipboard = "0.5"
 dirs = "4.0"
-eframe = {version = "0.20", features = ["persistence"]}
-egui_extras = {version = "0.20", features = ["image"]}
-egui_file = "0.7"
+eframe = {version = "0.21", features = ["persistence"]}
+egui_extras = {version = "0.21", features = ["image"]}
+egui_file = "0.8"
 futures = {version = "0.3", features = ["thread-pool"]}
 image = {version = "0.24", features = ["png"]}
 num-format = "0.4"

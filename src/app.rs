@@ -79,7 +79,7 @@ fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool
   if response.clicked() || close {
     ui.close_menu();
   } else if let Some(hotkey) = hotkey {
-    let cursor_pos = response.ctx.input().pointer.hover_pos();
+    let cursor_pos = response.ctx.input(|state| state.pointer.hover_pos());
     if let Some(pos) = cursor_pos {
       // Show the hotkey as a tooltip even if the menu item is disabled.
       if response.rect.contains(pos) && response.ctx.layer_id_at(pos) == Some(response.layer_id) {
@@ -178,61 +178,64 @@ impl App {
 
   fn handle_hotkeys(&mut self, ctx: &Context, frame: &mut eframe::Frame) -> bool {
     let mut handled = false;
-    for event in &ctx.input().events {
-      if let Event::Key {
-        key,
-        pressed,
-        modifiers,
-      } = event
-      {
-        if *pressed && !self.state.is_disabled() {
-          match key {
-            Key::Escape if self.page == Page::Stats && !self.stats.filter().is_none() => {
-              self.stats.set_filter(StatsFilter::None);
-              handled = true;
+    ctx.input(|state| {
+      for event in &state.events {
+        if let Event::Key {
+          key,
+          pressed,
+          repeat,
+          modifiers,
+        } = event
+        {
+          if *pressed && !*repeat && !self.state.is_disabled() {
+            match key {
+              Key::Escape if self.page == Page::Stats && !self.stats.filter().is_none() => {
+                self.stats.set_filter(StatsFilter::None);
+                handled = true;
+              }
+              Key::F
+                if modifiers.command_only()
+                  && self.page == Page::Stats
+                  && !self.stats.stats().is_empty() =>
+              {
+                self.stats.show_filter_dlg();
+                handled = true;
+              }
+              Key::L
+                if modifiers.command_only()
+                  && self.page == Page::Stats
+                  && !self.stats.avatar().is_empty() =>
+              {
+                self.stats.show_search_dlg();
+                handled = true;
+              }
+              Key::Q if modifiers.command_only() => {
+                frame.close();
+                handled = true;
+              }
+              Key::R
+                if modifiers.command_only()
+                  && self.page == Page::Stats
+                  && !self.stats.stats().is_empty()
+                  && !self.stats.filter().is_resists() =>
+              {
+                self.stats.set_filter(StatsFilter::Resists);
+                handled = true;
+              }
+              Key::S if modifiers.command_only() && self.offline.changed() => {
+                self.offline.store();
+                handled = true;
+              }
+              Key::F5 if self.page == Page::Stats => {
+                self.stats.reload(ctx);
+                handled = true;
+              }
+              _ => (),
             }
-            Key::F
-              if modifiers.command_only()
-                && self.page == Page::Stats
-                && !self.stats.stats().is_empty() =>
-            {
-              self.stats.show_filter_dlg();
-              handled = true;
-            }
-            Key::L
-              if modifiers.command_only()
-                && self.page == Page::Stats
-                && !self.stats.avatar().is_empty() =>
-            {
-              self.stats.show_search_dlg();
-              handled = true;
-            }
-            Key::Q if modifiers.command_only() => {
-              frame.close();
-              handled = true;
-            }
-            Key::R
-              if modifiers.command_only()
-                && self.page == Page::Stats
-                && !self.stats.stats().is_empty()
-                && !self.stats.filter().is_resists() =>
-            {
-              self.stats.set_filter(StatsFilter::Resists);
-              handled = true;
-            }
-            Key::S if modifiers.command_only() && self.offline.changed() => {
-              self.offline.store();
-              handled = true;
-            }
-            Key::F5 if self.page == Page::Stats => {
-              self.stats.reload(ctx);
-              handled = true;
-            }
-            _ => (),
           }
         }
       }
-    }
+    });
     handled
   }
 
@@ -316,7 +319,7 @@ impl eframe::App for App {
 
     // Set the progress cursor if the app is busy.
     if self.state.is_busy() {
-      ctx.output().cursor_icon = CursorIcon::Progress;
+      ctx.output_mut(|output| output.cursor_icon = CursorIcon::Progress);
     }
 
     // We want to close any open menu whenever a hotkey is processed.

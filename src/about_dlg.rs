@@ -80,7 +80,7 @@ impl AboutDlg {
   }
 
   fn handle_hotkeys(&mut self, ctx: &Context) {
-    if ctx.input().key_pressed(Key::Escape) {
+    if ctx.input(|state| state.key_pressed(Key::Escape)) {
       self.close();
     }
   }

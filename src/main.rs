@@ -37,5 +37,5 @@ fn main() {
     ..Default::default()
   };
 
-  eframe::run_native(APP_TITLE, options, Box::new(|cc| Box::new(App::new(cc))));
+  eframe::run_native(APP_TITLE, options, Box::new(|cc| Box::new(App::new(cc)))).expect(FAIL_ERR);
 }
