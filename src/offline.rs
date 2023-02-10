@@ -460,20 +460,20 @@ mod game_info {
           });
       });
 
-      if let Some(id) = changed.take() {
-        // Make sure this skill meets the minimum level for skills that require it.
-        let min = self.get_skill_min_level(id);
-        let skill = self.skills.get_mut(id);
-        if min > skill.level {
-          skill.level = min;
-        }
+      match changed.take() {
+        Some(id) => {
+          // Make sure this skill meets the minimum level for skills that require it.
+          let min = self.get_skill_min_level(id);
+          let skill = self.skills.get_mut(id);
+          skill.level = skill.level.max(min);
 
-        // Clone the skill so that we can borrow self as mutable again.
-        let skill = skill.clone();
-        self.check_skill_requirements(&skill);
-        return true;
+          // Clone the skill so that we can borrow self as mutable again.
+          let skill = skill.clone();
+          self.check_skill_requirements(&skill);
+          true
+        }
+        None => false,
       }
-      false
     }
 
     pub fn get_file_path(&self) -> PathBuf {
