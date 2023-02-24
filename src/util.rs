@@ -230,6 +230,7 @@ pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
   for line in text.lines() {
     let mut fields = line.split(',');
     if let Some(group) = fields.next() {
+      // CSVs are pre-sorted, so we just need to create a new group on group change.
       if group != skill_group.name {
         if !skill_group.name.is_empty() {
           skill_groups.push(skill_group);
