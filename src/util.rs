@@ -201,6 +201,7 @@ pub struct SkillInfo {
   pub reqs: Vec<Requires>,
 }
 
+#[derive(Default)]
 pub struct SkillInfoGroup {
   pub name: &'static str,
   pub skills: Vec<SkillInfo>,
@@ -222,7 +223,7 @@ pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
     SkillCategory::Producer => include_str!("res/producer_skills.csv"),
   };
   let mut skill_groups = Vec::new();
-  let mut skill_group = SkillInfoGroup::new(Default::default());
+  let mut skill_group = SkillInfoGroup::default();
 
   // Temporary vector to hold skill requirements in order to keep memory use and reallocations low.
   let mut tmp_reqs = Vec::new();
