@@ -163,12 +163,14 @@ impl Stats {
 
           // Determine the current avatar.
           if let Some(first) = self.avatars.first() {
+            // Check if the avatar is in the configuration.
             if let Some(avatar) = config::get_avatar(frame.storage().expect(NONE_ERR)) {
               if self.avatars.binary_search(&avatar).is_ok() {
                 self.avatar = avatar;
               }
             }
 
+            // If the avatar wasn't set then use the first avatar.
             if self.avatar.is_empty() {
               config::set_avatar(frame.storage_mut().expect(NONE_ERR), first.clone());
               self.avatar = first.clone();
@@ -305,6 +307,7 @@ impl Stats {
             // Add-in magic resistance.
             if let Some(magic) = resist_values.remove(&Resist::Magic) {
               for (key, resist) in &mut resist_values {
+                // Chaos is not affected by magic resistance.
                 if *key != Resist::Chaos {
                   *resist += magic;
                 }
