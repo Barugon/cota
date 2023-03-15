@@ -42,6 +42,8 @@ Using either straight text or regular expressions.
 
 ### Offline save-game editor
 
+> NOTE: once you store your changes then you must reload the save-game in Shroud of the Avatar from the main menu.
+
 ![screenshot](https://a4.pbase.com/o12/09/605909/1/170775639.JD7XD39u.Screenshotfrom20221216144706.png)
 
 ![screenshot](https://a4.pbase.com/o12/09/605909/1/173233692.lKzg5kgV.Screenshotfrom20221216144200.png)
