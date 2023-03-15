@@ -47,7 +47,7 @@ impl AboutDlg {
             ui.add_space(4.0);
             ui.label(RichText::new(APP_TITLE).heading().color(Color32::GOLD));
             ui.label(format!("Version {APP_VERSION}"));
-            ui.label(format!("Copyright © 2022 {APP_AUTHORS}"));
+            ui.label(format!("Copyright © 2022-present {APP_AUTHORS}"));
           });
           ui.add_space(8.0);
           ui.separator();
