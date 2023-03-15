@@ -6,15 +6,15 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 **Click [here](https://github.com/Barugon/cota/releases) for binaries**
 
-> **Note for Linux**: If you're using Wayland and you find the app's title bar disagreeable then set this environment variable before running: `WINIT_UNIX_BACKEND=x11`
+> **Note**: **Linux** - If you're using Wayland and you find the app's title bar disagreeable then set this environment variable before running: `WINIT_UNIX_BACKEND=x11`
 
 <!-- intentional spacing -->
 
-> **Windows note**: You might need to right click cota.exe (once unzipped), select `Properties` and then check `Unblock`.
+> **Note**: **Windows** - You might need to right click cota.exe (once unzipped), select `Properties` and then check `Unblock`.
 
 <!-- intentional spacing -->
 
-> **Mac note**: I no longer provide a Mac build due to Apple's licensing. However, building should be pretty easy — install [rust](https://www.rust-lang.org/tools/install), clone this repository and then build it using `cargo build --release`. You will probably also need to install Apple's [Xcode](https://developer.apple.com/download/all/?q=xcode).
+> **Note**: **Mac** - I no longer provide a Mac build due to Apple's licensing. However, building should be pretty easy — install [rust](https://www.rust-lang.org/tools/install), clone this repository and then build it using `cargo build --release`. You will probably also need to install Apple's [Xcode](https://developer.apple.com/download/all/?q=xcode).
 
 ## Features
 
