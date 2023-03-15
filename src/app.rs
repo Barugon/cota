@@ -4,6 +4,7 @@ use crate::{
   config,
   confirm_dlg::{Choice, ConfirmDlg, Hence},
   experience::Experience,
+  farming::Farming,
   offline::Offline,
   stats::{Stats, StatsFilter},
   util::{AppState, FAIL_ERR, NONE_ERR},
@@ -62,6 +63,8 @@ fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> 
     Page::Chronometer => ("chronometer_status", Margin::symmetric(8.0, 6.0)),
     // The experience page doesn't have a status area.
     Page::Experience => unreachable!(),
+    // The farming page doesn't have a status area.
+    Page::Farming => unreachable!(),
     Page::Offline => ("offline_status", Margin::symmetric(8.0, 2.0)),
   };
 
@@ -96,10 +99,11 @@ fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Page {
-  Stats,
   Chronometer,
   Experience,
+  Farming,
   Offline,
+  Stats,
 }
 
 pub struct App {
@@ -108,10 +112,11 @@ pub struct App {
   page: Page,
 
   // Tab pages.
-  stats: Stats,
   chronometer: Chronometer,
   experience: Experience,
+  farming: Farming,
   offline: Offline,
+  stats: Stats,
 
   // Dialogs.
   about_dlg: AboutDlg,
@@ -147,16 +152,16 @@ impl App {
 
     // State.
     let state = AppState::default();
-    let page = Page::Stats;
+    let page = Page::Chronometer;
 
     // Tab pages.
-    let ctx = &cc.egui_ctx;
     let storage = cc.storage.expect(NONE_ERR);
     let log_path = config::get_log_path(storage).unwrap_or_default();
-    let stats = Stats::new(ctx, log_path, state.clone(), threads.clone());
-    let chronometer = Chronometer::new(threads);
+    let chronometer = Chronometer::new(threads.clone());
     let experience = Experience::new();
+    let farming = Farming::new();
     let offline = Offline::new(state.clone());
+    let stats = Stats::new(log_path, state.clone(), threads);
 
     // Dialog windows.
     let about_dlg = AboutDlg::new(state.clone());
@@ -166,10 +171,11 @@ impl App {
     App {
       state,
       page,
-      stats,
       chronometer,
       experience,
+      farming,
       offline,
+      stats,
       about_dlg,
       confirm_dlg,
       file_dlg,
@@ -333,24 +339,6 @@ impl eframe::App for App {
         menu::bar(ui, |ui| {
           ui.menu_button("File", |ui| {
             match self.page {
-              Page::Stats => {
-                if menu_item(ui, close_menu, "Set Log Folder...", None) {
-                  self.choose_folder_path(ctx);
-                }
-
-                let enabled = !self.stats.avatar().is_empty();
-                ui.add_enabled_ui(enabled, |ui| {
-                  if menu_item(ui, close_menu, "Search Logs...", Some(cmd!("L"))) {
-                    self.stats.show_search_dlg();
-                  }
-                });
-
-                if menu_item(ui, close_menu, "Reload Stats", Some("F5")) {
-                  self.stats.reload(ui.ctx());
-                }
-
-                ui.separator();
-              }
               Page::Offline => {
                 if menu_item(ui, close_menu, "Load Save-game...", None) {
                   let storage = frame.storage_mut().expect(NONE_ERR);
@@ -373,6 +361,24 @@ impl eframe::App for App {
 
                 ui.separator();
               }
+              Page::Stats => {
+                if menu_item(ui, close_menu, "Set Log Folder...", None) {
+                  self.choose_folder_path(ctx);
+                }
+
+                let enabled = !self.stats.avatar().is_empty();
+                ui.add_enabled_ui(enabled, |ui| {
+                  if menu_item(ui, close_menu, "Search Logs...", Some(cmd!("L"))) {
+                    self.stats.show_search_dlg();
+                  }
+                });
+
+                if menu_item(ui, close_menu, "Reload Stats", Some("F5")) {
+                  self.stats.reload(ui.ctx());
+                }
+
+                ui.separator();
+              }
               _ => (),
             }
 
@@ -380,6 +386,7 @@ impl eframe::App for App {
               frame.close();
             }
           });
+
           if self.page == Page::Stats {
             ui.menu_button("View", |ui| {
               let enabled = !self.stats.filter().is_resists() && !self.stats.stats().is_empty();
@@ -404,6 +411,7 @@ impl eframe::App for App {
               });
             });
           }
+
           ui.menu_button("Help", |ui| {
             if menu_item(ui, close_menu, "About...", None) {
               self.about_dlg.open();
@@ -461,10 +469,6 @@ impl eframe::App for App {
     // Bottom panel for the status. This needs to be done before
     // the central panel so that we know how much space is left.
     match self.page {
-      Page::Stats => bottom_panel(Page::Stats, ctx, |ui| {
-        ui.set_enabled(enabled);
-        self.stats.show_status(ui);
-      }),
       Page::Chronometer => bottom_panel(Page::Chronometer, ctx, |ui| {
         ui.set_enabled(enabled);
         self.chronometer.show_status(ui);
@@ -472,6 +476,10 @@ impl eframe::App for App {
       Page::Offline => bottom_panel(Page::Offline, ctx, |ui| {
         ui.set_enabled(enabled);
         self.offline.show_status(ui);
+      }),
+      Page::Stats => bottom_panel(Page::Stats, ctx, |ui| {
+        ui.set_enabled(enabled);
+        self.stats.show_status(ui);
       }),
       _ => (),
     }
@@ -482,11 +490,6 @@ impl eframe::App for App {
 
       // Tab control.
       ui.horizontal(|ui| {
-        let button = ui.selectable_value(&mut self.page, Page::Stats, "Stats");
-        if button.clicked() {
-          self.chronometer.stop_timer();
-        }
-
         let button = ui.selectable_value(&mut self.page, Page::Chronometer, "Chronometer");
         if button.clicked() {
           self.chronometer.start_timer(ctx);
@@ -497,7 +500,17 @@ impl eframe::App for App {
           self.chronometer.stop_timer();
         }
 
+        let button = ui.selectable_value(&mut self.page, Page::Farming, "Farming");
+        if button.clicked() {
+          self.chronometer.stop_timer();
+        }
+
         let button = ui.selectable_value(&mut self.page, Page::Offline, "Offline");
+        if button.clicked() {
+          self.chronometer.stop_timer();
+        }
+
+        let button = ui.selectable_value(&mut self.page, Page::Stats, "Stats");
         if button.clicked() {
           self.chronometer.stop_timer();
         }
@@ -507,10 +520,11 @@ impl eframe::App for App {
 
       // Tab pages.
       match self.page {
-        Page::Stats => self.stats.show(ui, frame),
         Page::Chronometer => self.chronometer.show(ui),
         Page::Experience => self.experience.show(ui),
+        Page::Farming => self.farming.show(ui),
         Page::Offline => self.offline.show(ui),
+        Page::Stats => self.stats.show(ui, frame),
       }
     });
   }
