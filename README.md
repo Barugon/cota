@@ -6,7 +6,7 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 **Click [here](https://github.com/Barugon/cota/releases) for binaries**
 
-> **Linux note**: If you're using Wayland and you find the app's title bar disagreeable then set this environment variable before running: `WINIT_UNIX_BACKEND=x11`
+> **Note for Linux**: If you're using Wayland and you find the app's title bar disagreeable then set this environment variable before running: `WINIT_UNIX_BACKEND=x11`
 
 <!-- intentional spacing -->
 
