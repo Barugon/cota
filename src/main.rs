@@ -10,6 +10,7 @@ mod chronometer;
 mod config;
 mod confirm_dlg;
 mod experience;
+mod farming;
 mod game_data;
 mod items_dlg;
 mod log_data;
