@@ -1,6 +1,6 @@
 # Companion of the Avatar
 
-Copyright (C) 2022 Barugon
+Copyright (C) 2022-present Barugon
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
