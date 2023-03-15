@@ -6,7 +6,7 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 **Click [here](https://github.com/Barugon/cota/releases) for binaries**
 
-> **Linux Note**: If you're using Wayland and you find the app's title bar disagreeable then set this environment variable before running: `WINIT_UNIX_BACKEND=x11`
+> **Linux note**: If you're using Wayland and you find the app's title bar disagreeable then set this environment variable before running: `WINIT_UNIX_BACKEND=x11`
 
 <!-- intentional spacing -->
 
@@ -26,7 +26,7 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 ![screenshot](https://a4.pbase.com/o12/09/605909/1/164136608.rcq0amhQ.Screenshotfrom20220710144634.png)
 
-### Search chat Logs
+### Search chat logs
 
 Using either straight text or regular expressions.
 
@@ -42,7 +42,7 @@ Using either straight text or regular expressions.
 
 ### Offline save-game editor
 
-> NOTE: once you store your changes then you must reload the save-game in Shroud of the Avatar from the main menu.
+> **Note**: once you store your changes then you must reload the save-game in Shroud of the Avatar from the main menu.
 
 ![screenshot](https://a4.pbase.com/o12/09/605909/1/170775639.JD7XD39u.Screenshotfrom20221216144706.png)
 
