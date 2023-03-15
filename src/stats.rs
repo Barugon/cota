@@ -19,7 +19,7 @@ use futures::{channel::mpsc, executor::ThreadPool};
 use num_format::Locale;
 use std::{
   collections::HashMap,
-  path::{Path, PathBuf},
+  path::{Path, PathBuf}, mem::take,
 };
 
 pub struct Stats {
@@ -51,10 +51,13 @@ pub struct Stats {
   search_dlg: SearchDlg,
   notes_dlg: NotesDlg,
   log_dlg: LogDlg,
+
+  // initialize on first view.
+  init: bool,
 }
 
 impl Stats {
-  pub fn new(ctx: &Context, log_path: PathBuf, state: AppState, threads: ThreadPool) -> Self {
+  pub fn new(log_path: PathBuf, state: AppState, threads: ThreadPool) -> Self {
     let resist_stats = HashMap::from([
       ("AirAttunement", (Resist::Air, 0.5)),
       ("AirResistance", (Resist::Air, 1.0)),
@@ -109,7 +112,7 @@ impl Stats {
     let notes_dlg = NotesDlg::new(state.clone());
     let log_dlg = LogDlg::new(state.clone());
 
-    let mut stats = Stats {
+    let stats = Stats {
       resist_stats,
       threads,
       channel,
@@ -126,12 +129,16 @@ impl Stats {
       search_dlg,
       notes_dlg,
       log_dlg,
+      init: true,
     };
-    stats.request_avatars(ctx);
     stats
   }
 
   pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
+    if take(&mut self.init) {
+      self.request_avatars(ui.ctx());
+    }
+
     if !self.filter_dlg.show(ui.ctx()) {
       if let Some(search) = self.filter_dlg.take_search_term() {
         self.filter = StatsFilter::Search { search };
