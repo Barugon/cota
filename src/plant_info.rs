@@ -1,6 +1,8 @@
 #![allow(unused)]
+use std::time::Duration;
+
 use crate::util::{HOUR_SECS, NONE_ERR};
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, TimeDelta};
 
 #[derive(Clone, Copy)]
 pub enum SeedType {
@@ -94,8 +96,8 @@ impl PlantInfo {
     self.environment
   }
 
-  /// Get the event status.
-  pub fn status(&self) -> Event {
+  /// Get the current event.
+  pub fn current_event(&self) -> Event {
     if self.event[2] {
       return Event::Harvest;
     }
@@ -105,6 +107,26 @@ impl PlantInfo {
     }
 
     Event::None
+  }
+
+  /// Get the next event and it's date/time.
+  pub fn next_event(&self) -> (Event, DateTime<Local>) {
+    let elapsed = (Local::now() - self.date_time).num_seconds();
+    let interval = self.seed_type as i64 * self.environment as i64;
+
+    for count in 0..self.event.len() {
+      let timeout = interval * count as i64;
+      if elapsed < timeout {
+        let date_time = self.date_time + TimeDelta::seconds(timeout);
+        if count < 2 {
+          return (Event::Water, date_time);
+        } else {
+          return (Event::Harvest, date_time);
+        }
+      }
+    }
+
+    (Event::None, Default::default())
   }
 
   /// Check for events.
