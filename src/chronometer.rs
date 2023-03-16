@@ -1,4 +1,4 @@
-use crate::util::Cancel;
+use crate::util::{Cancel, HOUR_SECS};
 use chrono::{DateTime, TimeZone, Utc};
 use eframe::{
   egui::{Context, Grid, Layout, RichText, Ui},
@@ -237,8 +237,6 @@ fn epoch() -> DateTime<Utc> {
   Utc.with_ymd_and_hms(1997, 9, 2, 0, 0, 0).unwrap() // LocalResult does not have expect.
 }
 
-/// Number of seconds in an hour (one in-game day).
-const HOUR_SECS: i64 = 60 * 60;
 const RIFT_COUNT: usize = 8;
 
 // Get the number of seconds for each rift.

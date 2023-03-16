@@ -23,6 +23,9 @@ pub const LEVEL_EXP: [i64; 200] = include!("res/level_exp_values");
 pub const SKILL_EXP: [i64; 200] = include!("res/skill_exp_values");
 pub const LVL_RANGE: RangeInclusive<i32> = 1..=200;
 
+/// Number of seconds in an hour (one in-game day).
+pub const HOUR_SECS: i64 = 60 * 60;
+
 #[macro_export]
 macro_rules! debugln {
   ($($arg:tt)*) => (#[cfg(debug_assertions)] println!($($arg)*));
@@ -266,6 +269,40 @@ pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
   }
 
   skill_groups
+}
+
+#[allow(unused)]
+#[derive(Clone, Copy)]
+pub enum SeedType {
+  Low = 0,
+  Med = 1,
+  High = 2,
+}
+
+#[allow(unused)]
+impl SeedType {
+  fn new(text: &str) -> Option<Self> {
+    match text {
+      "0" => Some(SeedType::Low),
+      "1" => Some(SeedType::Med),
+      "2" => Some(SeedType::High),
+      _ => None,
+    }
+  }
+}
+
+/// Parse the CSV for seeds.
+#[allow(unused)]
+pub fn parse_seeds() -> Vec<(&'static str, SeedType)> {
+  const SEEDS: &str = include_str!("res/seeds.csv");
+  let mut result = Vec::new();
+  for line in SEEDS.lines() {
+    let mut iter = line.split(',');
+    let Some(seed_name) = iter.next() else { break };
+    let Some(seed_type) = iter.next() else { break };
+    result.push((seed_name, SeedType::new(seed_type).expect(NONE_ERR)));
+  }
+  result
 }
 
 /// Return the byte distance between `text` and `sub`.
