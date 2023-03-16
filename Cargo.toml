@@ -7,7 +7,7 @@ name = "cota"
 version = "5.0.0"
 
 [dependencies]
-chrono = {git = "https://github.com/chronotope/chrono.git"}
+chrono = "0.4"
 clipboard = "0.5"
 dirs = "4.0"
 eframe = {version = "0.21", features = ["persistence"]}
