@@ -1,8 +1,6 @@
 #![allow(unused)]
-use std::time::Duration;
-
 use crate::util::{HOUR_SECS, NONE_ERR};
-use chrono::{DateTime, Local, TimeDelta};
+use chrono::{Duration, Local, NaiveDateTime};
 
 #[derive(Clone, Copy)]
 pub enum SeedType {
@@ -51,7 +49,7 @@ pub enum Event {
 
 pub struct PlantInfo {
   description: String,
-  date_time: DateTime<Local>,
+  date_time: NaiveDateTime,
   seed_name: &'static str,
   seed_type: SeedType,
   environment: Environment,
@@ -61,7 +59,7 @@ pub struct PlantInfo {
 impl PlantInfo {
   pub fn new(
     description: String,
-    date_time: DateTime<Local>,
+    date_time: NaiveDateTime,
     seed_name: &'static str,
     seed_type: SeedType,
     environment: Environment,
@@ -80,7 +78,7 @@ impl PlantInfo {
     &self.description
   }
 
-  pub fn date_time(&self) -> DateTime<Local> {
+  pub fn date_time(&self) -> NaiveDateTime {
     self.date_time
   }
 
@@ -110,14 +108,14 @@ impl PlantInfo {
   }
 
   /// Get the next event and it's date/time.
-  pub fn next_event(&self) -> (Event, DateTime<Local>) {
-    let elapsed = (Local::now() - self.date_time).num_seconds();
+  pub fn next_event(&self) -> (Event, NaiveDateTime) {
+    let elapsed = (Local::now().naive_local() - self.date_time).num_seconds();
     let interval = self.seed_type as i64 * self.environment as i64;
 
     for count in 0..self.event.len() {
       let timeout = interval * count as i64;
       if elapsed < timeout {
-        let date_time = self.date_time + TimeDelta::seconds(timeout);
+        let date_time = self.date_time + Duration::seconds(timeout);
         if count < 2 {
           return (Event::Water, date_time);
         } else {
@@ -131,7 +129,7 @@ impl PlantInfo {
 
   /// Check for events.
   pub fn check(&mut self) -> bool {
-    let elapsed = (Local::now() - self.date_time).num_seconds();
+    let elapsed = (Local::now().naive_local() - self.date_time).num_seconds();
     let interval = self.seed_type as i64 * self.environment as i64;
 
     // Check the last event first.
