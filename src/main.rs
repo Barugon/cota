@@ -17,6 +17,7 @@ mod log_data;
 mod log_dlg;
 mod notes_dlg;
 mod offline;
+mod plant_dlg;
 mod plant_info;
 mod search_dlg;
 mod stats;
