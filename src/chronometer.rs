@@ -195,10 +195,9 @@ impl Chronometer {
     });
   }
 
-  pub fn start_timer(&mut self, ctx: &Context) {
+  pub fn start_timer(&mut self, ctx: Context) {
     self.stop_timer();
 
-    let ctx = ctx.clone();
     let cancel = Cancel::default();
     self.timer_cancel = Some(cancel.clone());
 
