@@ -14,8 +14,8 @@ use eframe::{
     containers, menu, style::Margin, CentralPanel, Context, CursorIcon, Event, Frame, Key,
     TopBottomPanel, Ui, Visuals,
   },
-  emath::{self, Align2},
-  epaint::Color32,
+  emath::Align2,
+  epaint::{vec2, Color32, Vec2},
   glow, Storage,
 };
 use futures::executor::ThreadPoolBuilder;
@@ -86,7 +86,7 @@ fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool
     if let Some(pos) = cursor_pos {
       // Show the hotkey as a tooltip even if the menu item is disabled.
       if response.rect.contains(pos) && response.ctx.layer_id_at(pos) == Some(response.layer_id) {
-        let pos = Some(pos + emath::vec2(16.0, 16.0));
+        let pos = Some(pos + vec2(16.0, 16.0));
         containers::show_tooltip_at(&response.ctx, response.id.with("_hotkey"), pos, |ui| {
           ui.label(hotkey);
         });
@@ -125,8 +125,8 @@ pub struct App {
 }
 
 impl App {
-  pub const fn inner_window_size() -> emath::Vec2 {
-    emath::vec2(480.0, 640.0)
+  pub const fn inner_window_size() -> Vec2 {
+    vec2(480.0, 640.0)
   }
 
   pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
@@ -157,11 +157,14 @@ impl App {
     // Tab pages.
     let storage = cc.storage.expect(NONE_ERR);
     let log_path = config::get_log_path(storage).unwrap_or_default();
-    let chronometer = Chronometer::new(threads.clone());
+    let mut chronometer = Chronometer::new(threads.clone());
     let experience = Experience::new();
-    let farming = Farming::new();
+    let farming = Farming::new(cc.egui_ctx.clone());
     let offline = Offline::new(state.clone());
     let stats = Stats::new(log_path, state.clone(), threads);
+
+    // Start the chronometer timer.
+    chronometer.start_timer(&cc.egui_ctx);
 
     // Dialog windows.
     let about_dlg = AboutDlg::new(state.clone());
@@ -551,5 +554,6 @@ impl eframe::App for App {
   fn on_exit(&mut self, _: Option<&glow::Context>) {
     self.stats.on_exit();
     self.chronometer.stop_timer();
+    self.farming.stop_timer();
   }
 }
