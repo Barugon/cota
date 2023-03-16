@@ -159,12 +159,12 @@ impl App {
     let log_path = config::get_log_path(storage).unwrap_or_default();
     let mut chronometer = Chronometer::new(threads.clone());
     let experience = Experience::new();
-    let farming = Farming::new(cc.egui_ctx.clone());
+    let farming = Farming::new(cc.egui_ctx.clone(), state.clone());
     let offline = Offline::new(state.clone());
     let stats = Stats::new(log_path, state.clone(), threads);
 
     // Start the chronometer timer.
-    chronometer.start_timer(&cc.egui_ctx);
+    chronometer.start_timer(cc.egui_ctx.clone());
 
     // Dialog windows.
     let about_dlg = AboutDlg::new(state.clone());
@@ -495,7 +495,7 @@ impl eframe::App for App {
       ui.horizontal(|ui| {
         let button = ui.selectable_value(&mut self.page, Page::Chronometer, "Chronometer");
         if button.clicked() {
-          self.chronometer.start_timer(ctx);
+          self.chronometer.start_timer(ctx.clone());
         }
 
         let button = ui.selectable_value(&mut self.page, Page::Experience, "Experience");
