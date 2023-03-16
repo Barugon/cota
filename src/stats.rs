@@ -19,7 +19,8 @@ use futures::{channel::mpsc, executor::ThreadPool};
 use num_format::Locale;
 use std::{
   collections::HashMap,
-  path::{Path, PathBuf}, mem::take,
+  mem::take,
+  path::{Path, PathBuf},
 };
 
 pub struct Stats {
@@ -112,7 +113,7 @@ impl Stats {
     let notes_dlg = NotesDlg::new(state.clone());
     let log_dlg = LogDlg::new(state.clone());
 
-    let stats = Stats {
+    Stats {
       resist_stats,
       threads,
       channel,
@@ -130,8 +131,7 @@ impl Stats {
       notes_dlg,
       log_dlg,
       init: true,
-    };
-    stats
+    }
   }
 
   pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
