@@ -153,7 +153,7 @@ impl PlantDlg {
               });
 
             // Description.
-            let widget = TextEdit::singleline(&mut self.description);
+            let widget = TextEdit::singleline(&mut self.description).hint_text("additional info");
             ui.spacing_mut().item_spacing.x = item_spacing.x;
             ui.add_sized(ui.available_size(), widget);
           });
