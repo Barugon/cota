@@ -34,6 +34,7 @@ impl Farming {
         let mut lock = plants.lock().expect(FAIL_ERR);
         for plant in lock.iter_mut() {
           if plant.check() {
+            // Popup a desktop notification.
             let summary = match plant.current_event() {
               Event::None => Default::default(),
               Event::Water => "Water Plants",
@@ -50,6 +51,8 @@ impl Farming {
               };
               let _ = Notification::new().summary(summary).body(&body).show();
             }
+
+            // Repaint.
             ctx.request_repaint();
           }
         }
@@ -102,6 +105,7 @@ impl Farming {
           // Use a single column in order to force the scroll area to fill the entire available width.
           ui.columns(1, |col| {
             col[0].horizontal(|ui| {
+              // Seed name.
               let text = WidgetText::from(plant.seed_name());
               let text = match event {
                 Event::None => text.color(Color32::from_rgb(220, 220, 220)),
@@ -112,11 +116,13 @@ impl Farming {
               ui.label(text);
               ui.separator();
 
+              // Planting environment.
               let text = plant.date_time().format("%Y-%m-%d %H:%M").to_string();
               let text = format!("{:?} {text}", plant.environment());
               ui.label(text);
               ui.separator();
 
+              // Next event.
               let (event, date_time) = plant.next_event();
               if event != Event::None {
                 let format = date_time.format("%Y-%m-%d %H:%M");
