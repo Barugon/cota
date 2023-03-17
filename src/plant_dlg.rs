@@ -10,6 +10,7 @@ use eframe::{
 };
 use egui_extras::DatePickerButton;
 
+#[derive(Default)]
 pub struct PlantDlg {
   state: AppState,
   date: NaiveDate,
@@ -26,27 +27,23 @@ pub struct PlantDlg {
 
 impl PlantDlg {
   pub fn new(state: AppState) -> Self {
-    let now = Local::now();
     let seeds = parse_seeds();
     let seed_types = seeds.iter().map(|seed| seed.1).collect();
     let seed_names = seeds.iter().map(|seed| seed.0).collect();
     Self {
       state,
-      date: now.date_naive(),
-      hour: now.hour(),
-      min: now.minute(),
       seed_types,
       seed_names,
-      seed_index: None,
-      environment: None,
-      description: String::new(),
-      result: None,
-      visible: false,
+      ..Default::default()
     }
   }
 
   pub fn open(&mut self) {
     if !self.visible {
+      let now = Local::now();
+      self.date = now.date_naive();
+      self.hour = now.hour();
+      self.min = now.minute();
       self.result = None;
       self.state.set_disabled(true);
       self.visible = true;
@@ -81,7 +78,7 @@ impl PlantDlg {
               // Minute.
               let widget = DragValue::new(&mut self.min)
                 .custom_formatter(|val, _| format!("{val:02}"))
-                .clamp_range(0..=23)
+                .clamp_range(0..=59)
                 .speed(0.125);
               ui.spacing_mut().item_spacing.x = 1.0;
               ui.spacing_mut().interact_size.x = 23.0;
