@@ -1,7 +1,8 @@
 use crate::util::{HOUR_SECS, NONE_ERR};
 use chrono::{Duration, Local, NaiveDateTime};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum SeedType {
   Low = 1,
   Med = 2,
@@ -32,7 +33,7 @@ pub fn parse_seeds() -> Vec<(&'static str, SeedType)> {
   result
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Environment {
   Greenhouse = 12 * HOUR_SECS as isize / 3,
   Outside = 24 * HOUR_SECS as isize / 3,
@@ -46,10 +47,11 @@ pub enum Event {
   Harvest,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PlantInfo {
   description: String,
   date_time: NaiveDateTime,
-  seed_name: &'static str,
+  seed_name: String,
   seed_type: SeedType,
   environment: Environment,
   events: [Option<bool>; 3],
@@ -59,7 +61,7 @@ impl PlantInfo {
   pub fn new(
     description: String,
     date_time: NaiveDateTime,
-    seed_name: &'static str,
+    seed_name: String,
     seed_type: SeedType,
     environment: Environment,
   ) -> Self {
@@ -82,7 +84,7 @@ impl PlantInfo {
   }
 
   pub fn seed_name(&self) -> &str {
-    self.seed_name
+    &self.seed_name
   }
 
   pub fn environment(&self) -> Environment {

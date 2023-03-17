@@ -195,7 +195,7 @@ impl PlantDlg {
       self.result = Some(PlantInfo::new(
         self.description.clone(),
         self.date.and_time(time),
-        self.seed_names[index],
+        self.seed_names[index].to_owned(),
         self.seed_types[index],
         environment,
       ));
