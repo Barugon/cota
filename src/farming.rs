@@ -79,13 +79,6 @@ impl Farming {
   }
 
   pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
-    // Tool bar.
-    ui.horizontal(|ui| {
-      if ui.button("Add Timer").clicked() {
-        self.plant_dlg.open();
-      }
-    });
-
     if !self.plant_dlg.show(ui.ctx()) {
       if let Some(plant_info) = self.plant_dlg.take_result() {
         let mut lock = self.plants.lock().expect(FAIL_ERR);
@@ -96,8 +89,16 @@ impl Farming {
       }
     }
 
+    // Tool bar.
+    ui.horizontal(|ui| {
+      if ui.button("Add Timer").clicked() {
+        self.plant_dlg.open();
+      }
+    });
+
     ui.separator();
 
+    // Timer list.
     ScrollArea::vertical()
       .id_source("farming_scroll_area")
       .show(ui, |ui| {
@@ -122,13 +123,12 @@ impl Farming {
               };
               ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
               ui.label(text);
-              ui.separator();
 
               // Planting environment.
               let text = plant.date_time().format("%Y-%m-%d %H:%M").to_string();
               let text = format!("{:?} {text}", plant.environment());
-              ui.label(text);
               ui.separator();
+              ui.label(text);
 
               // Next event.
               let (event, date_time) = plant.next_event();
@@ -136,6 +136,7 @@ impl Farming {
                 let format = date_time.format("%Y-%m-%d %H:%M");
                 let text = format!("{event:?} {}", format.to_string());
                 let widget = Label::new(text).wrap(true);
+                ui.separator();
                 ui.add(widget);
               }
             });
