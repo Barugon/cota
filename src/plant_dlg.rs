@@ -154,8 +154,6 @@ impl PlantDlg {
 
             // Description.
             let widget = TextEdit::singleline(&mut self.description);
-            ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
-            ui.label(RichText::from("Description").color(LABEL_COLOR));
             ui.spacing_mut().item_spacing.x = item_spacing.x;
             ui.add_sized(ui.available_size(), widget);
           });
