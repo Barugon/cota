@@ -1,5 +1,5 @@
 use crate::{
-  plant_info::{parse_seeds, Environment, PlantInfo, SeedType},
+  plant_info::{self, Environment, PlantInfo, SeedType},
   util::{AppState, NONE_ERR},
 };
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
@@ -27,7 +27,7 @@ pub struct PlantDlg {
 
 impl PlantDlg {
   pub fn new(state: AppState) -> Self {
-    let seeds = parse_seeds();
+    let seeds = plant_info::parse_seeds();
     let seed_types = seeds.iter().map(|seed| seed.1).collect();
     let seed_names = seeds.iter().map(|seed| seed.0).collect();
     Self {

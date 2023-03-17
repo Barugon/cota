@@ -15,7 +15,7 @@ use eframe::{
     TopBottomPanel, Ui, Visuals,
   },
   emath::Align2,
-  epaint::{vec2, Color32, Vec2},
+  epaint::{self, Color32, Vec2},
   glow, Storage,
 };
 use futures::executor::ThreadPoolBuilder;
@@ -86,7 +86,7 @@ fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool
     if let Some(pos) = cursor_pos {
       // Show the hotkey as a tooltip even if the menu item is disabled.
       if response.rect.contains(pos) && response.ctx.layer_id_at(pos) == Some(response.layer_id) {
-        let pos = Some(pos + vec2(16.0, 16.0));
+        let pos = Some(pos + epaint::vec2(16.0, 16.0));
         containers::show_tooltip_at(&response.ctx, response.id.with("_hotkey"), pos, |ui| {
           ui.label(hotkey);
         });
@@ -126,7 +126,7 @@ pub struct App {
 
 impl App {
   pub const fn inner_window_size() -> Vec2 {
-    vec2(480.0, 640.0)
+    epaint::vec2(480.0, 640.0)
   }
 
   pub fn new(cc: &eframe::CreationContext<'_>) -> Self {

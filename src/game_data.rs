@@ -1,6 +1,6 @@
 use crate::util::{
-  parse_skill_info_groups, SkillCategory, SkillInfo, SkillInfoGroup, FAIL_ERR, LEVEL_EXP,
-  LVL_RANGE, NONE_ERR, SKILL_EXP,
+  self, SkillCategory, SkillInfo, SkillInfoGroup, FAIL_ERR, LEVEL_EXP, LVL_RANGE, NONE_ERR,
+  SKILL_EXP,
 };
 use serde_json::Value;
 use std::{borrow::Cow, fs::File, io::Write, ops::Range, path::PathBuf, sync::RwLock};
@@ -160,7 +160,7 @@ impl GameData {
 
   pub fn get_skills(&self, category: SkillCategory) -> Vec<SkillLvlGroup> {
     let sk2 = self.character.get(SK2).expect(NONE_ERR);
-    let groups = parse_skill_info_groups(category);
+    let groups = util::parse_skill_info_groups(category);
     let mut skills = Vec::with_capacity(groups.len());
     for group in groups {
       skills.push(SkillLvlGroup::new(sk2, group));

@@ -1,6 +1,6 @@
-use crate::util::{offset, replace_decimal, Cancel, Search, FAIL_ERR, NONE_ERR};
+use crate::util::{self, Cancel, Search, FAIL_ERR, NONE_ERR};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
-use futures::{channel::mpsc, executor::ThreadPool, future::join_all, StreamExt};
+use futures::{channel::mpsc, executor::ThreadPool, future, StreamExt};
 use regex::Regex;
 use std::{
   cmp::Reverse,
@@ -27,7 +27,7 @@ pub fn get_log_text(line: &str) -> &str {
 
     // Check if a chat timestamp was output.
     if let Some(time) = get_log_date(text.trim_start()) {
-      let pos = offset(text, time).expect(NONE_ERR) + time.len();
+      let pos = util::offset(text, time).expect(NONE_ERR) + time.len();
       return &text[pos..];
     }
     return text;
@@ -54,7 +54,7 @@ impl<'a> Iterator for StatsIter<'a> {
   fn next(&mut self) -> Option<Self::Item> {
     // We're expecting "name: value" pairs.
     let name = self.iter.next()?.strip_suffix(':')?;
-    let value = replace_decimal(self.iter.next()?).parse().ok()?;
+    let value = util::replace_decimal(self.iter.next()?).parse().ok()?;
     Some((name, value))
   }
 }
@@ -171,7 +171,7 @@ pub async fn get_stats_timestamps(
     rx.collect().await
   } else {
     // Collect the results directly.
-    join_all(futures).await
+    future::join_all(futures).await
   };
 
   if cancel.is_canceled() {
@@ -208,13 +208,13 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, ts: i64, cancel: Cance
 
             if let Some(mut stats) = get_stats_text(line, ts, date) {
               // Include subsequent lines that do not start with a square bracket.
-              let pos = offset(&text, stats).expect(NONE_ERR);
+              let pos = util::offset(&text, stats).expect(NONE_ERR);
               let sub = &text[pos + stats.len()..];
               for line in sub.lines() {
                 if line.starts_with('[') {
                   break;
                 }
-                stats = &text[pos..offset(&text, line).expect(NONE_ERR)];
+                stats = &text[pos..util::offset(&text, line).expect(NONE_ERR)];
               }
 
               return StatsData::new(stats.into());
