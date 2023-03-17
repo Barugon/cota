@@ -1,8 +1,10 @@
+use crate::plant_info::PlantInfo;
 use eframe::Storage;
 use std::path::{Path, PathBuf};
 
 const LOG_PATH_KEY: &str = "log_path";
 const SAVE_PATH_KEY: &str = "save_path";
+const PLANTS_KEY: &str = "plants";
 const AVATAR_KEY: &str = "avatar";
 const NOTES_KEY: &str = "notes";
 
@@ -43,6 +45,15 @@ pub fn set_save_path(storage: &mut dyn Storage, folder: &Path) {
   } else {
     println!("Unable to convert path to string: {folder:?}");
   }
+}
+
+pub fn get_plants(storage: &dyn Storage) -> Option<Vec<PlantInfo>> {
+  let text = get_value(storage, PLANTS_KEY)?;
+  ron::from_str(&text).ok()
+}
+
+pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<PlantInfo>) {
+  set_value(storage, PLANTS_KEY, ok!(ron::to_string(plants)));
 }
 
 pub fn get_avatar(storage: &dyn Storage) -> Option<String> {

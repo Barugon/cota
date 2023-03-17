@@ -1,16 +1,18 @@
 use crate::{
+  config,
   plant_dlg::PlantDlg,
   plant_info::{Event, PlantInfo},
-  util::{AppState, Cancel, FAIL_ERR},
+  util::{AppState, Cancel, FAIL_ERR, NONE_ERR},
 };
 use eframe::{
   egui::{Context, Label, ScrollArea, Ui, WidgetText},
   epaint::Color32,
+  Storage,
 };
 use notify_rust::Notification;
 use std::{
   sync::{Arc, Mutex},
-  thread::{sleep, spawn, JoinHandle},
+  thread::{self, JoinHandle},
   time::{Duration, Instant},
 };
 
@@ -22,15 +24,16 @@ pub struct Farming {
 }
 
 impl Farming {
-  pub fn new(ctx: Context, state: AppState) -> Self {
+  pub fn new(ctx: Context, storage: &dyn Storage, state: AppState) -> Self {
     let plant_dlg = PlantDlg::new(state);
-    let plants = Arc::new(Mutex::new(Vec::new()));
+    let plants = config::get_plants(storage).unwrap_or_default();
+    let plants = Arc::new(Mutex::new(plants));
     let cancel = Cancel::default();
     Self {
       plant_dlg,
       plants: plants.clone(),
       cancel: Some(cancel.clone()),
-      thread: Some(spawn(move || loop {
+      thread: Some(thread::spawn(move || loop {
         let mut lock = plants.lock().expect(FAIL_ERR);
         for plant in lock.iter_mut() {
           if plant.check() {
@@ -69,13 +72,13 @@ impl Farming {
           }
 
           // We need to sleep for some actual amount of time or this thread will peg one of the cores.
-          sleep(Duration::from_millis(10));
+          thread::sleep(Duration::from_millis(10));
         }
       })),
     }
   }
 
-  pub fn show(&mut self, ui: &mut Ui) {
+  pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
     // Tool bar.
     ui.horizontal(|ui| {
       if ui.button("Add Timer").clicked() {
@@ -85,7 +88,11 @@ impl Farming {
 
     if !self.plant_dlg.show(ui.ctx()) {
       if let Some(plant_info) = self.plant_dlg.take_result() {
-        self.plants.lock().expect(FAIL_ERR).push(plant_info);
+        let mut lock = self.plants.lock().expect(FAIL_ERR);
+        lock.push(plant_info);
+
+        // Persist the timers.
+        config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
       }
     }
 
@@ -159,6 +166,7 @@ impl Farming {
 
           if delete {
             lock.remove(index);
+            config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
           } else {
             index += 1;
           }

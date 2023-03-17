@@ -159,7 +159,7 @@ impl App {
     let log_path = config::get_log_path(storage).unwrap_or_default();
     let mut chronometer = Chronometer::new(threads.clone());
     let experience = Experience::new();
-    let farming = Farming::new(cc.egui_ctx.clone(), state.clone());
+    let farming = Farming::new(cc.egui_ctx.clone(), storage, state.clone());
     let offline = Offline::new(state.clone());
     let stats = Stats::new(log_path, state.clone(), threads);
 
@@ -525,7 +525,7 @@ impl eframe::App for App {
       match self.page {
         Page::Chronometer => self.chronometer.show(ui),
         Page::Experience => self.experience.show(ui),
-        Page::Farming => self.farming.show(ui),
+        Page::Farming => self.farming.show(ui, frame),
         Page::Offline => self.offline.show(ui),
         Page::Stats => self.stats.show(ui, frame),
       }
