@@ -1,8 +1,7 @@
-#![allow(unused)]
 use crate::util::{HOUR_SECS, NONE_ERR};
 use chrono::{Duration, Local, NaiveDateTime};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SeedType {
   Low = 1,
   Med = 2,
@@ -33,14 +32,14 @@ pub fn parse_seeds() -> Vec<(&'static str, SeedType)> {
   result
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Environment {
   Greenhouse = 12 * HOUR_SECS as isize / 3,
   Outside = 24 * HOUR_SECS as isize / 3,
   Inside = 240 * HOUR_SECS as isize / 3,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Event {
   None,
   Water,
@@ -53,7 +52,7 @@ pub struct PlantInfo {
   seed_name: &'static str,
   seed_type: SeedType,
   environment: Environment,
-  event: [bool; 3],
+  events: [Option<bool>; 3],
 }
 
 impl PlantInfo {
@@ -70,7 +69,7 @@ impl PlantInfo {
       seed_name,
       seed_type,
       environment,
-      event: Default::default(),
+      events: [Some(false); 3],
     }
   }
 
@@ -86,21 +85,17 @@ impl PlantInfo {
     self.seed_name
   }
 
-  pub fn seed_type(&self) -> SeedType {
-    self.seed_type
-  }
-
   pub fn environment(&self) -> Environment {
     self.environment
   }
 
   /// Get the current event.
   pub fn current_event(&self) -> Event {
-    if self.event[2] {
+    if self.events[2] == Some(true) {
       return Event::Harvest;
     }
 
-    if self.event[0] || self.event[1] {
+    if self.events[0] == Some(true) || self.events[1] == Some(true) {
       return Event::Water;
     }
 
@@ -112,11 +107,11 @@ impl PlantInfo {
     let elapsed = (Local::now().naive_local() - self.date_time).num_seconds();
     let interval = self.seed_type as i64 * self.environment as i64;
 
-    for count in 0..self.event.len() {
+    for count in 1..=self.events.len() {
       let timeout = interval * count as i64;
       if elapsed < timeout {
         let date_time = self.date_time + Duration::seconds(timeout);
-        if count < 2 {
+        if count < 3 {
           return (Event::Water, date_time);
         } else {
           return (Event::Harvest, date_time);
@@ -133,15 +128,15 @@ impl PlantInfo {
     let interval = self.seed_type as i64 * self.environment as i64;
 
     // Check the last event first.
-    for count in (0..self.event.len()).rev() {
-      if elapsed > interval * count as i64 {
-        if !self.event[count] {
+    for count in (0..self.events.len()).rev() {
+      if elapsed > interval * (count as i64 + 1) {
+        if self.events[count] == Some(false) {
           // Flag this event.
-          self.event[count] = true;
+          self.events[count] = Some(true);
 
           // Clear previous events.
           for count in (0..count).rev() {
-            self.event[count] = false;
+            self.events[count] = None;
           }
 
           // Return true to signal a new event.
@@ -153,5 +148,14 @@ impl PlantInfo {
     }
 
     false
+  }
+
+  /// Reset any events.
+  pub fn reset_events(&mut self) {
+    for event in &mut self.events {
+      if *event == Some(true) {
+        *event = None;
+      }
+    }
   }
 }
