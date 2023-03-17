@@ -4,10 +4,7 @@ use crate::{
   log_dlg::LogDlg,
   notes_dlg::NotesDlg,
   search_dlg::SearchDlg,
-  util::{
-    f64_to_string, get_locale, text_size, timestamp_to_string, AppState, Cancel, Search, FAIL_ERR,
-    NONE_ERR,
-  },
+  util::{self, AppState, Cancel, Search, FAIL_ERR, NONE_ERR},
 };
 use eframe::{
   egui::{ComboBox, Context, Layout, RichText, Ui},
@@ -19,7 +16,7 @@ use futures::{channel::mpsc, executor::ThreadPool};
 use num_format::Locale;
 use std::{
   collections::HashMap,
-  mem::take,
+  mem,
   path::{Path, PathBuf},
 };
 
@@ -93,7 +90,7 @@ impl Stats {
     };
 
     // State.
-    let locale = get_locale();
+    let locale = util::get_locale();
 
     // Collections
     let avatars = Vec::new();
@@ -135,7 +132,7 @@ impl Stats {
   }
 
   pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
-    if take(&mut self.init) {
+    if mem::take(&mut self.init) {
       self.request_avatars(ui.ctx());
     }
 
@@ -220,13 +217,13 @@ impl Stats {
         ui.add_enabled_ui(!self.dates.is_empty(), |ui| {
           let mut date_changed = false;
           ComboBox::from_id_source("date_combo")
-            .selected_text(timestamp_to_string(self.date))
+            .selected_text(util::timestamp_to_string(self.date))
             .show_ui(ui, |ui| {
               // This is here to keep the data text from wrapping when the scroll bar is visible.
               ui.set_min_width(140.0);
               for date in &self.dates {
                 let date = Some(*date);
-                let text = timestamp_to_string(date);
+                let text = util::timestamp_to_string(date);
                 if ui.selectable_label(self.date == date, text).clicked() && self.date != date {
                   self.date = date;
                   date_changed = true;
@@ -269,7 +266,7 @@ impl Stats {
     ui.add_enabled_ui(!self.stats.is_empty(), |ui| {
       const NAME_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
       let spacing = ui.spacing().item_spacing;
-      let row_size = text_size(ui) + spacing[1] * 2.0;
+      let row_size = util::text_size(ui) + spacing[1] * 2.0;
       let available_width = ui.available_width();
       TableBuilder::new(ui)
         .cell_layout(Layout::left_to_right(Align::Center))
@@ -293,7 +290,7 @@ impl Stats {
                   ui.label(RichText::from(name).color(NAME_COLOR));
                 });
                 row.col(|ui| {
-                  ui.label(f64_to_string(value, self.locale));
+                  ui.label(util::f64_to_string(value, self.locale));
                 });
               });
             }
@@ -335,7 +332,7 @@ impl Stats {
 
             for (key, name) in RESIST_KEYS {
               if let Some(value) = resist_values.get(&key) {
-                let value = f64_to_string(*value, self.locale);
+                let value = util::f64_to_string(*value, self.locale);
                 body.row(row_size, |mut row| {
                   row.col(|ui| {
                     const RESIST_COLOR: Color32 = Color32::from_rgb(154, 120, 180);
@@ -356,7 +353,7 @@ impl Stats {
                     ui.label(RichText::from(name).color(NAME_COLOR));
                   });
                   row.col(|ui| {
-                    ui.label(f64_to_string(value, self.locale));
+                    ui.label(util::f64_to_string(value, self.locale));
                   });
                 });
               }
@@ -371,7 +368,7 @@ impl Stats {
       return;
     }
 
-    let date = timestamp_to_string(self.date);
+    let date = util::timestamp_to_string(self.date);
     if date.is_empty() {
       return;
     }

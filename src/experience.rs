@@ -1,7 +1,4 @@
-use crate::util::{
-  button_size, get_locale, parse_skill_info_groups, scroll_bar_size, SkillCategory, SkillInfo,
-  SkillInfoGroup, LVL_RANGE, SKILL_EXP,
-};
+use crate::util::{self, SkillCategory, SkillInfo, SkillInfoGroup, LVL_RANGE, SKILL_EXP};
 use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::{
   egui::{DragValue, Label, Layout, RichText, ScrollArea, Sense, Ui, Widget},
@@ -23,12 +20,12 @@ pub struct Experience {
 impl Experience {
   pub fn new() -> Self {
     Experience {
-      adventurer: parse_skill_info_groups(SkillCategory::Adventurer),
-      producer: parse_skill_info_groups(SkillCategory::Producer),
+      adventurer: util::parse_skill_info_groups(SkillCategory::Adventurer),
+      producer: util::parse_skill_info_groups(SkillCategory::Producer),
       selected: Default::default(),
       current_level: 1,
       target_level: 1,
-      locale: get_locale(),
+      locale: util::get_locale(),
     }
   }
 
@@ -108,8 +105,8 @@ impl Experience {
             ui.columns(1, |col| {
               let response = col[0].collapsing(skill_group.name, |ui| {
                 let spacing = ui.spacing().item_spacing;
-                let row_size = button_size(ui) + spacing[1];
-                let available_width = ui.available_width() - scroll_bar_size(ui);
+                let row_size = util::button_size(ui) + spacing[1];
+                let available_width = ui.available_width() - util::scroll_bar_size(ui);
                 TableBuilder::new(ui)
                   .cell_layout(Layout::left_to_right(Align::Center))
                   .striped(true)
