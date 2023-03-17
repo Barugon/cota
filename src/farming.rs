@@ -105,6 +105,7 @@ impl Farming {
         let mut index = 0;
         while index < lock.len() {
           let mut delete = false;
+          let mut store = false;
           let plant = &mut lock[index];
           let event = plant.current_event();
           let item_spacing = ui.spacing().item_spacing;
@@ -148,6 +149,7 @@ impl Farming {
                 Event::Water => {
                   if ui.button("Water").clicked() {
                     plant.reset_events();
+                    store = true;
                   }
                 }
                 Event::Harvest => {
@@ -169,6 +171,9 @@ impl Farming {
             config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
           } else {
             index += 1;
+            if store {
+              config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
+            }
           }
         }
       });
