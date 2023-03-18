@@ -30,7 +30,7 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 Add timers that remind you to water/harvest your plants via desktop notifications.
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/173475863.jbhPupmK.Screenshotfrom20230317234357.png)
+![screenshot](https://a4.pbase.com/o12/09/605909/1/173475278.glSIYf6x.Screenshot_from_20230317234357.png)
 
 ### Offline save-game editor
 
