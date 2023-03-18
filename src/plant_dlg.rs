@@ -150,7 +150,7 @@ impl PlantDlg {
           ui.add_space(3.0);
 
           ui.horizontal(|ui| {
-            // Description.
+            // Additional information.
             let widget = TextEdit::singleline(&mut self.description).hint_text("additional info");
             ui.spacing_mut().item_spacing.x = item_spacing.x;
             ui.add_sized(ui.available_size(), widget);
