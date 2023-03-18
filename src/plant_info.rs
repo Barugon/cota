@@ -2,7 +2,7 @@ use crate::util::{HOUR_SECS, NONE_ERR};
 use chrono::{Duration, Local, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Seed {
   Low = 1,
   Med = 2,
@@ -47,7 +47,7 @@ pub enum Event {
   Harvest,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Plant {
   description: String,
   date_time: NaiveDateTime,
