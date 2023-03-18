@@ -134,7 +134,7 @@ impl Farming {
               let (event, date_time) = plant.next_event();
               if event != Event::None {
                 let format = date_time.format("%Y-%m-%d %H:%M");
-                let text = format!("{event:?} {}", format.to_string());
+                let text = format!("{event:?} {format}");
                 let widget = Label::new(text).wrap(true);
                 ui.separator();
                 ui.add(widget);
