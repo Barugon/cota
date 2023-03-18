@@ -92,15 +92,39 @@ impl PlantDlg {
                 .speed(0.125);
               ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
               ui.add(widget);
-              ui.spacing_mut().item_spacing.x = item_spacing.x;
-              ui.label(RichText::from("Time").color(LABEL_COLOR));
 
               // Date.
               let widget = DatePickerButton::new(&mut self.date);
-              ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
-              ui.add(widget);
               ui.spacing_mut().item_spacing.x = item_spacing.x;
-              ui.label(RichText::from("Date").color(LABEL_COLOR));
+              ui.add(widget);
+
+              // Environment.
+              let text = if let Some(environment) = self.environment {
+                format!("{environment:?}")
+              } else {
+                Default::default()
+              };
+              ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
+              ComboBox::from_id_source("environment_combo")
+                .selected_text(text)
+                .show_ui(ui, |ui| {
+                  let selected = self.environment == Some(Environment::Greenhouse);
+                  if ui.selectable_label(selected, "Greenhouse").clicked() && !selected {
+                    self.environment = Some(Environment::Greenhouse);
+                  }
+
+                  let selected = self.environment == Some(Environment::Outside);
+                  if ui.selectable_label(selected, "Outside").clicked() && !selected {
+                    self.environment = Some(Environment::Outside);
+                  }
+
+                  let selected = self.environment == Some(Environment::Inside);
+                  if ui.selectable_label(selected, "Inside").clicked() && !selected {
+                    self.environment = Some(Environment::Inside);
+                  }
+                });
+              ui.spacing_mut().item_spacing.x = item_spacing.x;
+              ui.label(RichText::from("Env").color(LABEL_COLOR));
 
               // Seed combo.
               let text = if let Some(index) = self.seed_index {
@@ -124,34 +148,6 @@ impl PlantDlg {
           });
 
           ui.horizontal(|ui| {
-            // Environment.
-            ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
-            ui.label(RichText::from("Environment").color(LABEL_COLOR));
-            ui.spacing_mut().item_spacing.x = item_spacing.x;
-            let text = if let Some(environment) = self.environment {
-              format!("{environment:?}")
-            } else {
-              Default::default()
-            };
-            ComboBox::from_id_source("environment_combo")
-              .selected_text(text)
-              .show_ui(ui, |ui| {
-                let selected = self.environment == Some(Environment::Greenhouse);
-                if ui.selectable_label(selected, "Greenhouse").clicked() && !selected {
-                  self.environment = Some(Environment::Greenhouse);
-                }
-
-                let selected = self.environment == Some(Environment::Outside);
-                if ui.selectable_label(selected, "Outside").clicked() && !selected {
-                  self.environment = Some(Environment::Outside);
-                }
-
-                let selected = self.environment == Some(Environment::Inside);
-                if ui.selectable_label(selected, "Inside").clicked() && !selected {
-                  self.environment = Some(Environment::Inside);
-                }
-              });
-
             // Description.
             let widget = TextEdit::singleline(&mut self.description).hint_text("additional info");
             ui.spacing_mut().item_spacing.x = item_spacing.x;
