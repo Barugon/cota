@@ -1,7 +1,7 @@
 use crate::{
   config,
   plant_dlg::PlantDlg,
-  plant_info::{Event, PlantInfo},
+  plant_info::{Event, Plant},
   util::{AppState, Cancel, FAIL_ERR, NONE_ERR},
 };
 use eframe::{
@@ -18,7 +18,7 @@ use std::{
 
 pub struct Farming {
   plant_dlg: PlantDlg,
-  plants: Arc<Mutex<Vec<PlantInfo>>>,
+  plants: Arc<Mutex<Vec<Plant>>>,
   cancel: Option<Cancel>,
   thread: Option<JoinHandle<()>>,
 }

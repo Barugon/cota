@@ -3,32 +3,32 @@ use chrono::{Duration, Local, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub enum SeedType {
+pub enum Seed {
   Low = 1,
   Med = 2,
   High = 3,
 }
 
-impl SeedType {
+impl Seed {
   fn new(text: &str) -> Option<Self> {
     match text {
-      "1" => Some(SeedType::Low),
-      "2" => Some(SeedType::Med),
-      "3" => Some(SeedType::High),
+      "1" => Some(Seed::Low),
+      "2" => Some(Seed::Med),
+      "3" => Some(Seed::High),
       _ => None,
     }
   }
 }
 
 /// Parse the seeds CSV.
-pub fn parse_seeds() -> Vec<(&'static str, SeedType)> {
+pub fn parse_seeds() -> Vec<(&'static str, Seed)> {
   const SEEDS: &str = include_str!("res/seeds.csv");
   let mut result = Vec::new();
   for line in SEEDS.lines() {
     let mut iter = line.split(',');
     let Some(seed_name) = iter.next() else { break };
     let Some(seed_type) = iter.next() else { break };
-    result.push((seed_name, SeedType::new(seed_type).expect(NONE_ERR)));
+    result.push((seed_name, Seed::new(seed_type).expect(NONE_ERR)));
   }
   result
 }
@@ -48,21 +48,21 @@ pub enum Event {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct PlantInfo {
+pub struct Plant {
   description: String,
   date_time: NaiveDateTime,
   seed_name: String,
-  seed_type: SeedType,
+  seed_type: Seed,
   environment: Environment,
   events: [Option<bool>; 3],
 }
 
-impl PlantInfo {
+impl Plant {
   pub fn new(
     description: String,
     date_time: NaiveDateTime,
     seed_name: String,
-    seed_type: SeedType,
+    seed_type: Seed,
     environment: Environment,
   ) -> Self {
     Self {
