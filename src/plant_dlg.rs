@@ -156,7 +156,6 @@ impl PlantDlg {
             ui.add_sized(ui.available_size(), widget);
           });
 
-          // ui.add_space(8.0);
           ui.separator();
           ui.horizontal(|ui| {
             let enabled = self.seed_index.is_some() && self.environment.is_some();
