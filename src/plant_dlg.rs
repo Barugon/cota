@@ -1,5 +1,5 @@
 use crate::{
-  plant_info::{self, Environment, PlantInfo, SeedType},
+  plant_info::{self, Environment, Plant, Seed},
   util::{AppState, NONE_ERR},
 };
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
@@ -16,12 +16,12 @@ pub struct PlantDlg {
   date: NaiveDate,
   hour: u32,
   min: u32,
-  seed_types: Vec<SeedType>,
+  seed_types: Vec<Seed>,
   seed_names: Vec<&'static str>,
   seed_index: Option<usize>,
   environment: Option<Environment>,
   description: String,
-  result: Option<PlantInfo>,
+  result: Option<Plant>,
   visible: bool,
 }
 
@@ -181,7 +181,7 @@ impl PlantDlg {
     self.visible
   }
 
-  pub fn take_result(&mut self) -> Option<PlantInfo> {
+  pub fn take_result(&mut self) -> Option<Plant> {
     self.result.take()
   }
 
@@ -190,7 +190,7 @@ impl PlantDlg {
       let Some(index) = self.seed_index else { return };
       let Some(environment) = self.environment else { return };
       let time = NaiveTime::from_hms_opt(self.hour, self.min, 0).expect(NONE_ERR);
-      self.result = Some(PlantInfo::new(
+      self.result = Some(Plant::new(
         self.description.clone(),
         self.date.and_time(time),
         self.seed_names[index].to_owned(),

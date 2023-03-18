@@ -1,4 +1,4 @@
-use crate::plant_info::PlantInfo;
+use crate::plant_info::Plant;
 use eframe::Storage;
 use std::path::{Path, PathBuf};
 
@@ -47,12 +47,12 @@ pub fn set_save_path(storage: &mut dyn Storage, folder: &Path) {
   }
 }
 
-pub fn get_plants(storage: &dyn Storage) -> Option<Vec<PlantInfo>> {
+pub fn get_plants(storage: &dyn Storage) -> Option<Vec<Plant>> {
   let text = get_value(storage, PLANTS_KEY)?;
   ron::from_str(&text).ok()
 }
 
-pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<PlantInfo>) {
+pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<Plant>) {
   set_value(storage, PLANTS_KEY, ok!(ron::to_string(plants)));
 }
 
