@@ -18,32 +18,31 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 ## Features
 
-### Display stats recorded to chat-logs via the `/stats` command
-
-- Press F5 to refresh the display after typing `/stats` in-game
-- Press Ctrl+R to get a list of effective resists
-- Press Ctrl+F to filter the stats
-
-![screenshot](https://a4.pbase.com/o12/09/605909/1/164136608.rcq0amhQ.Screenshotfrom20220710144634.png)
-
-### Search chat logs
-
-Using either straight text or regular expressions.
-
-![screenshot](https://a4.pbase.com/o12/09/605909/1/172748130.7CtBnycN.Screenshotfrom20220710145444.png)
-
 ### Portal and Cabalist chronometer
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/166622004.99jNUqv1.Screenshotfrom20220702105817.png)
+![screenshot](https://a4.pbase.com/o12/09/605909/1/166622004.C6X9X0rG.Screenshotfrom20230317234110.png)
 
 ### Experience needed calculator
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/169657368.6LSuf2mo.Screenshotfrom20220707123539.png)
+![screenshot](https://a4.pbase.com/o12/09/605909/1/169657368.b3O2lfRh.Screenshotfrom20230317234146.png)
+
+### Agriculture
+
+Add timers that remind you to water/harvest your plants with desktop notifications.
+
+![screenshot](https://a4.pbase.com/o12/09/605909/1/173475863.jbhPupmK.Screenshotfrom20230317234357.png)
 
 ### Offline save-game editor
 
 > **Note**: once you store your changes then you must reload the save-game in Shroud of the Avatar from the main menu.
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/170775639.JD7XD39u.Screenshotfrom20221216144706.png)
+![screenshot](https://a4.pbase.com/o12/09/605909/1/170775639.MMl94QYP.Screenshotfrom20230317234519.png)
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/173233692.lKzg5kgV.Screenshotfrom20221216144200.png)
+### Display stats recorded to chat-logs via the `/stats` command
+
+- Press F5 to refresh the display after typing `/stats` in-game
+- Press Ctrl+R to get a list of effective resists
+- Press Ctrl+F to filter the stats
+- Press Ctrl+L to search the chat logs
+
+![screenshot](https://a4.pbase.com/o12/09/605909/1/164136608.QBmjRKgr.Screenshotfrom20230317234632.png)
