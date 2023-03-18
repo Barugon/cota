@@ -79,13 +79,11 @@ impl Farming {
   }
 
   pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
+    let mut store = false;
     if !self.plant_dlg.show(ui.ctx()) {
       if let Some(plant_info) = self.plant_dlg.take_result() {
-        let mut lock = self.plants.lock().expect(FAIL_ERR);
-        lock.push(plant_info);
-
-        // Persist the timers.
-        config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
+        self.plants.lock().expect(FAIL_ERR).push(plant_info);
+        store = true;
       }
     }
 
@@ -106,7 +104,6 @@ impl Farming {
         let mut index = 0;
         while index < lock.len() {
           let mut delete = false;
-          let mut store = false;
           let plant = &mut lock[index];
           let event = plant.current_event();
           let item_spacing = ui.spacing().item_spacing;
@@ -125,19 +122,17 @@ impl Farming {
               ui.label(text);
 
               // Planting environment.
-              let text = plant.date_time().format("%Y-%m-%d %H:%M").to_string();
-              let text = format!("{:?} {text}", plant.environment());
+              let environment = plant.environment();
+              let date_time = plant.date_time().format("%Y-%m-%d %H:%M");
               ui.separator();
-              ui.label(text);
+              ui.label(format!("{environment:?} {date_time}",));
 
               // Next event.
               let (event, date_time) = plant.next_event();
               if event != Event::None {
-                let format = date_time.format("%Y-%m-%d %H:%M");
-                let text = format!("{event:?} {format}");
-                let widget = Label::new(text).wrap(true);
+                let date_time = date_time.format("%Y-%m-%d %H:%M");
                 ui.separator();
-                ui.add(widget);
+                ui.label(format!("{event:?} {date_time}"));
               }
             });
             col[0].horizontal(|ui| {
@@ -169,13 +164,15 @@ impl Farming {
 
           if delete {
             lock.remove(index);
-            config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
+            store = true;
           } else {
             index += 1;
-            if store {
-              config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
-            }
           }
+        }
+
+        if store {
+          // Persist the timers.
+          config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
         }
       });
   }
