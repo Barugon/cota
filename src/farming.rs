@@ -11,7 +11,10 @@ use eframe::{
 };
 use notify_rust::Notification;
 use std::{
-  sync::{Arc, Mutex},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc, Mutex,
+  },
   thread::{self, JoinHandle},
   time::{Duration, Instant},
 };
@@ -19,6 +22,7 @@ use std::{
 pub struct Farming {
   plant_dlg: PlantDlg,
   plants: Arc<Mutex<Vec<Plant>>>,
+  store: Arc<AtomicBool>,
   cancel: Option<Cancel>,
   thread: Option<JoinHandle<()>>,
 }
@@ -28,10 +32,12 @@ impl Farming {
     let plant_dlg = PlantDlg::new(state);
     let plants = config::get_plants(storage).unwrap_or_default();
     let plants = Arc::new(Mutex::new(plants));
+    let store = Arc::new(AtomicBool::new(false));
     let cancel = Cancel::default();
     Self {
       plant_dlg,
       plants: plants.clone(),
+      store: store.clone(),
       cancel: Some(cancel.clone()),
       thread: Some(thread::spawn(move || loop {
         let mut lock = plants.lock().expect(FAIL_ERR);
@@ -54,6 +60,9 @@ impl Farming {
               };
               let _ = Notification::new().summary(summary).body(&body).show();
             }
+
+            // Flag that the timers need to be persisted.
+            store.store(true, Ordering::Relaxed);
 
             // Repaint.
             ctx.request_repaint();
@@ -79,11 +88,10 @@ impl Farming {
   }
 
   pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
-    let mut store = false;
     if !self.plant_dlg.show(ui.ctx()) {
       if let Some(plant_info) = self.plant_dlg.take_result() {
         self.plants.lock().expect(FAIL_ERR).push(plant_info);
-        store = true;
+        self.store.store(true, Ordering::Relaxed);
       }
     }
 
@@ -145,7 +153,7 @@ impl Farming {
                 Event::Water => {
                   if ui.button("Water").clicked() {
                     plant.reset_events();
-                    store = true;
+                    self.store.store(true, Ordering::Relaxed);
                   }
                 }
                 Event::Harvest => {
@@ -164,13 +172,13 @@ impl Farming {
 
           if delete {
             lock.remove(index);
-            store = true;
+            self.store.store(true, Ordering::Relaxed);
           } else {
             index += 1;
           }
         }
 
-        if store {
+        if self.store.swap(false, Ordering::Relaxed) {
           // Persist the timers.
           config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
         }
