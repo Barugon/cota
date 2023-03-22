@@ -124,7 +124,7 @@ impl Plant {
     (Event::None, Default::default())
   }
 
-  /// Check for events.
+  /// Check and update events.
   pub fn check(&mut self) -> bool {
     let elapsed = (Local::now().naive_local() - self.date_time).num_seconds();
     let interval = self.seed_type as i64 * self.environment as i64;
