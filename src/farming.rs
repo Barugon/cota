@@ -22,7 +22,7 @@ use std::{
 pub struct Farming {
   plant_dlg: PlantDlg,
   plants: Arc<Mutex<Vec<Plant>>>,
-  store: Arc<AtomicBool>,
+  persist: Arc<AtomicBool>,
   cancel: Option<Cancel>,
   thread: Option<JoinHandle<()>>,
 }
@@ -37,7 +37,7 @@ impl Farming {
     Self {
       plant_dlg,
       plants: plants.clone(),
-      store: store.clone(),
+      persist: store.clone(),
       cancel: Some(cancel.clone()),
       thread: Some(thread::spawn(move || loop {
         let mut lock = plants.lock().expect(FAIL_ERR);
@@ -91,7 +91,7 @@ impl Farming {
     if !self.plant_dlg.show(ui.ctx()) {
       if let Some(plant_info) = self.plant_dlg.take_result() {
         self.plants.lock().expect(FAIL_ERR).push(plant_info);
-        self.store.store(true, Ordering::Relaxed);
+        self.persist.store(true, Ordering::Relaxed);
       }
     }
 
@@ -153,7 +153,7 @@ impl Farming {
                 Event::Water => {
                   if ui.button("Water").clicked() {
                     plant.reset_events();
-                    self.store.store(true, Ordering::Relaxed);
+                    self.persist.store(true, Ordering::Relaxed);
                   }
                 }
                 Event::Harvest => {
@@ -172,13 +172,13 @@ impl Farming {
 
           if delete {
             lock.remove(index);
-            self.store.store(true, Ordering::Relaxed);
+            self.persist.store(true, Ordering::Relaxed);
           } else {
             index += 1;
           }
         }
 
-        if self.store.swap(false, Ordering::Relaxed) {
+        if self.persist.swap(false, Ordering::Relaxed) {
           // Persist the timers.
           config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
         }
