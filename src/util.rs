@@ -53,6 +53,9 @@ macro_rules! ok {
   };
 }
 
+/// Explicitly ignore a `Result`.
+pub fn ignore<T, E>(_: Result<T, E>) {}
+
 #[derive(Default)]
 struct State {
   /// Show the "progress" cursor.
