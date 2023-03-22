@@ -59,7 +59,7 @@ impl Experience {
         if response.on_hover_text_at_pointer("Click to copy").clicked() {
           // Copy the value to the clipboard.
           if let Ok::<ClipboardContext, _>(mut ctx) = ClipboardProvider::new() {
-            let _ = ctx.set_contents(format!("{exp}"));
+            util::ignore(ctx.set_contents(format!("{exp}")));
           }
         }
       }
