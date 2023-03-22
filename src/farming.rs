@@ -2,7 +2,7 @@ use crate::{
   config,
   plant_dlg::PlantDlg,
   plant_info::{Event, Plant},
-  util::{self, AppState, Cancel, FAIL_ERR, NONE_ERR},
+  util::{AppState, Cancel, FAIL_ERR, NONE_ERR},
 };
 use eframe::{
   egui::{Context, Label, ScrollArea, Ui, WidgetText},
@@ -58,7 +58,7 @@ impl Farming {
               } else {
                 format!("{name} | {env:?} | {desc}")
               };
-              util::ignore(Notification::new().summary(summary).body(&body).show());
+              err!(Notification::new().summary(summary).body(&body).show());
             }
 
             // Flag that the timers need to be persisted.
@@ -193,7 +193,7 @@ impl Farming {
 
     // Wait for it to join.
     if let Some(thread) = self.thread.take() {
-      util::ignore(thread.join());
+      err!(thread.join());
     }
   }
 }

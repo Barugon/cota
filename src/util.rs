@@ -32,12 +32,13 @@ macro_rules! debugln {
 }
 
 #[macro_export]
+/// Return from function if `Result` is not `Ok`.
 macro_rules! ok {
   ($res:expr) => {
     match $res {
       Ok(val) => val,
       Err(err) => {
-        println!("{}", err);
+        println!("{err:?}");
         return;
       }
     }
@@ -46,15 +47,23 @@ macro_rules! ok {
     match $res {
       Ok(val) => val,
       Err(err) => {
-        println!("{}", err);
+        println!("{err:?}");
         return $ret;
       }
     }
   };
 }
 
-/// Explicitly ignore a `Result`.
-pub fn ignore<T, E>(_: Result<T, E>) {}
+#[macro_export]
+/// Print if `Err`.
+macro_rules! err {
+  ($res:expr) => {
+    if let Err(err) = $res {
+      println!("{err:?}");
+      return;
+    }
+  };
+}
 
 #[derive(Default)]
 struct State {
