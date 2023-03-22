@@ -193,7 +193,7 @@ impl Farming {
 
     // Wait for it to join.
     if let Some(thread) = self.thread.take() {
-      err!(thread.join());
+      thread.join().expect(FAIL_ERR);
     }
   }
 }
