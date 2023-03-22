@@ -70,7 +70,7 @@ pub fn set_notes(storage: &mut dyn Storage, avatar: &str, notes: String) {
 
 pub fn get_plants(storage: &dyn Storage) -> Option<Vec<Plant>> {
   let text = get_value(storage, PLANTS_KEY)?;
-  ron::from_str(&text).ok()
+  Some(ok!(ron::from_str(&text), None))
 }
 
 pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<Plant>) {
