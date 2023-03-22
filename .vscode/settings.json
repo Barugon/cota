@@ -15,6 +15,7 @@
     "egui",
     "emath",
     "epaint",
+    "errln",
     "etceter",
     "fastus",
     "fortus",
