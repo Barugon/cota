@@ -26,6 +26,9 @@ pub const LVL_RANGE: RangeInclusive<i32> = 1..=200;
 /// Number of seconds in an hour (one in-game day).
 pub const HOUR_SECS: i64 = 60 * 60;
 
+/// Number of seconds in a fortnight (two weeks, one in-game year).
+pub const FORTNIGHT_SECS: i64 = HOUR_SECS * 24 * 14;
+
 #[macro_export]
 macro_rules! debugln {
   ($($arg:tt)*) => (#[cfg(debug_assertions)] println!($($arg)*));
