@@ -32,12 +32,12 @@ impl Farming {
     let plant_dlg = PlantDlg::new(state);
     let plants = config::get_plants(storage).unwrap_or_default();
     let plants = Arc::new(Mutex::new(plants));
-    let store = Arc::new(AtomicBool::new(false));
+    let persist = Arc::new(AtomicBool::new(false));
     let cancel = Cancel::default();
     Self {
       plant_dlg,
       plants: plants.clone(),
-      persist: store.clone(),
+      persist: persist.clone(),
       cancel: Some(cancel.clone()),
       thread: Some(thread::spawn(move || loop {
         let mut lock = plants.lock().expect(FAIL_ERR);
@@ -62,7 +62,7 @@ impl Farming {
             }
 
             // Flag that the timers need to be persisted.
-            store.store(true, Ordering::Relaxed);
+            persist.store(true, Ordering::Relaxed);
 
             // Repaint.
             ctx.request_repaint();
