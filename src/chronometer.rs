@@ -1,4 +1,7 @@
-use crate::util::{Cancel, HOUR_SECS};
+use crate::{
+  ethos::{Virtue, CABALISTS, PLANETARY_ORBITS, TOWNS},
+  util::{Cancel, FORTNIGHT_SECS, HOUR_SECS},
+};
 use chrono::{DateTime, TimeZone, Utc};
 use eframe::{
   egui::{Context, Grid, Layout, RichText, Ui},
@@ -88,7 +91,10 @@ impl Chronometer {
         }
       });
 
-    ui.add_space(4.0);
+    ui.scope(|ui| {
+      ui.visuals_mut().widgets.noninteractive.bg_stroke.color = Color32::from_rgb(40, 40, 40);
+      ui.separator();
+    });
 
     Grid::new("lost_vale_grid")
       .min_col_width((width - spacing.x) / 2.0)
@@ -121,6 +127,7 @@ impl Chronometer {
 
     ui.add_space(4.0);
     ui.separator();
+    if ui.button("Towns").clicked() {}
     ui.add_space(4.0);
 
     Grid::new("cabalists_grid")
@@ -136,32 +143,13 @@ impl Chronometer {
         });
         ui.end_row();
 
-        const ETHOS_INDEX: usize = 6;
-        const CABALISTS: [&str; CABALIST_COUNT] = [
-          "Dolus", "Temna", "Nefario", "Nefas", "Avara", "Indigno", "Corpus", "Fastus",
-        ];
-        const TOWNS: [&str; TOWN_COUNT] = [
-          "Kiln (Honor)",
-          "Northwood (Sacrifice)",
-          "Jaanaford (Justice)",
-          "Point West (Valor)",
-          "Brookside (Compassion)",
-          "Etceter (Honesty)",
-          "None (Ethos)",
-          "Resolute (Courage)",
-          "Ardoris (Love)",
-          "Aerie (Truth)",
-          "Eastmarch (Humility)",
-          "Fortus End (Spirituality)",
-        ];
-
         let sieges = get_sieges(now);
         for (index, siege) in sieges.into_iter().enumerate() {
           // Increment the town index for the next town.
           let next = (siege.town + 1) % 12;
           let next = format!("Next Town: {}", TOWNS[next]);
 
-          let (cabalist_color, town_color) = if siege.town != ETHOS_INDEX {
+          let (cabalist_color, town_color) = if siege.town != Virtue::Ethos as usize {
             const ACTIVE_CABALIST_COLOR: Color32 = Color32::from_rgb(240, 140, 178);
             const ACTIVE_TOWN_COLOR: Color32 = Color32::from_gray(204);
             (ACTIVE_CABALIST_COLOR, ACTIVE_TOWN_COLOR)
@@ -178,11 +166,9 @@ impl Chronometer {
               .on_hover_text_at_pointer(&next);
           });
           ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            ui.label(
-              RichText::from(get_countdown_text(Default::default(), siege.remain_secs))
-                .color(town_color),
-            )
-            .on_hover_text_at_pointer(next);
+            let text = get_countdown_text(Default::default(), siege.remain_secs);
+            ui.label(RichText::from(text).color(town_color))
+              .on_hover_text_at_pointer(next);
           });
           ui.end_row();
         }
@@ -217,6 +203,7 @@ impl Chronometer {
   }
 }
 
+/// Get the remaining time in XXh XXm XXs format.
 fn get_countdown_text(prefix: &str, sec: i32) -> String {
   if sec >= 60 {
     let min = sec / 60;
@@ -230,6 +217,15 @@ fn get_countdown_text(prefix: &str, sec: i32) -> String {
   }
   format!("{prefix}{sec:02}s")
 }
+
+/// Get the remaining time in HH:MM:SS format.
+// fn get_countdown_text(prefix: &str, sec: i32) -> String {
+//   let min = sec / 60;
+//   let sec = sec % 60;
+//   let hour = min / 60;
+//   let min = min % 60;
+//   return format!("{prefix}{hour:02}:{min:02}:{sec:02}");
+// }
 
 /// SotA epoch (date/time of lunar cataclysm).
 fn epoch() -> DateTime<Utc> {
@@ -296,11 +292,6 @@ fn get_lost_vale_countdown(now: DateTime<Utc>) -> i32 {
   }
 }
 
-/// Number of seconds in a fortnight (two weeks, one in-game year).
-const FORTNIGHT_SECS: i64 = HOUR_SECS * 24 * 14;
-const CABALIST_COUNT: usize = 8;
-const TOWN_COUNT: usize = 12;
-
 #[derive(Default)]
 struct Siege {
   town: usize,
@@ -308,56 +299,7 @@ struct Siege {
 }
 
 /// Calculate the town index and number of seconds remaining in a siege for each cabalist.
-fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALIST_COUNT] {
-  // Orbital period of each planet in seconds.
-  const DECEIT_SECS: i64 = HOUR_SECS * 19;
-  const DESPISE_SECS: i64 = HOUR_SECS * 17;
-  const DASTARD_SECS: i64 = HOUR_SECS * 13;
-  const INJUSTICE_SECS: i64 = HOUR_SECS * 11;
-  const PUNISHMENT_SECS: i64 = HOUR_SECS * 3;
-  const DISHONOR_SECS: i64 = HOUR_SECS * 2;
-  const CARNALITY_SECS: i64 = HOUR_SECS * 23;
-  const VANITY_SECS: i64 = HOUR_SECS * 29;
-
-  const CONSTELLATION_ZONE: f64 = 1.0 / TOWN_COUNT as f64;
-  const CONSTELLATION_RATE: f64 = 1.0 / FORTNIGHT_SECS as f64;
-
-  // Orbital periods and zone times.
-  const PLANETARY_ORBITS: [(i64, f64); CABALIST_COUNT] = [
-    (
-      DECEIT_SECS,
-      CONSTELLATION_ZONE / (1.0 / DECEIT_SECS as f64 - CONSTELLATION_RATE),
-    ),
-    (
-      DESPISE_SECS,
-      CONSTELLATION_ZONE / (1.0 / DESPISE_SECS as f64 - CONSTELLATION_RATE),
-    ),
-    (
-      DASTARD_SECS,
-      CONSTELLATION_ZONE / (1.0 / DASTARD_SECS as f64 - CONSTELLATION_RATE),
-    ),
-    (
-      INJUSTICE_SECS,
-      CONSTELLATION_ZONE / (1.0 / INJUSTICE_SECS as f64 - CONSTELLATION_RATE),
-    ),
-    (
-      PUNISHMENT_SECS,
-      CONSTELLATION_ZONE / (1.0 / PUNISHMENT_SECS as f64 - CONSTELLATION_RATE),
-    ),
-    (
-      DISHONOR_SECS,
-      CONSTELLATION_ZONE / (1.0 / DISHONOR_SECS as f64 - CONSTELLATION_RATE),
-    ),
-    (
-      CARNALITY_SECS,
-      CONSTELLATION_ZONE / (1.0 / CARNALITY_SECS as f64 - CONSTELLATION_RATE),
-    ),
-    (
-      VANITY_SECS,
-      CONSTELLATION_ZONE / (1.0 / VANITY_SECS as f64 - CONSTELLATION_RATE),
-    ),
-  ];
-
+fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
   PLANETARY_ORBITS.map(|(orbit_secs, zone_secs)| {
     // Get the number of seconds elapsed since epoch.
     let epoch_secs = (now - epoch()).num_seconds();
@@ -371,7 +313,7 @@ fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALIST_COUNT] {
     // Planet position relative to the constellations [0.0, 12.0).
     let delta = planet_orbit - constellation_orbit;
     let delta = if delta < 0.0 { 1.0 + delta } else { delta };
-    let zone_phase = TOWN_COUNT as f64 * delta;
+    let zone_phase = TOWNS.len() as f64 * delta;
 
     // The town index is the whole number.
     let town = zone_phase as usize;
