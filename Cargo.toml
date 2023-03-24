@@ -4,7 +4,7 @@ description = "Companion of the Avatar"
 edition = "2021"
 license = "GPL-3.0-or-later"
 name = "cota"
-version = "5.0.2"
+version = "5.1.0"
 
 [dependencies]
 chrono = {version = "0.4", features = [ "serde"]}
