@@ -47,7 +47,7 @@ impl TownsDlg {
     let available = ctx.available_rect();
     let mut open = true;
 
-    Window::new(RichText::from("⚔  Town Sieges").strong())
+    Window::new(RichText::from("⚔  Sieges by Town").strong())
       .open(&mut open)
       .collapsible(false)
       .current_pos([0.0, 24.0])
