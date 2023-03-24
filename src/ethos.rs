@@ -1,6 +1,6 @@
 use crate::util::{FORTNIGHT_SECS, HOUR_SECS};
 
-#[allow(unused)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Virtue {
   Honor,
   Sacrifice,
@@ -16,24 +16,38 @@ pub enum Virtue {
   Spirituality,
 }
 
-pub const CABALISTS: [&str; 8] = [
-  "Dolus", "Temna", "Nefario", "Nefas", "Avara", "Indigno", "Corpus", "Fastus",
+pub const VIRTUES: &[Virtue] = &[
+  Virtue::Honor,
+  Virtue::Sacrifice,
+  Virtue::Justice,
+  Virtue::Valor,
+  Virtue::Compassion,
+  Virtue::Honesty,
+  Virtue::Ethos,
+  Virtue::Courage,
+  Virtue::Love,
+  Virtue::Truth,
+  Virtue::Humility,
+  Virtue::Spirituality,
 ];
 
-// The count can be changed to use mem::variant_count when it stabilizes.
-pub const TOWNS: [&str; Virtue::Spirituality as usize + 1] = [
-  "Kiln (Honor)",
-  "Northwood (Sacrifice)",
-  "Jaanaford (Justice)",
-  "Point West (Valor)",
-  "Brookside (Compassion)",
-  "Etceter (Honesty)",
-  "None (Ethos)",
-  "Resolute (Courage)",
-  "Ardoris (Love)",
-  "Aerie (Truth)",
-  "Eastmarch (Humility)",
-  "Fortus End (Spirituality)",
+pub const TOWNS: [&str; VIRTUES.len()] = [
+  "Kiln",
+  "Northwood",
+  "Jaanaford",
+  "Point West",
+  "Brookside",
+  "Etceter",
+  "None",
+  "Resolute",
+  "Ardoris",
+  "Aerie",
+  "Eastmarch",
+  "Fortus End",
+];
+
+pub const CABALISTS: &[&str] = &[
+  "Dolus", "Temna", "Nefario", "Nefas", "Avara", "Indigno", "Corpus", "Fastus",
 ];
 
 /// Orbital periods and zone times.
@@ -71,6 +85,28 @@ pub const PLANETARY_ORBITS: [(i64, f64); CABALISTS.len()] = [
     CONSTELLATION_ZONE / (1.0 / VANITY_SECS as f64 - CONSTELLATION_RATE),
   ),
 ];
+
+pub struct Siege {
+  virtue: Virtue,
+  remain_secs: i32,
+}
+
+impl Siege {
+  pub fn new(virtue: Virtue, remain_secs: i32) -> Self {
+    Self {
+      virtue,
+      remain_secs,
+    }
+  }
+
+  pub fn virtue(&self) -> Virtue {
+    self.virtue
+  }
+
+  pub fn remain_secs(&self) -> i32 {
+    self.remain_secs
+  }
+}
 
 // Orbital period of each planet in seconds.
 const DECEIT_SECS: i64 = HOUR_SECS * 19;
