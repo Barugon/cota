@@ -22,6 +22,7 @@ mod plant_dlg;
 mod plant_info;
 mod search_dlg;
 mod stats;
+mod towns_dlg;
 
 use app::App;
 use util::{APP_ICON, APP_TITLE, FAIL_ERR};
