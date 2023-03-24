@@ -60,19 +60,19 @@ impl TownsDlg {
           .show(ui, |ui| {
             // Header.
             const HEADER_COLOR: Color32 = Color32::from_rgb(229, 187, 123);
-            ui.label(RichText::from("Town (Devotional)  ").color(HEADER_COLOR));
+            ui.label(RichText::from("Town (Devotional)").color(HEADER_COLOR));
             ui.centered_and_justified(|ui| {
-              ui.label(RichText::from("Cabalist  ").color(HEADER_COLOR));
+              ui.label(RichText::from("Cabalist").color(HEADER_COLOR));
             });
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-              ui.label(RichText::from("Remaining Time  ").color(HEADER_COLOR));
+              ui.label(RichText::from("Remaining Time").color(HEADER_COLOR));
             });
             ui.end_row();
 
             for (town_index, info) in towns.iter().enumerate() {
               if info.0 {
                 // Show the town with the active color.
-                let text = format!("{} ({:?})  ", TOWNS[town_index], VIRTUES[town_index]);
+                let text = format!("{} ({:?})", TOWNS[town_index], VIRTUES[town_index]);
                 ui.label(RichText::from(text).color(Color32::from_rgb(154, 229, 255)));
 
                 // List all the cabalists that are currently sieging.
@@ -85,7 +85,7 @@ impl TownsDlg {
                     }
 
                     ui.centered_and_justified(|ui| {
-                      ui.label(format!("{}  ", CABALISTS[cabalist_index]));
+                      ui.label(format!("{}", CABALISTS[cabalist_index]));
                     });
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                       ui.label(util::get_countdown_text(
@@ -98,7 +98,7 @@ impl TownsDlg {
                 }
               } else {
                 // Show the town with the inactive color.
-                let text = format!("{} ({:?})  ", TOWNS[town_index], VIRTUES[town_index]);
+                let text = format!("{} ({:?})", TOWNS[town_index], VIRTUES[town_index]);
                 ui.label(RichText::from(text).color(Color32::from_rgb(102, 154, 180)));
                 ui.end_row();
               }
