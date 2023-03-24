@@ -157,7 +157,7 @@ impl App {
     // Tab pages.
     let storage = cc.storage.expect(NONE_ERR);
     let log_path = config::get_log_path(storage).unwrap_or_default();
-    let mut chronometer = Chronometer::new(threads.clone());
+    let mut chronometer = Chronometer::new(threads.clone(), state.clone());
     let experience = Experience::new();
     let farming = Farming::new(cc.egui_ctx.clone(), storage, state.clone());
     let offline = Offline::new(state.clone());
