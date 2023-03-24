@@ -69,8 +69,23 @@ macro_rules! err {
 }
 
 /// SotA epoch (date/time of lunar cataclysm).
-pub fn epoch() -> DateTime<Utc> {
+pub fn get_epoch() -> DateTime<Utc> {
   Utc.with_ymd_and_hms(1997, 9, 2, 0, 0, 0).unwrap() // LocalResult does not have expect.
+}
+
+/// Get the remaining time in XXh XXm XXs format.
+pub fn get_countdown_text(prefix: &str, sec: i32) -> String {
+  if sec >= 60 {
+    let min = sec / 60;
+    let sec = sec % 60;
+    if min >= 60 {
+      let hour = min / 60;
+      let min = min % 60;
+      return format!("{prefix}{hour:02}h {min:02}m {sec:02}s");
+    }
+    return format!("{prefix}{min:02}m {sec:02}s");
+  }
+  format!("{prefix}{sec:02}s")
 }
 
 #[derive(Default)]

@@ -74,14 +74,14 @@ impl Chronometer {
             (
               OPEN_RIFT_COLOR,
               ACTIVE_PORTAL_COLOR,
-              get_countdown_text("Closes: ", -countdown),
+              util::get_countdown_text("Closes: ", -countdown),
             )
           } else {
             const CLOSED_RIFT_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
             (
               CLOSED_RIFT_COLOR,
               INACTIVE_PORTAL_COLOR,
-              get_countdown_text("Opens: ", countdown),
+              util::get_countdown_text("Opens: ", countdown),
             )
           };
 
@@ -112,14 +112,14 @@ impl Chronometer {
           (
             OPEN_VALE_COLOR,
             ACTIVE_PORTAL_COLOR,
-            get_countdown_text("Closes: ", -countdown),
+            util::get_countdown_text("Closes: ", -countdown),
           )
         } else {
           const CLOSED_VALE_COLOR: Color32 = Color32::from_rgb(140, 140, 187);
           (
             CLOSED_VALE_COLOR,
             INACTIVE_PORTAL_COLOR,
-            get_countdown_text("Opens: ", countdown),
+            util::get_countdown_text("Opens: ", countdown),
           )
         };
 
@@ -173,7 +173,7 @@ impl Chronometer {
               .on_hover_text_at_pointer(&next);
           });
           ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            let text = get_countdown_text(Default::default(), siege.remain_secs());
+            let text = util::get_countdown_text(Default::default(), siege.remain_secs());
             ui.label(RichText::from(text).color(town_color))
               .on_hover_text_at_pointer(next);
           });
@@ -210,21 +210,6 @@ impl Chronometer {
   }
 }
 
-/// Get the remaining time in XXh XXm XXs format.
-fn get_countdown_text(prefix: &str, sec: i32) -> String {
-  if sec >= 60 {
-    let min = sec / 60;
-    let sec = sec % 60;
-    if min >= 60 {
-      let hour = min / 60;
-      let min = min % 60;
-      return format!("{prefix}{hour:02}h {min:02}m {sec:02}s");
-    }
-    return format!("{prefix}{min:02}m {sec:02}s");
-  }
-  format!("{prefix}{sec:02}s")
-}
-
 const RIFT_COUNT: usize = 8;
 
 // Get the number of seconds for each rift.
@@ -233,7 +218,7 @@ fn get_rift_countdowns(now: DateTime<Utc>) -> [i32; RIFT_COUNT] {
   const CYCLE_SECS: i64 = 4200;
 
   // Get the number of seconds since epoch.
-  let delta_secs = (now - util::epoch()).num_seconds();
+  let delta_secs = (now - util::get_epoch()).num_seconds();
 
   // Calculate the lunar phase from the delta. Each phase is 525 seconds and there are 8 phases, for a total of 4200
   // seconds per lunar cycle.
@@ -289,7 +274,7 @@ fn get_lost_vale_countdown(now: DateTime<Utc>) -> i32 {
 pub fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
   PLANETARY_ORBITS.map(|(orbit_secs, zone_secs)| {
     // Get the number of seconds elapsed since epoch.
-    let epoch_secs = (now - util::epoch()).num_seconds();
+    let epoch_secs = (now - util::get_epoch()).num_seconds();
 
     // Current rotation of the constellations [0.0, 1.0).
     let constellation_orbit = (epoch_secs % FORTNIGHT_SECS) as f64 / FORTNIGHT_SECS as f64;
