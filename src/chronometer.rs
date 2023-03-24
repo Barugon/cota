@@ -1,6 +1,7 @@
 use crate::{
-  ethos::{Virtue, CABALISTS, PLANETARY_ORBITS, TOWNS},
-  util::{Cancel, FORTNIGHT_SECS, HOUR_SECS},
+  ethos::{Siege, Virtue, CABALISTS, PLANETARY_ORBITS, TOWNS, VIRTUES},
+  towns_dlg::TownsDlg,
+  util::{self, AppState, Cancel, FORTNIGHT_SECS, HOUR_SECS},
 };
 use chrono::{DateTime, TimeZone, Utc};
 use eframe::{
@@ -12,13 +13,15 @@ use futures::executor::ThreadPool;
 use std::time::Duration;
 
 pub struct Chronometer {
+  towns_dlg: TownsDlg,
   threads: ThreadPool,
   timer_cancel: Option<Cancel>,
 }
 
 impl Chronometer {
-  pub fn new(threads: ThreadPool) -> Self {
+  pub fn new(threads: ThreadPool, state: AppState) -> Self {
     Self {
+      towns_dlg: TownsDlg::new(state),
       threads,
       timer_cancel: None,
     }
@@ -32,9 +35,11 @@ impl Chronometer {
     let width = ui.available_width();
     let spacing = ui.spacing().item_spacing;
     let now = Utc::now();
+    let sieges = get_sieges(now);
+
+    self.towns_dlg.show(ui.ctx(), &sieges);
 
     ui.add_space(4.0);
-
     Grid::new("lunar_rifts_grid")
       .min_col_width((width - spacing.x * 2.0) / 3.0)
       .show(ui, |ui| {
@@ -127,7 +132,9 @@ impl Chronometer {
 
     ui.add_space(4.0);
     ui.separator();
-    if ui.button("Towns").clicked() {}
+    if ui.button("Towns").clicked() {
+      self.towns_dlg.open();
+    }
     ui.add_space(4.0);
 
     Grid::new("cabalists_grid")
@@ -143,13 +150,12 @@ impl Chronometer {
         });
         ui.end_row();
 
-        let sieges = get_sieges(now);
         for (index, siege) in sieges.into_iter().enumerate() {
           // Increment the town index for the next town.
-          let next = (siege.town + 1) % 12;
-          let next = format!("Next Town: {}", TOWNS[next]);
+          let next = (siege.virtue() as usize + 1) % 12;
+          let next = format!("Next Town: {} ({:?})", TOWNS[next], siege.virtue());
 
-          let (cabalist_color, town_color) = if siege.town != Virtue::Ethos as usize {
+          let (cabalist_color, town_color) = if siege.virtue() != Virtue::Ethos {
             const ACTIVE_CABALIST_COLOR: Color32 = Color32::from_rgb(240, 140, 178);
             const ACTIVE_TOWN_COLOR: Color32 = Color32::from_gray(204);
             (ACTIVE_CABALIST_COLOR, ACTIVE_TOWN_COLOR)
@@ -162,11 +168,12 @@ impl Chronometer {
           ui.label(RichText::from(CABALISTS[index]).color(cabalist_color))
             .on_hover_text_at_pointer(&next);
           ui.centered_and_justified(|ui| {
-            ui.label(RichText::from(TOWNS[siege.town]).color(town_color))
+            let text = format!("{} ({:?})", TOWNS[siege.virtue() as usize], siege.virtue());
+            ui.label(RichText::from(text).color(town_color))
               .on_hover_text_at_pointer(&next);
           });
           ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            let text = get_countdown_text(Default::default(), siege.remain_secs);
+            let text = get_countdown_text(Default::default(), siege.remain_secs());
             ui.label(RichText::from(text).color(town_color))
               .on_hover_text_at_pointer(next);
           });
@@ -218,20 +225,6 @@ fn get_countdown_text(prefix: &str, sec: i32) -> String {
   format!("{prefix}{sec:02}s")
 }
 
-/// Get the remaining time in HH:MM:SS format.
-// fn get_countdown_text(prefix: &str, sec: i32) -> String {
-//   let min = sec / 60;
-//   let sec = sec % 60;
-//   let hour = min / 60;
-//   let min = min % 60;
-//   return format!("{prefix}{hour:02}:{min:02}:{sec:02}");
-// }
-
-/// SotA epoch (date/time of lunar cataclysm).
-fn epoch() -> DateTime<Utc> {
-  Utc.with_ymd_and_hms(1997, 9, 2, 0, 0, 0).unwrap() // LocalResult does not have expect.
-}
-
 const RIFT_COUNT: usize = 8;
 
 // Get the number of seconds for each rift.
@@ -240,7 +233,7 @@ fn get_rift_countdowns(now: DateTime<Utc>) -> [i32; RIFT_COUNT] {
   const CYCLE_SECS: i64 = 4200;
 
   // Get the number of seconds since epoch.
-  let delta_secs = (now - epoch()).num_seconds();
+  let delta_secs = (now - util::epoch()).num_seconds();
 
   // Calculate the lunar phase from the delta. Each phase is 525 seconds and there are 8 phases, for a total of 4200
   // seconds per lunar cycle.
@@ -292,17 +285,11 @@ fn get_lost_vale_countdown(now: DateTime<Utc>) -> i32 {
   }
 }
 
-#[derive(Default)]
-struct Siege {
-  town: usize,
-  remain_secs: i32,
-}
-
-/// Calculate the town index and number of seconds remaining in a siege for each cabalist.
-fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
+/// Calculate the virtue and number of seconds remaining in a siege for each cabalist.
+pub fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
   PLANETARY_ORBITS.map(|(orbit_secs, zone_secs)| {
     // Get the number of seconds elapsed since epoch.
-    let epoch_secs = (now - epoch()).num_seconds();
+    let epoch_secs = (now - util::epoch()).num_seconds();
 
     // Current rotation of the constellations [0.0, 1.0).
     let constellation_orbit = (epoch_secs % FORTNIGHT_SECS) as f64 / FORTNIGHT_SECS as f64;
@@ -315,12 +302,12 @@ fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
     let delta = if delta < 0.0 { 1.0 + delta } else { delta };
     let zone_phase = TOWNS.len() as f64 * delta;
 
-    // The town index is the whole number.
-    let town = zone_phase as usize;
+    // The virtue is the whole number.
+    let virtue = VIRTUES[zone_phase as usize];
 
     // Fractional part is the position within the zone.
     let remain_secs = (zone_secs - zone_phase.fract() * zone_secs).ceil() as i32;
 
-    Siege { town, remain_secs }
+    Siege::new(virtue, remain_secs)
   })
 }
