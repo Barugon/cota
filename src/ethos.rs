@@ -1,5 +1,27 @@
 use crate::util::{FORTNIGHT_SECS, HOUR_SECS};
 
+pub struct Siege {
+  virtue: Virtue,
+  remain_secs: i32,
+}
+
+impl Siege {
+  pub fn new(virtue: Virtue, remain_secs: i32) -> Self {
+    Self {
+      virtue,
+      remain_secs,
+    }
+  }
+
+  pub fn virtue(&self) -> Virtue {
+    self.virtue
+  }
+
+  pub fn remain_secs(&self) -> i32 {
+    self.remain_secs
+  }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Virtue {
   Honor,
@@ -85,28 +107,6 @@ pub const PLANETARY_ORBITS: [(i64, f64); CABALISTS.len()] = [
     CONSTELLATION_ZONE / (1.0 / VANITY_SECS as f64 - CONSTELLATION_RATE),
   ),
 ];
-
-pub struct Siege {
-  virtue: Virtue,
-  remain_secs: i32,
-}
-
-impl Siege {
-  pub fn new(virtue: Virtue, remain_secs: i32) -> Self {
-    Self {
-      virtue,
-      remain_secs,
-    }
-  }
-
-  pub fn virtue(&self) -> Virtue {
-    self.virtue
-  }
-
-  pub fn remain_secs(&self) -> i32 {
-    self.remain_secs
-  }
-}
 
 // Orbital period of each planet in seconds.
 const DECEIT_SECS: i64 = HOUR_SECS * 19;
