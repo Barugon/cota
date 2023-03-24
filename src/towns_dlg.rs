@@ -45,15 +45,13 @@ impl TownsDlg {
 
     self.handle_hotkeys(ctx);
 
-    let available = ctx.available_rect();
     let mut open = true;
-
     Window::new(RichText::from("⚔  Sieges by Town").strong())
       .open(&mut open)
       .collapsible(false)
       .current_pos([0.0, 24.0])
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
-      .default_size([available.width(), 0.0])
+      .default_size([ctx.available_rect().width(), 0.0])
       .resizable(false)
       .show(ctx, |ui| {
         Grid::new("towns_grid")
