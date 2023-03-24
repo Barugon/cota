@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use eframe::egui::{TextStyle, Ui};
 use num_format::Locale;
 use regex::Regex;
@@ -66,6 +66,11 @@ macro_rules! err {
       return;
     }
   };
+}
+
+/// SotA epoch (date/time of lunar cataclysm).
+pub fn epoch() -> DateTime<Utc> {
+  Utc.with_ymd_and_hms(1997, 9, 2, 0, 0, 0).unwrap() // LocalResult does not have expect.
 }
 
 #[derive(Default)]
