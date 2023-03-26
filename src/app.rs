@@ -58,7 +58,6 @@ fn central_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
 
 fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
   let (id, margin) = match page {
-    Page::Stats => ("stats_status", Margin::symmetric(8.0, 2.0)),
     // We need a little more vertical space for the chronometer status area so that it looks good.
     Page::Chronometer => ("chronometer_status", Margin::symmetric(8.0, 6.0)),
     // The experience page doesn't have a status area.
@@ -66,6 +65,7 @@ fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> 
     // The farming page doesn't have a status area.
     Page::Farming => unreachable!(),
     Page::Offline => ("offline_status", Margin::symmetric(8.0, 2.0)),
+    Page::Stats => ("stats_status", Margin::symmetric(8.0, 2.0)),
   };
 
   TopBottomPanel::bottom(id)
