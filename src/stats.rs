@@ -219,7 +219,7 @@ impl Stats {
           ComboBox::from_id_source("date_combo")
             .selected_text(util::timestamp_to_string(self.date))
             .show_ui(ui, |ui| {
-              // This is here to keep the data text from wrapping when the scroll bar is visible.
+              // This is here to keep the date text from wrapping when the scroll bar is visible.
               ui.set_min_width(140.0);
               for date in &self.dates {
                 let date = Some(*date);
