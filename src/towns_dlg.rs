@@ -84,7 +84,7 @@ impl TownsDlg {
                     }
 
                     ui.centered_and_justified(|ui| {
-                      ui.label(format!("{}", CABALISTS[cabalist_index]));
+                      ui.label(CABALISTS[cabalist_index]);
                     });
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                       ui.label(util::get_countdown_text(
