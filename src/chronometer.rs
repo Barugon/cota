@@ -270,16 +270,16 @@ fn get_lost_vale_countdown(now: DateTime<Utc>) -> i32 {
   }
 }
 
-/// Calculate the virtue and number of seconds remaining in a siege for each cabalist.
+/// Calculate the virtue/town and number of seconds remaining in a siege for each cabalist.
 pub fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
   PLANETARY_ORBITS.map(|(orbit_secs, zone_secs)| {
     // Get the number of seconds elapsed since epoch.
     let epoch_secs = (now - util::get_epoch()).num_seconds();
 
-    // Current rotation of the constellations [0.0, 1.0).
+    // Current rotational position of the constellations [0.0, 1.0).
     let constellation_orbit = (epoch_secs % FORTNIGHT_SECS) as f64 / FORTNIGHT_SECS as f64;
 
-    // Current rotation of the planetary body [0.0, 1.0).
+    // Current rotational position of the planetary body [0.0, 1.0).
     let planet_orbit = (epoch_secs % orbit_secs) as f64 / orbit_secs as f64;
 
     // Planet position relative to the constellations [0.0, 12.0).
@@ -287,7 +287,7 @@ pub fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
     let delta = if delta < 0.0 { 1.0 + delta } else { delta };
     let zone_phase = TOWNS.len() as f64 * delta;
 
-    // The virtue is the whole number.
+    // The virtue/town is the whole number.
     let virtue = VIRTUES[zone_phase as usize];
 
     // Fractional part is the position within the zone.
