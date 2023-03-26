@@ -240,8 +240,7 @@ impl Stats {
           let mut avatar_changed = false;
           ComboBox::from_id_source("avatar_combo")
             .selected_text(&self.avatar)
-            // We need to take into account the item spacing.
-            .width(ui.available_width() - ui.spacing().item_spacing.x)
+            .width(ui.available_width())
             .show_ui(ui, |ui| {
               for avatar in &self.avatars {
                 if ui
