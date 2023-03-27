@@ -1,5 +1,5 @@
 use crate::{
-  ethos::{Siege, CABALISTS, TOWNS, VIRTUES},
+  ethos::{Siege, Virtue, CABALISTS, TOWNS, VIRTUES},
   util::{self, AppState},
 };
 use eframe::{
@@ -33,7 +33,7 @@ impl TownsDlg {
     }
 
     let towns = {
-      // Convert the sieges to a by-town list.
+      // Convert the sieges into a by-town array.
       let mut towns: [(bool, [bool; CABALISTS.len()]); TOWNS.len()] = Default::default();
       for (cabalist_index, siege) in sieges.iter().enumerate() {
         let town_index = siege.virtue() as usize;
@@ -69,6 +69,11 @@ impl TownsDlg {
             ui.end_row();
 
             for (town_index, info) in towns.iter().enumerate() {
+              // Don't show Ethos.
+              if town_index == Virtue::Ethos as usize {
+                continue;
+              }
+
               if info.0 {
                 // Show the town with the active color.
                 let text = format!("{} ({:?})", TOWNS[town_index], VIRTUES[town_index]);
