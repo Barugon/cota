@@ -1,7 +1,8 @@
 use crate::util::AppState;
 use eframe::{
   egui::{
-    text::CCursor, text_edit::CCursorRange, Context, Key, RichText, ScrollArea, TextEdit, Window,
+    scroll_area::ScrollBarVisibility, text::CCursor, text_edit::CCursorRange, Context, Key,
+    RichText, ScrollArea, TextEdit, Window,
   },
   emath::Align2,
 };
@@ -49,7 +50,7 @@ impl NotesDlg {
             ScrollArea::vertical()
           }
           .max_height(available.height() * 0.5)
-          .always_show_scroll(true)
+          .scroll_bar_visibility(ScrollBarVisibility::AlwaysVisible)
           .show(ui, |ui| {
             let response = ui.add_sized(
               ui.available_size(),

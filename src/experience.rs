@@ -1,7 +1,10 @@
 use crate::util::{self, SkillCategory, SkillInfo, SkillInfoGroup, LVL_RANGE, SKILL_EXP};
 use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::{
-  egui::{DragValue, Label, Layout, RichText, ScrollArea, Sense, Ui, Widget},
+  egui::{
+    scroll_area::ScrollBarVisibility, DragValue, Label, Layout, RichText, ScrollArea, Sense, Ui,
+    Widget,
+  },
   emath::{Align, Vec2},
   epaint::Color32,
 };
@@ -98,7 +101,7 @@ impl Experience {
     ui.vertical(|ui| {
       ScrollArea::vertical()
         .id_source(scroll_id)
-        .always_show_scroll(true)
+        .scroll_bar_visibility(ScrollBarVisibility::AlwaysVisible)
         .show(ui, |ui| {
           for skill_group in groups {
             // Use a single column in order to force the scroll area to fill the entire available width.
