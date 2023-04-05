@@ -240,7 +240,10 @@ mod game_info {
     util::{button_size, SkillCategory, NONE_ERR},
   };
   use eframe::{
-    egui::{CollapsingHeader, DragValue, Layout, RichText, ScrollArea, Ui},
+    egui::{
+      scroll_area::ScrollBarVisibility, CollapsingHeader, DragValue, Layout, RichText, ScrollArea,
+      Ui,
+    },
     emath::{Align, Vec2},
     epaint::Color32,
   };
@@ -401,7 +404,7 @@ mod game_info {
       ui.vertical(|ui| {
         ScrollArea::vertical()
           .id_source(scroll_id)
-          .always_show_scroll(true)
+          .scroll_bar_visibility(ScrollBarVisibility::AlwaysVisible)
           .show(ui, |ui| {
             for skill_group in groups {
               // Use a single column in order to force the scroll area to fill the entire available width.
