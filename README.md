@@ -22,9 +22,9 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 ![screenshot](https://a4.pbase.com/o12/09/605909/1/166622004.C6X9X0rG.Screenshotfrom20230317234110.png)
 
-### Experience needed calculator
+### Experience planner
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/169657368.b3O2lfRh.Screenshotfrom20230317234146.png)
+![screenshot](https://a4.pbase.com/o12/09/605909/1/169657368.XNOp5ift.Screenshotfrom20230406201414.png)
 
 ### Agriculture
 
