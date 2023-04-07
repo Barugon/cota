@@ -158,7 +158,7 @@ impl App {
     let storage = cc.storage.expect(NONE_ERR);
     let log_path = config::get_log_path(storage).unwrap_or_default();
     let mut chronometer = Chronometer::new(threads.clone(), state.clone());
-    let experience = Experience::new();
+    let experience = Experience::new(log_path.clone(), threads.clone(), state.clone());
     let farming = Farming::new(cc.egui_ctx.clone(), storage, state.clone());
     let offline = Offline::new(state.clone());
     let stats = Stats::new(log_path, state.clone(), threads);
@@ -524,7 +524,7 @@ impl eframe::App for App {
       // Tab pages.
       match self.page {
         Page::Chronometer => self.chronometer.show(ui),
-        Page::Experience => self.experience.show(ui),
+        Page::Experience => self.experience.show(ui, frame),
         Page::Farming => self.farming.show(ui, frame),
         Page::Offline => self.offline.show(ui),
         Page::Stats => self.stats.show(ui, frame),
@@ -549,6 +549,10 @@ impl eframe::App for App {
     }
 
     false
+  }
+
+  fn save(&mut self, storage: &mut dyn Storage) {
+    self.experience.save(storage);
   }
 
   fn on_exit(&mut self, _: Option<&glow::Context>) {

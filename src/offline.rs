@@ -237,7 +237,8 @@ const MAX_GOLD: i32 = i32::MAX / 2;
 mod game_info {
   use crate::{
     game_data::{GameData, Item, SkillLvl, SkillLvlGroup},
-    util::{button_size, SkillCategory, NONE_ERR},
+    skill_info::SkillCategory,
+    util::{button_size, NONE_ERR},
   };
   use eframe::{
     egui::{
