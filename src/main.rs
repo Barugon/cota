@@ -21,6 +21,7 @@ mod offline;
 mod plant_dlg;
 mod plant_info;
 mod search_dlg;
+mod skill_info;
 mod stats;
 mod towns_dlg;
 

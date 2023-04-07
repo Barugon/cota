@@ -1,9 +1,13 @@
-use crate::plant_info::Plant;
+use crate::{plant_info::Plant, skill_info::SkillLvlPlan};
 use eframe::Storage;
-use std::path::{Path, PathBuf};
+use std::{
+  collections::HashMap,
+  path::{Path, PathBuf},
+};
 
 const LOG_PATH_KEY: &str = "log_path";
 const SAVE_PATH_KEY: &str = "save_path";
+const SKILL_LEVELS_KEY: &str = "skill_levels";
 const PLANTS_KEY: &str = "plants";
 const AVATAR_KEY: &str = "avatar";
 const NOTES_KEY: &str = "notes";
@@ -74,7 +78,27 @@ pub fn get_plants(storage: &dyn Storage) -> Option<Vec<Plant>> {
 }
 
 pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<Plant>) {
-  set_value(storage, PLANTS_KEY, ok!(ron::to_string(plants)));
+  let text = ok!(ron::to_string(plants));
+  set_value(storage, PLANTS_KEY, text);
+}
+
+pub fn get_levels(storage: &mut dyn Storage, avatar: &str) -> Option<HashMap<u32, SkillLvlPlan>> {
+  if avatar.is_empty() {
+    return None;
+  }
+
+  let text = get_value(storage, format!("{avatar} {SKILL_LEVELS_KEY}").as_str())?;
+  Some(ok!(ron::from_str(&text), None))
+}
+
+pub fn set_levels(storage: &mut dyn Storage, avatar: &str, levels: &HashMap<u32, SkillLvlPlan>) {
+  if avatar.is_empty() {
+    return;
+  }
+
+  let text = ok!(ron::to_string(levels));
+  let key = format!("{avatar} {SKILL_LEVELS_KEY}");
+  set_value(storage, &key, text);
 }
 
 fn get_default_log_path() -> Option<PathBuf> {
