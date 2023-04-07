@@ -10,9 +10,9 @@ version = "5.2.0"
 chrono = {version = "0.4", features = ["serde"]}
 clipboard = "0.5"
 dirs = "4.0"
-eframe = {path = "../egui/crates/eframe", features = ["persistence"]}
-egui_extras = {path = "../egui/crates/egui_extras", features = ["image", "datepicker"]}
-egui_file = {path = "../egui_file"}
+eframe = {version = "0.21", features = ["persistence"]}
+egui_extras = {version = "0.21", features = ["image", "datepicker"]}
+egui_file = "0.8"
 futures = {version = "0.3", features = ["thread-pool"]}
 image = {version = "0.24", features = ["png"]}
 notify-rust = "4"
