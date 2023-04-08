@@ -96,7 +96,14 @@ pub fn set_levels(storage: &mut dyn Storage, avatar: &str, levels: &HashMap<u32,
     return;
   }
 
-  let text = ok!(ron::to_string(levels));
+  // Filter out empties.
+  let levels: HashMap<u32, SkillLvlPlan> = levels
+    .iter()
+    .filter(|(_, plan)| plan.cur > 0 && plan.tgt > 0)
+    .map(|(id, plan)| (*id, *plan))
+    .collect();
+
+  let text = ok!(ron::to_string(&levels));
   let key = format!("{avatar} {SKILL_LEVELS_KEY}");
   set_value(storage, &key, text);
 }
