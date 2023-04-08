@@ -8,8 +8,9 @@ use std::{
 const LOG_PATH_KEY: &str = "log_path";
 const SAVE_PATH_KEY: &str = "save_path";
 const SKILL_LEVELS_KEY: &str = "skill_levels";
+const STATS_AVATAR_KEY: &str = "stats_avatar";
+const EXP_AVATAR_KEY: &str = "experience_avatar";
 const PLANTS_KEY: &str = "plants";
-const AVATAR_KEY: &str = "avatar";
 const NOTES_KEY: &str = "notes";
 
 pub fn get_sota_config_path() -> Option<PathBuf> {
@@ -51,12 +52,20 @@ pub fn set_save_path(storage: &mut dyn Storage, folder: &Path) {
   }
 }
 
-pub fn get_avatar(storage: &dyn Storage) -> Option<String> {
-  get_value(storage, AVATAR_KEY)
+pub fn get_stats_avatar(storage: &dyn Storage) -> Option<String> {
+  get_value(storage, STATS_AVATAR_KEY)
 }
 
-pub fn set_avatar(storage: &mut dyn Storage, avatar: String) {
-  set_value(storage, AVATAR_KEY, avatar);
+pub fn set_stats_avatar(storage: &mut dyn Storage, avatar: String) {
+  set_value(storage, STATS_AVATAR_KEY, avatar);
+}
+
+pub fn get_exp_avatar(storage: &dyn Storage) -> Option<String> {
+  get_value(storage, EXP_AVATAR_KEY)
+}
+
+pub fn set_exp_avatar(storage: &mut dyn Storage, avatar: String) {
+  set_value(storage, EXP_AVATAR_KEY, avatar);
 }
 
 pub fn get_notes(storage: &dyn Storage, avatar: &str) -> Option<String> {
