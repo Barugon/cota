@@ -76,7 +76,7 @@ impl Experience {
         }
       }
 
-      if self.avatars.binary_search(&self.avatar).is_err() {
+      if self.avatars.binary_search(&avatar).is_err() {
         avatar.clear();
       }
 
