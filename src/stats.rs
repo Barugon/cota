@@ -168,7 +168,7 @@ impl Stats {
           // Determine the current avatar.
           if let Some(first) = self.avatars.first() {
             // Check if the avatar is in the configuration.
-            if let Some(avatar) = config::get_avatar(frame.storage().expect(NONE_ERR)) {
+            if let Some(avatar) = config::get_stats_avatar(frame.storage().expect(NONE_ERR)) {
               if self.avatars.binary_search(&avatar).is_ok() {
                 self.avatar = avatar;
               }
@@ -176,7 +176,7 @@ impl Stats {
 
             // If the avatar wasn't set then use the first avatar.
             if self.avatar.is_empty() {
-              config::set_avatar(frame.storage_mut().expect(NONE_ERR), first.clone());
+              config::set_stats_avatar(frame.storage_mut().expect(NONE_ERR), first.clone());
               self.avatar = first.clone();
             }
           }
@@ -248,7 +248,7 @@ impl Stats {
                   .clicked()
                   && self.avatar != *avatar
                 {
-                  config::set_avatar(frame.storage_mut().expect(NONE_ERR), avatar.clone());
+                  config::set_stats_avatar(frame.storage_mut().expect(NONE_ERR), avatar.clone());
                   self.avatar = avatar.clone();
                   avatar_changed = true;
                 }
