@@ -69,6 +69,13 @@ impl Experience {
       self.avatars = avatars;
 
       let mut avatar = self.avatar.clone();
+      if avatar.is_empty() {
+        // Get the last avatar.
+        if let Some(last_avatar) = config::get_exp_avatar(frame.storage().expect(NONE_ERR)) {
+          avatar = last_avatar;
+        }
+      }
+
       if self.avatars.binary_search(&self.avatar).is_err() {
         avatar.clear();
       }
@@ -291,6 +298,9 @@ impl Experience {
 
       // Store the values.
       config::set_levels(storage, &self.avatar, &levels);
+
+      // Store the new avatar name.
+      config::set_exp_avatar(storage, avatar.clone());
 
       // Get new values.
       *levels = config::get_levels(storage, &avatar).unwrap_or(HashMap::new());
