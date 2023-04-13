@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::util::{FAIL_ERR, NONE_ERR};
 
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]
-pub struct SkillLvlPlan {
+pub struct SkillPlan {
   pub cur: i32,
   pub tgt: i32,
 }

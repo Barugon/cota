@@ -1,6 +1,6 @@
 use crate::{
   config, log_data,
-  skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup, SkillLvlPlan},
+  skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup, SkillPlan},
   util::{self, AppState, Cancel, FAIL_ERR, NONE_ERR, SKILL_EXP},
 };
 use clipboard::{ClipboardContext, ClipboardProvider};
@@ -24,7 +24,7 @@ pub struct Experience {
   avatars: Vec<String>,
   adventurer_skills: Vec<SkillInfoGroup>,
   producer_skills: Vec<SkillInfoGroup>,
-  skill_levels: Mutex<HashMap<u32, SkillLvlPlan>>,
+  skill_levels: Mutex<HashMap<u32, SkillPlan>>,
   selected: SkillInfo,
   locale: Locale,
   init: bool,
@@ -316,11 +316,11 @@ struct Channel {
   cancel_avatars: Option<Cancel>,
 }
 
-fn get_skill_lvl_mut(levels: &mut HashMap<u32, SkillLvlPlan>, id: u32) -> &mut SkillLvlPlan {
-  levels.entry(id).or_insert_with(SkillLvlPlan::default)
+fn get_skill_lvl_mut(levels: &mut HashMap<u32, SkillPlan>, id: u32) -> &mut SkillPlan {
+  levels.entry(id).or_insert_with(SkillPlan::default)
 }
 
-fn get_needed_exp(level: &SkillLvlPlan, mul: f64) -> Option<i64> {
+fn get_needed_exp(level: &SkillPlan, mul: f64) -> Option<i64> {
   if level.cur > 0 || level.tgt > 0 {
     let cur_lvl = level.cur.max(1);
     let tgt_lvl = level.tgt.max(1);

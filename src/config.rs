@@ -1,4 +1,4 @@
-use crate::{plant_info::Plant, skill_info::SkillLvlPlan};
+use crate::{plant_info::Plant, skill_info::SkillPlan};
 use eframe::Storage;
 use std::{
   collections::HashMap,
@@ -91,7 +91,7 @@ pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<Plant>) {
   set_value(storage, PLANTS_KEY, text);
 }
 
-pub fn get_levels(storage: &mut dyn Storage, avatar: &str) -> Option<HashMap<u32, SkillLvlPlan>> {
+pub fn get_levels(storage: &mut dyn Storage, avatar: &str) -> Option<HashMap<u32, SkillPlan>> {
   if avatar.is_empty() {
     return None;
   }
@@ -100,13 +100,13 @@ pub fn get_levels(storage: &mut dyn Storage, avatar: &str) -> Option<HashMap<u32
   Some(ok!(ron::from_str(&text), None))
 }
 
-pub fn set_levels(storage: &mut dyn Storage, avatar: &str, levels: &HashMap<u32, SkillLvlPlan>) {
+pub fn set_levels(storage: &mut dyn Storage, avatar: &str, levels: &HashMap<u32, SkillPlan>) {
   if avatar.is_empty() {
     return;
   }
 
   // Filter out empties.
-  let levels: HashMap<u32, SkillLvlPlan> = levels
+  let levels: HashMap<u32, SkillPlan> = levels
     .iter()
     .filter(|(_, plan)| plan.cur > 0 && plan.tgt > 0)
     .map(|(id, plan)| (*id, *plan))
