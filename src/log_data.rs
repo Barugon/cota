@@ -3,7 +3,6 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{channel::mpsc, executor::ThreadPool, future, StreamExt};
 use regex::Regex;
 use std::{
-  cmp::Reverse,
   collections::HashSet,
   fs,
   path::{Path, PathBuf},
@@ -186,7 +185,7 @@ pub async fn get_stats_timestamps(
   }
 
   // Sort the timestamps so that the most recent is first.
-  timestamps.sort_unstable_by_key(|&key| Reverse(key));
+  timestamps.sort_unstable_by(|a, b| b.cmp(a));
   timestamps
 }
 
