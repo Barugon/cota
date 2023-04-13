@@ -70,7 +70,7 @@ impl Experience {
 
       let mut avatar = self.avatar.clone();
       if avatar.is_empty() {
-        // Get the last avatar.
+        // Get the avatar from the config file.
         if let Some(last_avatar) = config::get_exp_avatar(frame.storage().expect(NONE_ERR)) {
           avatar = last_avatar;
         }
