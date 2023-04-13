@@ -78,7 +78,7 @@ impl StatsData {
   }
 }
 
-const FILENAME_START: &str = "SotAChatLog_";
+const FILENAME_START: &str = "SotAChatLog";
 const STATS_KEY: &str = " AdventurerLevel: ";
 const LOG_SEARCH_LIMIT: usize = 256 * 1024;
 
@@ -92,7 +92,7 @@ pub async fn get_avatars(log_path: PathBuf, cancel: Cancel) -> Vec<String> {
       return Vec::new();
     }
 
-    let filename = &filename[FILENAME_START.len()..];
+    let filename = &filename[FILENAME_START.len() + 1..];
     if let Some(pos) = filename.rfind('_') {
       name_set.insert(&filename[..pos]);
     }
@@ -334,14 +334,13 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> 
 
   // The date text is either a specific date or, if not specified, regex to match the date.
   let date = if let Some(ts) = ts {
-    let date = timestamp_to_file_date(ts);
-    format!("_{date}")
+    timestamp_to_file_date(ts)
   } else {
-    String::from(r"_\d{4}-\d{2}-\d{2}")
+    String::from(r"\d{4}-\d{2}-\d{2}")
   };
 
   let regex = ok!(
-    Regex::new(&format!("^{FILENAME_START}{name}{date}.txt$")),
+    Regex::new(&format!("^{FILENAME_START}_{name}_{date}.txt$")),
     filenames
   );
 
