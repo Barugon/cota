@@ -180,10 +180,6 @@ pub async fn get_stats_timestamps(
   // Flatten the results.
   let mut timestamps: Vec<i64> = results.into_iter().flat_map(|v| v.into_iter()).collect();
 
-  if cancel.is_canceled() {
-    return Vec::new();
-  }
-
   // Sort the timestamps so that the most recent is first.
   timestamps.sort_unstable_by(|a, b| b.cmp(a));
   timestamps
