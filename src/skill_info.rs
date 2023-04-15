@@ -1,11 +1,20 @@
-use serde::{Deserialize, Serialize};
-
 use crate::util::{FAIL_ERR, NONE_ERR};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
-#[derive(Clone, Copy, Default, Serialize, Deserialize)]
-pub struct SkillPlan {
-  pub cur: i32,
-  pub tgt: i32,
+#[derive(Clone, Serialize, Deserialize)]
+pub struct AvatarPlan {
+  pub adv_lvl: i32,
+  pub skill_lvls: HashMap<u32, (i32, i32)>,
+}
+
+impl AvatarPlan {
+  pub fn new() ->Self {
+    AvatarPlan {
+      adv_lvl: 1,
+      skill_lvls: HashMap::new(),
+    }
+  }
 }
 
 #[derive(Clone, Copy, Debug)]

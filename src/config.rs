@@ -1,4 +1,4 @@
-use crate::{plant_info::Plant, skill_info::SkillPlan};
+use crate::{plant_info::Plant, skill_info::AvatarPlan};
 use eframe::Storage;
 use std::{
   collections::HashMap,
@@ -7,9 +7,9 @@ use std::{
 
 const LOG_PATH_KEY: &str = "log_path";
 const SAVE_PATH_KEY: &str = "save_path";
-const SKILL_LEVELS_KEY: &str = "skill_levels";
 const STATS_AVATAR_KEY: &str = "stats_avatar";
 const EXP_AVATAR_KEY: &str = "experience_avatar";
+const AVATAR_PLAN: &str = "plan";
 const PLANTS_KEY: &str = "plants";
 const NOTES_KEY: &str = "notes";
 
@@ -91,29 +91,37 @@ pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<Plant>) {
   set_value(storage, PLANTS_KEY, text);
 }
 
-pub fn get_levels(storage: &mut dyn Storage, avatar: &str) -> Option<HashMap<u32, SkillPlan>> {
+pub fn get_avatar_plan(storage: &mut dyn Storage, avatar: &str) -> Option<AvatarPlan> {
   if avatar.is_empty() {
     return None;
   }
 
-  let text = get_value(storage, format!("{avatar} {SKILL_LEVELS_KEY}").as_str())?;
-  Some(ok!(ron::from_str(&text), None))
+  let text = get_value(storage, format!("{avatar} {AVATAR_PLAN}").as_str())?;
+  let mut plan: AvatarPlan = ok!(ron::from_str(&text), None);
+  plan.adv_lvl = plan.adv_lvl.max(1);
+  Some(plan)
 }
 
-pub fn set_levels(storage: &mut dyn Storage, avatar: &str, levels: &HashMap<u32, SkillPlan>) {
+pub fn set_avatar_plan(storage: &mut dyn Storage, avatar: &str, plan: &AvatarPlan) {
   if avatar.is_empty() {
     return;
   }
 
   // Filter out empties.
-  let levels: HashMap<u32, SkillPlan> = levels
+  let skill_lvls: HashMap<u32, (i32, i32)> = plan
+    .skill_lvls
     .iter()
-    .filter(|(_, plan)| plan.cur > 0 && plan.tgt > 0)
+    .filter(|(_, plan)| plan.0 > 0 && plan.1 > 0)
     .map(|(id, plan)| (*id, *plan))
     .collect();
 
-  let text = ok!(ron::to_string(&levels));
-  let key = format!("{avatar} {SKILL_LEVELS_KEY}");
+  let plan = AvatarPlan {
+    adv_lvl: plan.adv_lvl,
+    skill_lvls,
+  };
+
+  let text = ok!(ron::to_string(&plan));
+  let key = format!("{avatar} {AVATAR_PLAN}");
   set_value(storage, &key, text);
 }
 

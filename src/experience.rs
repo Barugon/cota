@@ -1,7 +1,7 @@
 use crate::{
   config, log_data,
-  skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup, SkillPlan},
-  util::{self, AppState, Cancel, FAIL_ERR, NONE_ERR, SKILL_EXP},
+  skill_info::{self, AvatarPlan, SkillCategory, SkillInfo, SkillInfoGroup},
+  util::{self, AppState, Cancel, FAIL_ERR, LEVEL_EXP, LVL_RANGE, NONE_ERR, SKILL_EXP},
 };
 use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::{
@@ -24,7 +24,7 @@ pub struct Experience {
   avatars: Vec<String>,
   adventurer_skills: Vec<SkillInfoGroup>,
   producer_skills: Vec<SkillInfoGroup>,
-  skill_levels: Mutex<HashMap<u32, SkillPlan>>,
+  avatar_plan: Mutex<AvatarPlan>,
   selected: SkillInfo,
   locale: Locale,
   init: bool,
@@ -51,7 +51,7 @@ impl Experience {
       avatars: Vec::new(),
       adventurer_skills,
       producer_skills,
-      skill_levels: Mutex::new(HashMap::new()),
+      avatar_plan: Mutex::new(AvatarPlan::new()),
       selected: Default::default(),
       locale: util::get_locale(),
       init: true,
@@ -93,8 +93,44 @@ impl Experience {
     // Tool bar.
     ui.horizontal(|ui| {
       ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-        if ui.button("Reload Avatars").clicked() {
-          self.init = true;
+        {
+          const LABEL_COLOR: Color32 = Color32::from_rgb(154, 187, 154);
+          let item_spacing = ui.spacing().item_spacing;
+          let mut plan = self.avatar_plan.lock().expect(FAIL_ERR);
+          let value = &mut plan.adv_lvl;
+
+          ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
+          ui.allocate_ui_with_layout(
+            Vec2::new(107.0, ui.available_height()),
+            Layout::left_to_right(Align::Center),
+            |ui| {
+              let value = *value;
+              let next = (value + 1).min(200);
+              let exp = LEVEL_EXP[next as usize - 1] - LEVEL_EXP[value as usize - 1];
+              if exp > 0 {
+                let text = if exp > 0 {
+                  exp.to_formatted_string(&self.locale)
+                } else {
+                  String::new()
+                };
+
+                let text = RichText::from(text).color(Color32::WHITE);
+                let response = Label::new(text).sense(Sense::click()).ui(ui);
+                if response.on_hover_text_at_pointer("Click to copy").clicked() {
+                  // Copy the value to the clipboard.
+                  if let Ok::<ClipboardContext, _>(mut ctx) = ClipboardProvider::new() {
+                    err!(ctx.set_contents(format!("{exp}")));
+                  }
+                }
+              }
+            },
+          );
+          ui.spacing_mut().item_spacing.x = item_spacing.x;
+          ui.label("Next");
+          ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
+          ui.add(DragValue::new(value).clamp_range(LVL_RANGE));
+          ui.spacing_mut().item_spacing.x = item_spacing.x;
+          ui.label(RichText::from("Adv Lvl").color(LABEL_COLOR));
         }
 
         // Avatar combo-box.
@@ -189,9 +225,9 @@ impl Experience {
                       });
                     })
                     .body(|mut body| {
-                      let mut levels = self.skill_levels.lock().expect(FAIL_ERR);
+                      let mut plan = self.avatar_plan.lock().expect(FAIL_ERR);
                       for skill in &skill_group.skills {
-                        let level = get_skill_lvl_mut(&mut levels, skill.id);
+                        let level = get_skill_lvl_mut(&mut plan.skill_lvls, skill.id);
                         body.row(row_size, |mut row| {
                           row.col(|ui| {
                             let text = RichText::from(skill.name);
@@ -201,13 +237,13 @@ impl Experience {
                           });
                           row.col(|ui| {
                             let range = 0..=200;
-                            let value = &mut level.cur;
+                            let value = &mut level.0;
                             let widget = DragValue::new(value).clamp_range(range);
                             ui.add(widget);
                           });
                           row.col(|ui| {
                             let range = 0..=200;
-                            let value = &mut level.tgt;
+                            let value = &mut level.1;
                             let widget = DragValue::new(value).clamp_range(range);
                             ui.add(widget);
                           });
@@ -262,8 +298,8 @@ impl Experience {
   }
 
   pub fn save(&self, storage: &mut dyn Storage) {
-    let levels = self.skill_levels.lock().expect(FAIL_ERR);
-    config::set_levels(storage, &self.avatar, &levels);
+    let plan = self.avatar_plan.lock().expect(FAIL_ERR);
+    config::set_avatar_plan(storage, &self.avatar, &plan);
   }
 
   fn request_avatars(&mut self, ctx: &Context) {
@@ -294,16 +330,16 @@ impl Experience {
 
   fn set_avatar(&mut self, storage: &mut dyn Storage, avatar: String) {
     if self.avatar != avatar {
-      let mut levels = self.skill_levels.lock().expect(FAIL_ERR);
+      let mut plan = self.avatar_plan.lock().expect(FAIL_ERR);
 
       // Store the values.
-      config::set_levels(storage, &self.avatar, &levels);
+      config::set_avatar_plan(storage, &self.avatar, &plan);
 
       // Store the new avatar name.
       config::set_exp_avatar(storage, avatar.clone());
 
-      // Get new values.
-      *levels = config::get_levels(storage, &avatar).unwrap_or(HashMap::new());
+      // Get the values for the new avatar.
+      *plan = config::get_avatar_plan(storage, &avatar).unwrap_or(AvatarPlan::new());
 
       self.avatar = avatar;
     }
@@ -316,14 +352,14 @@ struct Channel {
   cancel_avatars: Option<Cancel>,
 }
 
-fn get_skill_lvl_mut(levels: &mut HashMap<u32, SkillPlan>, id: u32) -> &mut SkillPlan {
-  levels.entry(id).or_insert_with(SkillPlan::default)
+fn get_skill_lvl_mut(levels: &mut HashMap<u32, (i32, i32)>, id: u32) -> &mut (i32, i32) {
+  levels.entry(id).or_insert_with(|| (0, 0))
 }
 
-fn get_needed_exp(level: &SkillPlan, mul: f64) -> Option<i64> {
-  if level.cur > 0 || level.tgt > 0 {
-    let cur_lvl = level.cur.max(1);
-    let tgt_lvl = level.tgt.max(1);
+fn get_needed_exp(level: &(i32, i32), mul: f64) -> Option<i64> {
+  if level.0 > 0 || level.1 > 0 {
+    let cur_lvl = level.0.max(1);
+    let tgt_lvl = level.1.max(1);
     let val = SKILL_EXP[tgt_lvl as usize - 1] - SKILL_EXP[cur_lvl as usize - 1];
     return Some((val as f64 * mul).ceil() as i64);
   }
