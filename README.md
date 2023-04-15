@@ -24,7 +24,7 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 ### Experience planner
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/169657368.XNOp5ift.Screenshotfrom20230406201414.png)
+![screenshot](https://a4.pbase.com/o12/09/605909/1/169657368.kKZqL4w3.Screenshotfrom20230415150803.png)
 
 ### Agriculture
 
