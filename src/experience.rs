@@ -93,13 +93,18 @@ impl Experience {
     // Tool bar.
     ui.horizontal(|ui| {
       ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-        {
+        // Adventurer level.
+        ui.scope(|ui| {
           const LABEL_COLOR: Color32 = Color32::from_rgb(154, 187, 154);
-          let item_spacing = ui.spacing().item_spacing;
+          let x_spacing = ui.spacing().item_spacing.x;
           let mut plan = self.avatar_plan.lock().expect(FAIL_ERR);
           let value = &mut plan.adv_lvl;
 
-          ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
+          // Spacing adjustment occurs to the left of experience since the layout here is right to left.
+          ui.spacing_mut().item_spacing.x *= 0.5;
+
+          // This allocates enough space for the maximum experience value size and uses left to right
+          // layout internally to keep the experience label left justified.
           ui.allocate_ui_with_layout(
             Vec2::new(107.0, ui.available_height()),
             Layout::left_to_right(Align::Center),
@@ -125,13 +130,16 @@ impl Experience {
               }
             },
           );
-          ui.spacing_mut().item_spacing.x = item_spacing.x;
+
+          ui.spacing_mut().item_spacing.x = x_spacing;
           ui.label("Next");
-          ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
+
+          ui.spacing_mut().item_spacing.x *= 0.5;
           ui.add(DragValue::new(value).clamp_range(LVL_RANGE));
-          ui.spacing_mut().item_spacing.x = item_spacing.x;
+
+          ui.spacing_mut().item_spacing.x = x_spacing;
           ui.label(RichText::from("Adv Lvl").color(LABEL_COLOR));
-        }
+        });
 
         // Avatar combo-box.
         ui.add_enabled_ui(!self.avatars.is_empty(), |ui| {
