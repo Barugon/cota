@@ -35,7 +35,7 @@ impl LogDlg {
     }
   }
 
-  pub fn show(&mut self, ctx: &Context) -> bool {
+  pub fn show(&mut self, ctx: &Context) {
     if self.visible {
       self.handle_hotkeys(ctx);
 
@@ -89,7 +89,6 @@ impl LogDlg {
         self.close();
       }
     }
-    self.visible
   }
 
   pub fn open(&mut self, avatar: &str, cancel: Cancel) {
@@ -120,11 +119,12 @@ impl LogDlg {
 
   fn close(&mut self) {
     if self.visible {
-      self.state.set_disabled(false);
       if let Some(mut cancel) = self.cancel.take() {
         // Cancel the search if it's still outstanding.
         cancel.cancel();
       }
+
+      self.state.set_disabled(false);
       self.status = Default::default();
       self.layout = None;
       self.visible = false;
