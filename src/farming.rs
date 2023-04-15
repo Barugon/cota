@@ -167,6 +167,8 @@ impl Farming {
               ui.spacing_mut().item_spacing.x = item_spacing.x;
               ui.add(widget);
             });
+
+            col[0].visuals_mut().widgets.noninteractive.bg_stroke.color = Color32::from_gray(45);
             col[0].separator();
           });
 
