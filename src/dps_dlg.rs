@@ -148,7 +148,7 @@ impl DPSDlg {
 
           ui.horizontal(|ui| {
             if ui.button("Tally").clicked() {
-              self.tally_dps(ctx);
+              self.request_dps_tally(ctx);
             }
 
             if ui.button("Close").clicked() {
@@ -162,7 +162,7 @@ impl DPSDlg {
     }
   }
 
-  fn tally_dps(&mut self, ctx: &Context) {
+  fn request_dps_tally(&mut self, ctx: &Context) {
     self.tally = None;
 
     // Cancel any previous request.
