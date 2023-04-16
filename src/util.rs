@@ -1,4 +1,5 @@
 use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::egui::{TextStyle, Ui};
 use num_format::Locale;
 use regex::Regex;
@@ -63,7 +64,6 @@ macro_rules! err {
   ($res:expr) => {
     if let Err(err) = $res {
       println!("{err:?}");
-      return;
     }
   };
 }
@@ -83,6 +83,11 @@ macro_rules! f64_to_string {
       .trim_end_matches('.')
       .replacen('.', $locale.decimal(), 1)
   };
+}
+
+pub fn set_clipboard_contents(text: String) {
+  let mut ctx: ClipboardContext = ok!(ClipboardProvider::new());
+  err!(ctx.set_contents(text));
 }
 
 /// SotA epoch (date/time of lunar cataclysm).
