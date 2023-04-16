@@ -1,5 +1,6 @@
 use crate::{
   config,
+  dps_dlg::DPSDlg,
   log_data::{self, StatsData},
   log_dlg::LogDlg,
   notes_dlg::NotesDlg,
@@ -49,6 +50,7 @@ pub struct Stats {
   search_dlg: SearchDlg,
   notes_dlg: NotesDlg,
   log_dlg: LogDlg,
+  dps_dlg: DPSDlg,
 
   // initialize on first view.
   init: bool,
@@ -109,6 +111,7 @@ impl Stats {
     let search_dlg = SearchDlg::new(state.clone());
     let notes_dlg = NotesDlg::new(state.clone());
     let log_dlg = LogDlg::new(state.clone());
+    let dps_dlg = DPSDlg::new(state.clone(), threads.clone(), locale);
 
     Stats {
       resist_stats,
@@ -127,6 +130,7 @@ impl Stats {
       search_dlg,
       notes_dlg,
       log_dlg,
+      dps_dlg,
       init: true,
     }
   }
@@ -157,6 +161,7 @@ impl Stats {
     }
 
     self.log_dlg.show(ui.ctx());
+    self.dps_dlg.show(ui.ctx());
 
     // Collect messages.
     while let Ok(Some(msg)) = self.channel.rx.try_next() {
@@ -289,7 +294,7 @@ impl Stats {
                   ui.label(RichText::from(name).color(NAME_COLOR));
                 });
                 row.col(|ui| {
-                  ui.label(util::f64_to_string(value, self.locale));
+                  ui.label(f64_to_string!(value, 6, self.locale));
                 });
               });
             }
@@ -331,7 +336,7 @@ impl Stats {
 
             for (key, name) in RESIST_KEYS {
               if let Some(value) = resist_values.get(&key) {
-                let value = util::f64_to_string(*value, self.locale);
+                let value = f64_to_string!(*value, 6, self.locale);
                 body.row(row_size, |mut row| {
                   row.col(|ui| {
                     const RESIST_COLOR: Color32 = Color32::from_rgb(154, 120, 180);
@@ -352,7 +357,7 @@ impl Stats {
                     ui.label(RichText::from(name).color(NAME_COLOR));
                   });
                   row.col(|ui| {
-                    ui.label(util::f64_to_string(value, self.locale));
+                    ui.label(f64_to_string!(value, 6, self.locale));
                   });
                 });
               }
@@ -406,7 +411,11 @@ impl Stats {
 
   pub fn show_search_dlg(&mut self) {
     let title = format!("🔍  Search Logs ({})", self.avatar);
-    self.search_dlg.open(title)
+    self.search_dlg.open(title);
+  }
+
+  pub fn show_dps_dlg(&mut self) {
+    self.dps_dlg.open(&self.avatar, &self.log_path);
   }
 
   pub fn log_path(&self) -> &Path {
