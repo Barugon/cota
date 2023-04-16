@@ -111,7 +111,7 @@ pub fn set_avatar_plan(storage: &mut dyn Storage, avatar: &str, plan: &AvatarPla
   let skill_lvls: HashMap<u32, (i32, i32)> = plan
     .skill_lvls
     .iter()
-    .filter(|(_, plan)| plan.0 > 0 && plan.1 > 0)
+    .filter(|(_, plan)| plan.0 > 0 || plan.1 > 0)
     .map(|(id, plan)| (*id, *plan))
     .collect();
 
