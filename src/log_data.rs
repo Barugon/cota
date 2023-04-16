@@ -388,7 +388,7 @@ pub async fn tally_dps(
 
         let line = get_log_text(line);
         if let Some(range) = avatar_search.find(line) {
-          // The search ends with the damage value.
+          // The search term ends just past the damage value.
           if let Some(word) = line[range.range()].split_whitespace().rev().next() {
             if let Ok(val) = word.parse::<u64>() {
               if dmg_start_ts.is_none() {
