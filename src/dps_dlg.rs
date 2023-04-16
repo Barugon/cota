@@ -87,6 +87,7 @@ impl DPSDlg {
         .anchor(Align2::CENTER_TOP, [0.0, 0.0])
         .default_size(available.size())
         .show(ctx, |ui| {
+          // Date/time entry.
           ui.horizontal(|ui| {
             const LABEL_COLOR: Color32 = Color32::from_rgb(154, 187, 154);
             let x_spacing = ui.spacing().item_spacing.x;
@@ -114,6 +115,7 @@ impl DPSDlg {
           ui.separator();
 
           if let Some(tally) = &self.tally {
+            // Damage/DPS output.
             ui.horizontal(|ui| {
               Grid::new("dps_grid")
                 .min_col_width((ui.available_width() - ui.spacing().item_spacing.x * 3.0) / 4.0)
