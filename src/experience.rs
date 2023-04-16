@@ -3,7 +3,6 @@ use crate::{
   skill_info::{self, AvatarPlan, SkillCategory, SkillInfo, SkillInfoGroup},
   util::{self, AppState, Cancel, FAIL_ERR, LEVEL_EXP, LVL_RANGE, NONE_ERR, SKILL_EXP},
 };
-use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::{
   egui::{ComboBox, Context, DragValue, Label, Layout, RichText, ScrollArea, Sense, Ui, Widget},
   emath::{Align, Vec2},
@@ -119,13 +118,9 @@ impl Experience {
                   String::new()
                 };
 
-                let text = RichText::from(text).color(Color32::WHITE);
                 let response = Label::new(text).sense(Sense::click()).ui(ui);
                 if response.on_hover_text_at_pointer("Click to copy").clicked() {
-                  // Copy the value to the clipboard.
-                  if let Ok::<ClipboardContext, _>(mut ctx) = ClipboardProvider::new() {
-                    err!(ctx.set_contents(format!("{exp}")));
-                  }
+                  util::set_clipboard_contents(format!("{exp}"));
                 }
               }
             },
@@ -263,22 +258,16 @@ impl Experience {
                               let (text, exp) = if exp < 0 {
                                 // Half experience returned for un-training.
                                 let exp = exp / 2;
-                                let text =
-                                  format!("({})", exp.abs().to_formatted_string(&self.locale));
-                                let text = RichText::from(text).color(Color32::LIGHT_RED);
+                                let text = exp.abs().to_formatted_string(&self.locale);
+                                let text = format!("({})", text);
                                 (text, exp)
                               } else {
                                 let text = exp.to_formatted_string(&self.locale);
-                                let text = RichText::from(text).color(Color32::WHITE);
                                 (text, exp)
                               };
                               let response = Label::new(text).sense(Sense::click()).ui(ui);
                               if response.on_hover_text_at_pointer("Click to copy").clicked() {
-                                // Copy the value to the clipboard.
-                                if let Ok::<ClipboardContext, _>(mut ctx) = ClipboardProvider::new()
-                                {
-                                  err!(ctx.set_contents(format!("{exp}")));
-                                }
+                                util::set_clipboard_contents(format!("{exp}"));
                               }
                             }
                           });
