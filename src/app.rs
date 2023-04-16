@@ -202,6 +202,14 @@ impl App {
                 self.stats.set_filter(StatsFilter::None);
                 handled = true;
               }
+              Key::D
+                if modifiers.command_only()
+                  && self.page == Page::Stats
+                  && !self.stats.avatar().is_empty() =>
+              {
+                self.stats.show_dps_dlg();
+                handled = true;
+              }
               Key::F
                 if modifiers.command_only()
                   && self.page == Page::Stats
@@ -373,6 +381,12 @@ impl eframe::App for App {
                 ui.add_enabled_ui(enabled, |ui| {
                   if menu_item(ui, close_menu, "Search Logs...", Some(cmd!("L"))) {
                     self.stats.show_search_dlg();
+                  }
+                });
+
+                ui.add_enabled_ui(enabled, |ui| {
+                  if menu_item(ui, close_menu, "Tally DPS...", Some(cmd!("D"))) {
+                    self.stats.show_dps_dlg();
                   }
                 });
 
