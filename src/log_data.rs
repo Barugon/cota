@@ -6,7 +6,7 @@ use std::{
   collections::HashSet,
   fs,
   path::{Path, PathBuf},
-  str::SplitWhitespace,
+  str::SplitWhitespace, cmp,
 };
 
 /// Get the date portion of a log entry.
@@ -320,6 +320,7 @@ pub async fn find_log_entries(
 pub struct DPSTally {
   pub avatar: u64,
   pub pet: u64,
+  pub secs: u64,
 }
 
 pub async fn tally_dps(
@@ -355,13 +356,16 @@ pub async fn tally_dps(
   let pet_search = format!("<{avatar}> attacks .+ and hits, dealing [0-9]+");
   let pet_search = ok!(Regex::new(&pet_search), dps_tally);
 
-  let begin = begin.timestamp();
-  let end = end.timestamp();
-  let range = if end >= begin {
-    begin..=end
+  let begin_ts = begin.timestamp();
+  let end_ts = end.timestamp();
+  let range = if end_ts >= begin_ts {
+    begin_ts..=end_ts
   } else {
-    end..=begin
+    end_ts..=begin_ts
   };
+
+  let mut dmg_start_ts = None;
+  let mut dmg_end_ts = None;
 
   for filename in filenames {
     if cancel.is_canceled() {
@@ -384,17 +388,31 @@ pub async fn tally_dps(
           // The search ends with the damage value.
           if let Some(word) = line[range.range()].split_whitespace().rev().next() {
             if let Ok(val) = word.parse::<u64>() {
+              if dmg_start_ts.is_none() {
+                dmg_start_ts = Some(ts);
+              }
+              dmg_end_ts = Some(ts);
               dps_tally.avatar += val;
             }
           }
         } else if let Some(range) = pet_search.find(line) {
           if let Some(word) = line[range.range()].split_whitespace().rev().next() {
             if let Ok(val) = word.parse::<u64>() {
+              if dmg_start_ts.is_none() {
+                dmg_start_ts = Some(ts);
+              }
+              dmg_end_ts = Some(ts);
               dps_tally.pet += val;
             }
           }
         }
       }
+    }
+  }
+
+  if let Some(start_ts) = dmg_start_ts {
+    if let Some(end_ts) = dmg_end_ts {
+      dps_tally.secs = cmp::max(end_ts - start_ts, 0) as u64;
     }
   }
 
