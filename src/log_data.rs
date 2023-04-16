@@ -419,6 +419,7 @@ pub async fn tally_dps(
     }
   }
 
+  dps_tally.secs += 1;
   dps_tally
 }
 
