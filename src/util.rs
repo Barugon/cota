@@ -63,7 +63,6 @@ macro_rules! err {
   ($res:expr) => {
     if let Err(err) = $res {
       println!("{err:?}");
-      return;
     }
   };
 }
