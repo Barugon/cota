@@ -44,5 +44,6 @@ Add timers that remind you to water/harvest your plants via desktop notification
 - Press Ctrl+R to get a list of effective resists
 - Press Ctrl+F to filter the stats
 - Press Ctrl+L to search the chat logs
+- Press Ctrl+D to tally DPS
 
 ![screenshot](https://a4.pbase.com/o12/09/605909/1/164136608.QBmjRKgr.Screenshotfrom20230317234632.png)
