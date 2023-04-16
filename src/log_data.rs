@@ -3,10 +3,11 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{channel::mpsc, executor::ThreadPool, future, StreamExt};
 use regex::Regex;
 use std::{
+  cmp,
   collections::HashSet,
   fs,
   path::{Path, PathBuf},
-  str::SplitWhitespace, cmp,
+  str::SplitWhitespace,
 };
 
 /// Get the date portion of a log entry.
@@ -356,6 +357,7 @@ pub async fn tally_dps(
   let pet_search = format!("<{avatar}> attacks .+ and hits, dealing [0-9]+");
   let pet_search = ok!(Regex::new(&pet_search), dps_tally);
 
+  // Range for checking log entry date/time.
   let begin_ts = begin.timestamp();
   let end_ts = end.timestamp();
   let range = if end_ts >= begin_ts {
@@ -364,6 +366,7 @@ pub async fn tally_dps(
     end_ts..=begin_ts
   };
 
+  // Actual damage start and end timestamps.
   let mut dmg_start_ts = None;
   let mut dmg_end_ts = None;
 
