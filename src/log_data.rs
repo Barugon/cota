@@ -316,6 +316,91 @@ pub async fn find_log_entries(
   text
 }
 
+#[derive(Default)]
+pub struct DPSTally {
+  pub avatar: u64,
+  pub pet: u64,
+}
+
+pub async fn tally_dps(
+  log_path: PathBuf,
+  avatar: String,
+  begin: NaiveDateTime,
+  end: NaiveDateTime,
+  cancel: Cancel,
+) -> DPSTally {
+  let filenames = {
+    // Filter the filenames to the date range.
+    let filenames: Vec<String> = get_log_filenames(&log_path, Some(&avatar), None)
+      .into_iter()
+      .filter(|filename| {
+        let path = Path::new(filename);
+        if let Some(date) = get_log_file_date(&path) {
+          return date >= begin.date() && date <= end.date();
+        }
+        false
+      })
+      .collect();
+    filenames
+  };
+
+  let mut dps_tally = DPSTally::default();
+  if cancel.is_canceled() {
+    return dps_tally;
+  }
+
+  // Use regular expressions for the searches.
+  let avatar_search = format!("^ {avatar} attacks .+ and hits, dealing [0-9]+");
+  let avatar_search = ok!(Regex::new(&avatar_search), dps_tally);
+  let pet_search = format!("<{avatar}> attacks .+ and hits, dealing [0-9]+");
+  let pet_search = ok!(Regex::new(&pet_search), dps_tally);
+
+  let begin = begin.timestamp();
+  let end = end.timestamp();
+  let range = if end >= begin {
+    begin..=end
+  } else {
+    end..=begin
+  };
+
+  for filename in filenames {
+    if cancel.is_canceled() {
+      return DPSTally::default();
+    }
+
+    // Read the log file.
+    let path = log_path.join(filename);
+    let file_date = get_log_file_date(&path).expect(NONE_ERR);
+    if let Ok(text) = fs::read_to_string(path) {
+      // Search for attack lines.
+      for line in text.lines() {
+        let Some(ts) = get_log_timestamp(line, file_date) else { continue };
+        if !range.contains(&ts) {
+          continue;
+        }
+
+        let line = get_log_text(line);
+        if let Some(range) = avatar_search.find(line) {
+          // The search ends with the damage value.
+          if let Some(word) = line[range.range()].split_whitespace().rev().next() {
+            if let Ok(val) = word.parse::<u64>() {
+              dps_tally.avatar += val;
+            }
+          }
+        } else if let Some(range) = pet_search.find(line) {
+          if let Some(word) = line[range.range()].split_whitespace().rev().next() {
+            if let Ok(val) = word.parse::<u64>() {
+              dps_tally.pet += val;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  dps_tally
+}
+
 fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> Vec<String> {
   let mut filenames = Vec::new();
   let entries = ok!(log_path.read_dir(), filenames);
@@ -375,10 +460,13 @@ fn log_date_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
     if let Some(ap) = ap {
       if let Some(ch) = ap.chars().next() {
         if ch == 'P' || ch == 'p' {
-          hour += 12;
-          if hour == 24 {
-            hour = 0;
+          if hour < 12 {
+            // Add 12 to the hour.
+            hour += 12;
           }
+        } else if hour == 12 {
+          // 12 am becomes 0.
+          hour = 0;
         }
       }
     }
@@ -405,7 +493,13 @@ fn get_log_file_date(path: &Path) -> Option<NaiveDate> {
   NaiveDate::parse_from_str(text, "%Y-%m-%d").ok()
 }
 
-/// Get the log entry date as a timestamp if it's a `/stats` entry.
+/// Get the log entry date/time as a timestamp.
+fn get_log_timestamp(line: &str, file_date: NaiveDate) -> Option<i64> {
+  let date = get_log_date(line)?;
+  log_date_to_timestamp(&date[1..date.len() - 1], file_date)
+}
+
+/// Get the log entry date/time as a timestamp if it's a `/stats` entry.
 fn get_stats_timestamp(line: &str, file_date: NaiveDate) -> Option<i64> {
   let date = get_log_date(line)?;
   if line[date.len()..].contains(STATS_KEY) {

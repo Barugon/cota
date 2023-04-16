@@ -9,6 +9,7 @@ mod app;
 mod chronometer;
 mod config;
 mod confirm_dlg;
+mod dps_dlg;
 mod ethos;
 mod experience;
 mod farming;

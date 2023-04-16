@@ -68,6 +68,23 @@ macro_rules! err {
   };
 }
 
+#[macro_export]
+/// Nicely format a f64 for display.
+macro_rules! f64_to_string {
+  ($value:expr, 2, $locale:expr) => {
+    format!("{:.2}", $value)
+      .trim_end_matches('0')
+      .trim_end_matches('.')
+      .replacen('.', $locale.decimal(), 1)
+  };
+  ($value:expr, 6, $locale:expr) => {
+    format!("{:.6}", $value)
+      .trim_end_matches('0')
+      .trim_end_matches('.')
+      .replacen('.', $locale.decimal(), 1)
+  };
+}
+
 /// SotA epoch (date/time of lunar cataclysm).
 pub fn get_epoch() -> DateTime<Utc> {
   Utc.with_ymd_and_hms(1997, 9, 2, 0, 0, 0).unwrap() // LocalResult does not have expect.
@@ -282,14 +299,6 @@ pub fn replace_decimal(text: &str) -> String {
   }
 
   result
-}
-
-/// Nicely format a f64 for display.
-pub fn f64_to_string(value: f64, locale: Locale) -> String {
-  format!("{value:.6}")
-    .trim_end_matches('0')
-    .trim_end_matches('.')
-    .replacen('.', locale.decimal(), 1)
 }
 
 /// Convert a timestamp into a date & time string.
