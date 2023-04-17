@@ -132,13 +132,16 @@ impl DPSDlg {
                   let text = format!("{total_damage}");
                   ui.label(text);
 
-                  let text = f64_to_string!(total_damage as f64 / tally.secs as f64, 2, self.locale);
+                  let val = total_damage as f64 / tally.secs as f64;
+                  let text = f64_to_string!(val, 2, self.locale);
                   ui.label(text);
 
-                  let text = f64_to_string!(tally.avatar as f64 / tally.secs as f64, 2, self.locale);
+                  let val = tally.avatar as f64 / tally.secs as f64;
+                  let text = f64_to_string!(val, 2, self.locale);
                   ui.label(text);
 
-                  let text = f64_to_string!(tally.pet as f64 / tally.secs as f64, 2, self.locale);
+                  let val = tally.pet as f64 / tally.secs as f64;
+                  let text = f64_to_string!(val, 2, self.locale);
                   ui.label(text);
                 });
             });
