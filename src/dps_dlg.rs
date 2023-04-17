@@ -132,10 +132,12 @@ impl DPSDlg {
                   let text = format!("{total_damage}");
                   ui.label(text);
 
-                  let text = f64_to_string!(total_damage as f64 / tally.secs as f64, 2, self.locale);
+                  let text =
+                    f64_to_string!(total_damage as f64 / tally.secs as f64, 2, self.locale);
                   ui.label(text);
 
-                  let text = f64_to_string!(tally.avatar as f64 / tally.secs as f64, 2, self.locale);
+                  let text =
+                    f64_to_string!(tally.avatar as f64 / tally.secs as f64, 2, self.locale);
                   ui.label(text);
 
                   let text = f64_to_string!(tally.pet as f64 / tally.secs as f64, 2, self.locale);
@@ -223,7 +225,9 @@ fn show_date_time(ui: &mut Ui, date_time: &NaiveDateTime, id: &str) -> Option<Na
 
   // Date.
   let mut date = date_time.date();
-  let widget = DatePickerButton::new(&mut date).id_source(id);
+  let widget = DatePickerButton::new(&mut date)
+    .id_source(id)
+    .show_icon(false);
   ui.spacing_mut().item_spacing.x *= 0.5;
   if ui.add(widget).changed() {
     result = Some(NaiveDateTime::new(date, date_time.time()));
