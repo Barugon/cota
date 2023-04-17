@@ -337,7 +337,7 @@ pub async fn tally_dps(
       .into_iter()
       .filter(|filename| {
         let path = Path::new(filename);
-        if let Some(date) = get_log_file_date(&path) {
+        if let Some(date) = get_log_file_date(path) {
           return date >= begin.date() && date <= end.date();
         }
         false
