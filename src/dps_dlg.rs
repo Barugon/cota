@@ -23,7 +23,7 @@ pub struct DPSDlg {
   log_path: PathBuf,
   title: String,
   avatar: String,
-  span: Option<Span>,
+  span: Span,
   channel: Channel,
   tally: Option<DPSTally>,
   visible: bool,
@@ -42,7 +42,7 @@ impl DPSDlg {
       log_path: PathBuf::default(),
       title: String::new(),
       avatar: String::new(),
-      span: None,
+      span: Span::default(),
       channel,
       tally: None,
       visible: false,
@@ -51,17 +51,17 @@ impl DPSDlg {
 
   pub fn open(&mut self, avatar: &str, path_buf: &Path) {
     if !avatar.is_empty() && !self.visible {
-      if self.span.is_none() {
+      if self.span.begin == self.span.end {
         let now = Local::now().naive_local();
-        self.span = Some(Span {
+        self.span = Span {
           begin: now,
           end: now,
-        });
+        };
       }
 
+      self.title = format!("⚔  Tally DPS ({avatar})");
       self.log_path = path_buf.to_owned();
       self.avatar = avatar.to_owned();
-      self.title = format!("⚔  Tally DPS ({})", self.avatar);
       self.state.set_disabled(true);
       self.visible = true;
     }
@@ -91,13 +91,12 @@ impl DPSDlg {
           ui.horizontal(|ui| {
             const LABEL_COLOR: Color32 = Color32::from_rgb(154, 187, 154);
             let x_spacing = ui.spacing().item_spacing.x;
-            let span = self.span.as_mut().expect(NONE_ERR);
 
             ui.spacing_mut().item_spacing.x *= 0.5;
             ui.label(RichText::from("Begin").color(LABEL_COLOR));
             ui.spacing_mut().item_spacing.x = x_spacing;
-            if let Some(date_time) = show_date_time(ui, &span.begin, "begin_date_picker") {
-              span.begin = date_time;
+            if let Some(date_time) = show_date_time(ui, &self.span.begin, "begin_date_picker") {
+              self.span.begin = date_time;
               self.tally = None;
             }
 
@@ -106,8 +105,8 @@ impl DPSDlg {
             ui.spacing_mut().item_spacing.x *= 0.5;
             ui.label(RichText::from("End").color(LABEL_COLOR));
             ui.spacing_mut().item_spacing.x = x_spacing;
-            if let Some(date_time) = show_date_time(ui, &span.end, "end_date_picker") {
-              span.end = date_time;
+            if let Some(date_time) = show_date_time(ui, &self.span.end, "end_date_picker") {
+              self.span.end = date_time;
               self.tally = None;
             }
           });
@@ -128,18 +127,22 @@ impl DPSDlg {
                   ui.label(RichText::from("Pet DPS").color(HEADER_COLOR));
                   ui.end_row();
 
+                  // Total damage.
                   let total_damage = tally.avatar + tally.pet;
                   let text = format!("{total_damage}");
                   ui.label(text);
 
+                  // Total DPS.
                   let val = total_damage as f64 / tally.secs as f64;
                   let text = f64_to_string!(val, 2, self.locale);
                   ui.label(text);
 
+                  // Avatar DPS.
                   let val = tally.avatar as f64 / tally.secs as f64;
                   let text = f64_to_string!(val, 2, self.locale);
                   ui.label(text);
 
+                  // Pet DPS.
                   let val = tally.pet as f64 / tally.secs as f64;
                   let text = f64_to_string!(val, 2, self.locale);
                   ui.label(text);
@@ -182,8 +185,10 @@ impl DPSDlg {
     // Setup the future.
     let tx = self.channel.tx.clone();
     let ctx = ctx.clone();
-    let span = self.span.as_ref().expect(NONE_ERR).clone();
-    let future = log_data::tally_dps(self.log_path.clone(), self.avatar.clone(), span, cancel);
+    let log_path = self.log_path.clone();
+    let avatar = self.avatar.clone();
+    let span = self.span.clone();
+    let future = log_data::tally_dps(log_path, avatar, span, cancel);
     let future = async move {
       tx.unbounded_send(future.await).expect(FAIL_ERR);
       ctx.request_repaint();
