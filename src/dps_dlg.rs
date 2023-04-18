@@ -106,7 +106,7 @@ impl DPSDlg {
             ui.label(RichText::from("End").color(LABEL_COLOR));
             ui.spacing_mut().item_spacing.x = x_spacing;
             if let Some(date_time) = show_date_time(ui, &self.span.end, "end_date_picker") {
-              self.span.begin = date_time;
+              self.span.end = date_time;
               self.tally = None;
             }
           });
