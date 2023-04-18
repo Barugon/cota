@@ -1,5 +1,5 @@
 use crate::{
-  log_data::{self, DPSTally},
+  log_data::{self, DPSTally, Span},
   util::{AppState, Cancel, FAIL_ERR, NONE_ERR},
 };
 use chrono::{Local, NaiveDateTime, Timelike};
@@ -183,13 +183,7 @@ impl DPSDlg {
     let tx = self.channel.tx.clone();
     let ctx = ctx.clone();
     let span = self.span.as_ref().expect(NONE_ERR).clone();
-    let future = log_data::tally_dps(
-      self.log_path.clone(),
-      self.avatar.clone(),
-      span.begin,
-      span.end,
-      cancel,
-    );
+    let future = log_data::tally_dps(self.log_path.clone(), self.avatar.clone(), span, cancel);
     let future = async move {
       tx.unbounded_send(future.await).expect(FAIL_ERR);
       ctx.request_repaint();
@@ -269,12 +263,6 @@ fn show_date_time(ui: &mut Ui, date_time: &NaiveDateTime, id: &str) -> Option<Na
   ui.spacing_mut().interact_size.x = x_interact;
 
   result
-}
-
-#[derive(Clone)]
-struct Span {
-  begin: NaiveDateTime,
-  end: NaiveDateTime,
 }
 
 struct Channel {

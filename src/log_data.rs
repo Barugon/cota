@@ -317,6 +317,12 @@ pub async fn find_log_entries(
   text
 }
 
+#[derive(Clone)]
+pub struct Span {
+  pub begin: NaiveDateTime,
+  pub end: NaiveDateTime,
+}
+
 #[derive(Default)]
 pub struct DPSTally {
   pub avatar: u64,
@@ -324,21 +330,18 @@ pub struct DPSTally {
   pub secs: u64,
 }
 
-pub async fn tally_dps(
-  log_path: PathBuf,
-  avatar: String,
-  begin: NaiveDateTime,
-  end: NaiveDateTime,
-  cancel: Cancel,
-) -> DPSTally {
+pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Cancel) -> DPSTally {
   let filenames = {
+    let begin = span.begin.date();
+    let end = span.end.date();
+
     // Filter the filenames to the date range.
     let filenames: Vec<String> = get_log_filenames(&log_path, Some(&avatar), None)
       .into_iter()
       .filter(|filename| {
         let path = Path::new(filename);
         if let Some(date) = get_log_file_date(path) {
-          return date >= begin.date() && date <= end.date();
+          return date >= begin && date <= end;
         }
         false
       })
@@ -358,8 +361,8 @@ pub async fn tally_dps(
   let pet_search = ok!(Regex::new(&pet_search), dps_tally);
 
   // Range for checking log entry date/time.
-  let begin_ts = begin.timestamp();
-  let end_ts = end.timestamp();
+  let begin_ts = span.begin.timestamp();
+  let end_ts = span.end.timestamp();
   let range = if end_ts >= begin_ts {
     begin_ts..=end_ts
   } else {
