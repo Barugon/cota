@@ -3,7 +3,6 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{channel::mpsc, executor::ThreadPool, future, StreamExt};
 use regex::Regex;
 use std::{
-  cmp,
   collections::HashSet,
   fs,
   path::{Path, PathBuf},
@@ -390,25 +389,25 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
         }
 
         let line = get_log_text(line);
-        if let Some(range) = avatar_search.find(line) {
+        if let Some(found) = avatar_search.find(line) {
           // The search term ends just past the damage value.
-          if let Some(word) = line[range.range()].split_whitespace().rev().next() {
-            if let Ok(val) = word.parse::<u64>() {
+          if let Some(digits) = line[found.range()].split_whitespace().rev().next() {
+            if let Ok(value) = digits.parse::<u64>() {
               if dmg_start_ts.is_none() {
                 dmg_start_ts = Some(ts);
               }
               dmg_end_ts = Some(ts);
-              dps_tally.avatar += val;
+              dps_tally.avatar += value;
             }
           }
-        } else if let Some(range) = pet_search.find(line) {
-          if let Some(word) = line[range.range()].split_whitespace().rev().next() {
-            if let Ok(val) = word.parse::<u64>() {
+        } else if let Some(found) = pet_search.find(line) {
+          if let Some(digits) = line[found.range()].split_whitespace().rev().next() {
+            if let Ok(value) = digits.parse::<u64>() {
               if dmg_start_ts.is_none() {
                 dmg_start_ts = Some(ts);
               }
               dmg_end_ts = Some(ts);
-              dps_tally.pet += val;
+              dps_tally.pet += value;
             }
           }
         }
@@ -418,7 +417,7 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
 
   if let Some(start_ts) = dmg_start_ts {
     if let Some(end_ts) = dmg_end_ts {
-      dps_tally.secs = cmp::max(end_ts - start_ts, 0) as u64;
+      dps_tally.secs = 0.max(end_ts - start_ts) as u64;
     }
   }
 
