@@ -3,7 +3,6 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{channel::mpsc, executor::ThreadPool, future, StreamExt};
 use regex::Regex;
 use std::{
-  cmp,
   collections::HashSet,
   fs,
   path::{Path, PathBuf},
@@ -418,7 +417,7 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
 
   if let Some(start_ts) = dmg_start_ts {
     if let Some(end_ts) = dmg_end_ts {
-      dps_tally.secs = cmp::max(end_ts - start_ts, 0) as u64;
+      dps_tally.secs = 0.max(end_ts - start_ts) as u64;
     }
   }
 
