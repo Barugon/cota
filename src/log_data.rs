@@ -478,19 +478,20 @@ fn log_date_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
   let time = iter.next()?;
   let ap = iter.next();
 
-  // Parse the hour and adjust for PM.
+  // Parse the hour and adjust for AM/PM.
   let mut iter = time.split(':');
   let hour = {
     let mut hour = iter.next()?.parse().ok()?;
     if let Some(ap) = ap {
       if let Some(ch) = ap.chars().next() {
         if ch == 'P' || ch == 'p' {
+          // 12pm stays 12.
           if hour < 12 {
             // Add 12 to the hour.
             hour += 12;
           }
         } else if hour == 12 {
-          // 12 am becomes 0.
+          // 12am becomes 0.
           hour = 0;
         }
       }
