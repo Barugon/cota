@@ -390,9 +390,9 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
         }
 
         let line = get_log_text(line);
-        if let Some(range) = avatar_search.find(line) {
+        if let Some(found) = avatar_search.find(line) {
           // The search term ends just past the damage value.
-          if let Some(word) = line[range.range()].split_whitespace().rev().next() {
+          if let Some(word) = line[found.range()].split_whitespace().rev().next() {
             if let Ok(val) = word.parse::<u64>() {
               if dmg_start_ts.is_none() {
                 dmg_start_ts = Some(ts);
@@ -401,8 +401,8 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
               dps_tally.avatar += val;
             }
           }
-        } else if let Some(range) = pet_search.find(line) {
-          if let Some(word) = line[range.range()].split_whitespace().rev().next() {
+        } else if let Some(found) = pet_search.find(line) {
+          if let Some(word) = line[found.range()].split_whitespace().rev().next() {
             if let Ok(val) = word.parse::<u64>() {
               if dmg_start_ts.is_none() {
                 dmg_start_ts = Some(ts);
