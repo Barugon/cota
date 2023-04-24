@@ -74,34 +74,42 @@ pub const CABALISTS: &[&str] = &[
 
 /// Orbital periods and zone times.
 pub const PLANETARY_ORBITS: [(i64, f64); CABALISTS.len()] = [
+  // Dolus.
   (
     DECEIT_SECS,
     CONSTELLATION_ZONE / (1.0 / DECEIT_SECS as f64 - CONSTELLATION_RATE),
   ),
+  // Temna.
   (
     DESPISE_SECS,
     CONSTELLATION_ZONE / (1.0 / DESPISE_SECS as f64 - CONSTELLATION_RATE),
   ),
+  // Nefario.
   (
     DASTARD_SECS,
     CONSTELLATION_ZONE / (1.0 / DASTARD_SECS as f64 - CONSTELLATION_RATE),
   ),
+  // Nefas.
   (
     INJUSTICE_SECS,
     CONSTELLATION_ZONE / (1.0 / INJUSTICE_SECS as f64 - CONSTELLATION_RATE),
   ),
+  // Avara.
   (
     PUNISHMENT_SECS,
     CONSTELLATION_ZONE / (1.0 / PUNISHMENT_SECS as f64 - CONSTELLATION_RATE),
   ),
+  // Indigno.
   (
     DISHONOR_SECS,
     CONSTELLATION_ZONE / (1.0 / DISHONOR_SECS as f64 - CONSTELLATION_RATE),
   ),
+  // Corpus.
   (
     CARNALITY_SECS,
     CONSTELLATION_ZONE / (1.0 / CARNALITY_SECS as f64 - CONSTELLATION_RATE),
   ),
+  // Fastus.
   (
     VANITY_SECS,
     CONSTELLATION_ZONE / (1.0 / VANITY_SECS as f64 - CONSTELLATION_RATE),
