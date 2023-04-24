@@ -150,31 +150,47 @@ impl Chronometer {
         });
         ui.end_row();
 
+        let count = count_cabalists(&sieges);
         for (index, siege) in sieges.into_iter().enumerate() {
           // Increment the town index for the next town.
           let next = (siege.virtue() as usize + 1) % 12;
-          let next = format!("Next Town: {} ({:?})", TOWNS[next], siege.virtue());
+          let next = format!("Next Town: {} ({:?})", TOWNS[next], VIRTUES[next]);
 
-          let (cabalist_color, town_color) = if siege.virtue() != Virtue::Ethos {
-            const ACTIVE_CABALIST_COLOR: Color32 = Color32::from_rgb(240, 140, 178);
-            const ACTIVE_TOWN_COLOR: Color32 = Color32::from_gray(204);
-            (ACTIVE_CABALIST_COLOR, ACTIVE_TOWN_COLOR)
+          let (cabalist_color, town_color, remain_color) = if siege.virtue() != Virtue::Ethos {
+            let town_color = match count[siege.virtue() as usize] {
+              0 => unreachable!(),
+              1 => Color32::from_rgb(192, 192, 16),
+              2 => Color32::from_rgb(208, 96, 24),
+              _ => Color32::from_rgb(224, 48, 48),
+            };
+            (
+              Color32::from_rgb(240, 140, 178),
+              town_color,
+              Color32::from_gray(204),
+            )
           } else {
-            const DORMANT_CABALIST_COLOR: Color32 = Color32::from_rgb(180, 120, 154);
-            const DORMANT_TOWN_COLOR: Color32 = Color32::from_gray(128);
-            (DORMANT_CABALIST_COLOR, DORMANT_TOWN_COLOR)
+            (
+              Color32::from_rgb(180, 120, 154),
+              Color32::from_gray(128),
+              Color32::from_gray(128),
+            )
           };
 
+          // Cabalist.
           ui.label(RichText::from(CABALISTS[index]).color(cabalist_color))
             .on_hover_text_at_pointer(&next);
+
+          // Town (devotional).
           ui.centered_and_justified(|ui| {
             let text = format!("{} ({:?})", TOWNS[siege.virtue() as usize], siege.virtue());
             ui.label(RichText::from(text).color(town_color))
               .on_hover_text_at_pointer(&next);
           });
+
+          // Remaining time.
           ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             let text = util::get_countdown_text(Default::default(), siege.remain_secs());
-            ui.label(RichText::from(text).color(town_color))
+            ui.label(RichText::from(text).color(remain_color))
               .on_hover_text_at_pointer(next);
           });
           ui.end_row();
@@ -295,4 +311,12 @@ pub fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
 
     Siege::new(virtue, remain_secs)
   })
+}
+
+fn count_cabalists(sieges: &[Siege; CABALISTS.len()]) -> [u32; VIRTUES.len()] {
+  let mut count: [u32; VIRTUES.len()] = Default::default();
+  for siege in sieges {
+    count[siege.virtue() as usize] += 1;
+  }
+  count
 }
