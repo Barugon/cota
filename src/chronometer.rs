@@ -171,7 +171,7 @@ impl Chronometer {
             )
           } else {
             (
-              Color32::from_rgb(180, 120, 154),
+              Color32::from_rgb(144, 84, 107),
               Color32::from_gray(128),
               Color32::from_gray(128),
             )
