@@ -160,7 +160,7 @@ impl Chronometer {
           let (cabalist_color, town_color, remain_color) = if siege.virtue() != Virtue::Ethos {
             let town_color = match count[siege.virtue() as usize] {
               0 => unreachable!(),
-              1 => Color32::from_rgb(192, 192, 16),
+              1 => Color32::from_rgb(192, 164, 16),
               2 => Color32::from_rgb(208, 96, 24),
               _ => Color32::from_rgb(224, 48, 48),
             };
