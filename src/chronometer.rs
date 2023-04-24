@@ -143,7 +143,7 @@ impl Chronometer {
         // Header.
         ui.label(RichText::from("Cabalist").color(HEADER_COLOR));
         ui.centered_and_justified(|ui| {
-          ui.label(RichText::from("Town (Devotional)").color(HEADER_COLOR));
+          ui.label(RichText::from("Town (Virtue)").color(HEADER_COLOR));
         });
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
           ui.label(RichText::from("Remaining Time").color(HEADER_COLOR));
