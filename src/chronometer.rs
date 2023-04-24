@@ -156,6 +156,7 @@ impl Chronometer {
           let next = (siege.virtue() as usize + 1) % 12;
           let next = format!("Next Town: {} ({:?})", TOWNS[next], VIRTUES[next]);
 
+          // Get the colors.
           let (cabalist_color, town_color, remain_color) = if siege.virtue() != Virtue::Ethos {
             let town_color = match count[siege.virtue() as usize] {
               0 => unreachable!(),
