@@ -181,7 +181,7 @@ impl Chronometer {
           ui.label(RichText::from(CABALISTS[index]).color(cabalist_color))
             .on_hover_text_at_pointer(&next);
 
-          // Town (devotional).
+          // Town (virtue).
           ui.centered_and_justified(|ui| {
             let text = format!("{} ({:?})", TOWNS[siege.virtue() as usize], siege.virtue());
             ui.label(RichText::from(text).color(town_color))
