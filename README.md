@@ -20,7 +20,7 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 ### Portal and Cabalist chronometer
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/166622004.C6X9X0rG.Screenshotfrom20230317234110.png)
+![screenshot](https://a4.pbase.com/o12/09/605909/1/166622004.wKsH8AHG.Screenshotfrom20230424213227.png)
 
 ### Experience planner
 
