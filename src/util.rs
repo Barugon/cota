@@ -36,7 +36,7 @@ macro_rules! debugln {
 }
 
 #[macro_export]
-/// Return from function if `Result` is not `Ok`.
+/// Return from function (and print error) if `Result` is not `Ok`.
 macro_rules! ok {
   ($res:expr) => {
     match $res {
