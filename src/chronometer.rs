@@ -150,7 +150,7 @@ impl Chronometer {
         });
         ui.end_row();
 
-        let count = count_cabalists(&sieges);
+        let counts = count_cabalists(&sieges);
         for (index, siege) in sieges.into_iter().enumerate() {
           // Increment the town index for the next town.
           let next = (siege.virtue() as usize + 1) % 12;
@@ -158,7 +158,7 @@ impl Chronometer {
 
           // Get the colors.
           let (cabalist_color, town_color, remain_color) = if siege.virtue() != Virtue::Ethos {
-            let town_color = match count[siege.virtue() as usize] {
+            let town_color = match counts[siege.virtue() as usize] {
               0 => unreachable!(),
               1 => Color32::from_rgb(192, 164, 24),
               2 => Color32::from_rgb(208, 96, 32),
@@ -315,9 +315,9 @@ pub fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
 }
 
 fn count_cabalists(sieges: &[Siege; CABALISTS.len()]) -> [u32; VIRTUES.len()] {
-  let mut count: [u32; VIRTUES.len()] = Default::default();
+  let mut counts: [u32; VIRTUES.len()] = Default::default();
   for siege in sieges {
-    count[siege.virtue() as usize] += 1;
+    counts[siege.virtue() as usize] += 1;
   }
-  count
+  counts
 }
