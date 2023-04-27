@@ -21,74 +21,77 @@ pub fn get_sota_config_path() -> Option<PathBuf> {
 }
 
 pub fn get_log_path(storage: &dyn Storage) -> Option<PathBuf> {
-  if let Some(folder) = get_value(storage, LOG_PATH_KEY) {
+  if let Some(folder) = storage.get_string(LOG_PATH_KEY) {
     Some(PathBuf::from(folder))
   } else {
     get_default_log_path()
   }
 }
 
+pub fn set_log_path(storage: &mut dyn Storage, folder: &Path) {
+  if let Some(folder) = folder.to_str() {
+    storage.set_string(LOG_PATH_KEY, folder.to_owned());
+  } else {
+    println!("Unable to convert path to string: {folder:?}");
+  }
+}
+
 pub fn get_save_path(storage: &dyn Storage) -> Option<PathBuf> {
-  if let Some(folder) = get_value(storage, SAVE_PATH_KEY) {
+  if let Some(folder) = storage.get_string(SAVE_PATH_KEY) {
     Some(PathBuf::from(folder))
   } else {
     get_default_save_path()
   }
 }
 
-pub fn set_log_path(storage: &mut dyn Storage, folder: &Path) {
-  if let Some(folder) = folder.to_str() {
-    set_value(storage, LOG_PATH_KEY, folder.to_owned());
-  } else {
-    println!("Unable to convert path to string: {folder:?}");
-  }
-}
-
 pub fn set_save_path(storage: &mut dyn Storage, folder: &Path) {
   if let Some(folder) = folder.to_str() {
-    set_value(storage, SAVE_PATH_KEY, folder.to_owned());
+    storage.set_string(SAVE_PATH_KEY, folder.to_owned());
   } else {
     println!("Unable to convert path to string: {folder:?}");
   }
 }
 
 pub fn get_stats_avatar(storage: &dyn Storage) -> Option<String> {
-  get_value(storage, STATS_AVATAR_KEY)
+  storage.get_string(STATS_AVATAR_KEY)
 }
 
 pub fn set_stats_avatar(storage: &mut dyn Storage, avatar: String) {
-  set_value(storage, STATS_AVATAR_KEY, avatar);
+  storage.set_string(STATS_AVATAR_KEY, avatar);
 }
 
 pub fn get_exp_avatar(storage: &dyn Storage) -> Option<String> {
-  get_value(storage, EXP_AVATAR_KEY)
+  storage.get_string(EXP_AVATAR_KEY)
 }
 
 pub fn set_exp_avatar(storage: &mut dyn Storage, avatar: String) {
-  set_value(storage, EXP_AVATAR_KEY, avatar);
+  storage.set_string(EXP_AVATAR_KEY, avatar);
 }
 
 pub fn get_notes(storage: &dyn Storage, avatar: &str) -> Option<String> {
   if avatar.is_empty() {
     return None;
   }
-  get_value(storage, format!("{avatar} {NOTES_KEY}").as_str())
+
+  let key = format!("{avatar} {NOTES_KEY}");
+  storage.get_string(&key)
 }
 
 pub fn set_notes(storage: &mut dyn Storage, avatar: &str, notes: String) {
   if !avatar.is_empty() {
-    set_value(storage, format!("{avatar} {NOTES_KEY}").as_str(), notes);
+    let key = format!("{avatar} {NOTES_KEY}");
+    storage.set_string(&key, notes);
   }
 }
 
 pub fn get_plants(storage: &dyn Storage) -> Option<Vec<Plant>> {
-  let text = get_value(storage, PLANTS_KEY)?;
+  let text = storage.get_string(PLANTS_KEY)?;
   Some(ok!(ron::from_str(&text), None))
 }
 
 pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<Plant>) {
   let text = ok!(ron::to_string(plants));
-  set_value(storage, PLANTS_KEY, text);
+  storage.set_string(PLANTS_KEY, text);
 }
 
 pub fn get_avatar_plan(storage: &mut dyn Storage, avatar: &str) -> Option<AvatarPlan> {
@@ -96,7 +99,8 @@ pub fn get_avatar_plan(storage: &mut dyn Storage, avatar: &str) -> Option<Avatar
     return None;
   }
 
-  let text = get_value(storage, format!("{avatar} {AVATAR_PLAN}").as_str())?;
+  let key = format!("{avatar} {AVATAR_PLAN}");
+  let text = storage.get_string(&key)?;
   let mut plan: AvatarPlan = ok!(ron::from_str(&text), None);
   plan.adv_lvl = plan.adv_lvl.max(1);
   Some(plan)
@@ -122,7 +126,7 @@ pub fn set_avatar_plan(storage: &mut dyn Storage, avatar: &str, plan: &AvatarPla
 
   let text = ok!(ron::to_string(&plan));
   let key = format!("{avatar} {AVATAR_PLAN}");
-  set_value(storage, &key, text);
+  storage.set_string(&key, text);
 }
 
 fn get_default_log_path() -> Option<PathBuf> {
@@ -143,12 +147,4 @@ fn get_default_save_path() -> Option<PathBuf> {
     }
   }
   dirs::home_dir()
-}
-
-fn get_value(storage: &dyn Storage, key: &str) -> Option<String> {
-  storage.get_string(key)
-}
-
-fn set_value(storage: &mut dyn Storage, key: &str, value: String) {
-  storage.set_string(key, value);
 }
