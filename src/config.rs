@@ -13,13 +13,6 @@ const AVATAR_PLAN: &str = "plan";
 const PLANTS_KEY: &str = "plants";
 const NOTES_KEY: &str = "notes";
 
-pub fn get_sota_config_path() -> Option<PathBuf> {
-  let path = dirs::config_dir()?;
-
-  // Concatenate using join for correct separators.
-  Some(path.join("Portalarium").join("Shroud of the Avatar"))
-}
-
 pub fn get_log_path(storage: &dyn Storage) -> Option<PathBuf> {
   if let Some(folder) = storage.get_string(LOG_PATH_KEY) {
     Some(PathBuf::from(folder))
@@ -127,6 +120,13 @@ pub fn set_avatar_plan(storage: &mut dyn Storage, avatar: &str, plan: &AvatarPla
   let text = ok!(ron::to_string(&plan));
   let key = format!("{avatar} {AVATAR_PLAN}");
   storage.set_string(&key, text);
+}
+
+fn get_sota_config_path() -> Option<PathBuf> {
+  let path = dirs::config_dir()?;
+
+  // Concatenate using join for correct separators.
+  Some(path.join("Portalarium").join("Shroud of the Avatar"))
 }
 
 fn get_default_log_path() -> Option<PathBuf> {
