@@ -316,7 +316,7 @@ pub async fn find_log_entries(
   text
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct Span {
   pub begin: NaiveDateTime,
   pub end: NaiveDateTime,
