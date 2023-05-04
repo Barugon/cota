@@ -7,7 +7,7 @@ use crate::{
   farming::Farming,
   offline::Offline,
   stats::{Stats, StatsFilter},
-  util::{AppState, FAIL_ERR, NONE_ERR},
+  util::{self, AppState, FAIL_ERR, NONE_ERR},
 };
 use eframe::{
   egui::{
@@ -151,6 +151,7 @@ impl App {
       .expect(FAIL_ERR);
 
     // State.
+    let locale = util::get_locale();
     let state = AppState::default();
     let page = Page::Chronometer;
 
@@ -158,10 +159,10 @@ impl App {
     let storage = cc.storage.expect(NONE_ERR);
     let log_path = config::get_log_path(storage).unwrap_or_default();
     let mut chronometer = Chronometer::new(threads.clone(), state.clone());
-    let experience = Experience::new(log_path.clone(), threads.clone(), state.clone());
+    let experience = Experience::new(log_path.clone(), threads.clone(), state.clone(), locale);
     let farming = Farming::new(cc.egui_ctx.clone(), storage, state.clone());
     let offline = Offline::new(state.clone());
-    let stats = Stats::new(log_path, state.clone(), threads);
+    let stats = Stats::new(log_path, threads, state.clone(), locale);
 
     // Start the chronometer timer.
     chronometer.start_timer(cc.egui_ctx.clone());
