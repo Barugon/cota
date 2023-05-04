@@ -35,7 +35,7 @@ impl DPSDlg {
     let cancel = Some(Cancel::default());
     let channel = Channel { tx, rx, cancel };
 
-    // Default to the whole day for the search time-span.
+    // Default to the whole day for the search date/time span.
     let date = Local::now().naive_local().date();
     let begin = NaiveDateTime::new(date, NaiveTime::from_hms_opt(0, 0, 0).expect(NONE_ERR));
     let end = NaiveDateTime::new(date, NaiveTime::from_hms_opt(23, 59, 59).expect(NONE_ERR));
