@@ -57,7 +57,7 @@ pub struct Stats {
 }
 
 impl Stats {
-  pub fn new(log_path: PathBuf, state: AppState, threads: ThreadPool) -> Self {
+  pub fn new(log_path: PathBuf, threads: ThreadPool, state: AppState, locale: Locale) -> Self {
     let resist_stats = HashMap::from([
       ("AirAttunement", (Resist::Air, 0.5)),
       ("AirResistance", (Resist::Air, 1.0)),
@@ -90,9 +90,6 @@ impl Stats {
       cancel_stats: None,
       cancel_search: None,
     };
-
-    // State.
-    let locale = util::get_locale();
 
     // Collections
     let avatars = Vec::new();

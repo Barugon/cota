@@ -30,7 +30,7 @@ pub struct Experience {
 }
 
 impl Experience {
-  pub fn new(log_path: PathBuf, threads: ThreadPool, state: AppState) -> Self {
+  pub fn new(log_path: PathBuf, threads: ThreadPool, state: AppState, locale: Locale) -> Self {
     let (tx, rx) = mpsc::unbounded();
     let channel = Channel {
       tx,
@@ -52,7 +52,7 @@ impl Experience {
       producer_skills,
       avatar_plan: Mutex::new(AvatarPlan::new()),
       selected: Default::default(),
-      locale: util::get_locale(),
+      locale,
       init: true,
     }
   }
