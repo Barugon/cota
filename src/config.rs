@@ -9,7 +9,7 @@ const LOG_PATH_KEY: &str = "log_path";
 const SAVE_PATH_KEY: &str = "save_path";
 const STATS_AVATAR_KEY: &str = "stats_avatar";
 const EXP_AVATAR_KEY: &str = "experience_avatar";
-const AVATAR_PLAN: &str = "plan";
+const AVATAR_SKILLS: &str = "skills";
 const PLANTS_KEY: &str = "plants";
 const NOTES_KEY: &str = "notes";
 
@@ -87,7 +87,7 @@ pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<Plant>) {
   storage.set_string(PLANTS_KEY, text);
 }
 
-pub fn get_avatar_plan(
+pub fn get_avatar_skills(
   storage: &mut dyn Storage,
   avatar: &str,
 ) -> Option<HashMap<u32, (i32, i32)>> {
@@ -95,25 +95,29 @@ pub fn get_avatar_plan(
     return None;
   }
 
-  let key = format!("{avatar} {AVATAR_PLAN}");
+  let key = format!("{avatar} {AVATAR_SKILLS}");
   let text = storage.get_string(&key)?;
   Some(ok!(ron::from_str(&text), None))
 }
 
-pub fn set_avatar_plan(storage: &mut dyn Storage, avatar: &str, plan: &HashMap<u32, (i32, i32)>) {
+pub fn set_avatar_skills(
+  storage: &mut dyn Storage,
+  avatar: &str,
+  skills: &HashMap<u32, (i32, i32)>,
+) {
   if avatar.is_empty() {
     return;
   }
 
   // Filter out empties.
-  let plan: HashMap<u32, (i32, i32)> = plan
+  let skills: HashMap<u32, (i32, i32)> = skills
     .iter()
-    .filter(|(_, plan)| plan.0 > 0 || plan.1 > 0)
-    .map(|(id, plan)| (*id, *plan))
+    .filter(|(_, levels)| levels.0 > 0 || levels.1 > 0)
+    .map(|(id, levels)| (*id, *levels))
     .collect();
 
-  let text = ok!(ron::to_string(&plan));
-  let key = format!("{avatar} {AVATAR_PLAN}");
+  let text = ok!(ron::to_string(&skills));
+  let key = format!("{avatar} {AVATAR_SKILLS}");
   storage.set_string(&key, text);
 }
 
