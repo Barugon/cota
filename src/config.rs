@@ -1,4 +1,4 @@
-use crate::{plant_info::Plant, skill_info::AvatarPlan};
+use crate::plant_info::Plant;
 use eframe::Storage;
 use std::{
   collections::HashMap,
@@ -87,35 +87,30 @@ pub fn set_plants(storage: &mut dyn Storage, plants: &Vec<Plant>) {
   storage.set_string(PLANTS_KEY, text);
 }
 
-pub fn get_avatar_plan(storage: &mut dyn Storage, avatar: &str) -> Option<AvatarPlan> {
+pub fn get_avatar_plan(
+  storage: &mut dyn Storage,
+  avatar: &str,
+) -> Option<HashMap<u32, (i32, i32)>> {
   if avatar.is_empty() {
     return None;
   }
 
   let key = format!("{avatar} {AVATAR_PLAN}");
   let text = storage.get_string(&key)?;
-  let mut plan: AvatarPlan = ok!(ron::from_str(&text), None);
-  plan.adv_lvl = plan.adv_lvl.max(1);
-  Some(plan)
+  Some(ok!(ron::from_str(&text), None))
 }
 
-pub fn set_avatar_plan(storage: &mut dyn Storage, avatar: &str, plan: &AvatarPlan) {
+pub fn set_avatar_plan(storage: &mut dyn Storage, avatar: &str, plan: &HashMap<u32, (i32, i32)>) {
   if avatar.is_empty() {
     return;
   }
 
   // Filter out empties.
-  let skill_lvls: HashMap<u32, (i32, i32)> = plan
-    .skill_lvls
+  let plan: HashMap<u32, (i32, i32)> = plan
     .iter()
     .filter(|(_, plan)| plan.0 > 0 || plan.1 > 0)
     .map(|(id, plan)| (*id, *plan))
     .collect();
-
-  let plan = AvatarPlan {
-    adv_lvl: plan.adv_lvl,
-    skill_lvls,
-  };
 
   let text = ok!(ron::to_string(&plan));
   let key = format!("{avatar} {AVATAR_PLAN}");

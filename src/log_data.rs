@@ -79,6 +79,7 @@ impl StatsData {
 
 const FILENAME_START: &str = "SotAChatLog";
 const STATS_KEY: &str = " AdventurerLevel: ";
+const ADV_EXP_KEY: &str = " Adventurer Experience: ";
 const LOG_SEARCH_LIMIT: usize = 256 * 1024;
 
 /// Get a vector of avatar names from the log file names.
@@ -221,6 +222,39 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, ts: i64, cancel: Cance
   }
 
   StatsData::default()
+}
+
+/// Get the latest adventurer experience from `/xp`.
+pub async fn get_adv_exp(log_path: PathBuf, avatar: String, cancel: Cancel) -> Option<i64> {
+  // Work on files from newest to oldest.
+  let filenames = {
+    let mut filenames = get_log_filenames(&log_path, Some(&avatar), None);
+    filenames.sort_unstable_by(|a, b| b.cmp(a));
+    filenames
+  };
+
+  for filename in filenames {
+    if cancel.is_canceled() {
+      break;
+    }
+
+    let path = log_path.join(filename);
+    if let Ok(text) = fs::read_to_string(path) {
+      if text.is_empty() {
+        continue;
+      }
+
+      // Search from the latest entry.
+      for line in text.lines().rev() {
+        let exp = get_adv_xp(line);
+        if exp.is_some() {
+          return exp;
+        }
+      }
+    }
+  }
+
+  None
 }
 
 /// Find log entries matching the provided search term.
@@ -539,6 +573,16 @@ fn get_stats_text(line: &str, ts: i64, file_date: NaiveDate) -> Option<&str> {
   let lts = get_stats_timestamp(line, file_date)?;
   if lts == ts {
     return Some(get_log_text(line));
+  }
+
+  None
+}
+
+fn get_adv_xp(line: &str) -> Option<i64> {
+  let text = get_log_text(line);
+  if text.starts_with(ADV_EXP_KEY) {
+    let text = text[ADV_EXP_KEY.len()..].replace(&[',', '.'], Default::default());
+    return Some(text.parse().ok()?);
   }
 
   None
