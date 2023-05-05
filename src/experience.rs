@@ -1,7 +1,7 @@
 use crate::{
   config, log_data,
-  skill_info::{self, AvatarPlan, SkillCategory, SkillInfo, SkillInfoGroup},
-  util::{self, AppState, Cancel, FAIL_ERR, LEVEL_EXP, LVL_RANGE, NONE_ERR, SKILL_EXP},
+  skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup},
+  util::{self, AppState, Cancel, FAIL_ERR, LEVEL_EXP, NONE_ERR, SKILL_EXP},
 };
 use eframe::{
   egui::{
@@ -39,6 +39,7 @@ impl Experience {
       tx,
       rx,
       cancel_avatars: None,
+      cancel_adv_exp: None,
     };
 
     let adventurer_skills = skill_info::parse_skill_info_groups(SkillCategory::Adventurer);
@@ -66,30 +67,39 @@ impl Experience {
     }
 
     // Check for avatars.
-    while let Ok(Some(avatars)) = self.channel.rx.try_next() {
+    while let Ok(Some(msg)) = self.channel.rx.try_next() {
       self.state.set_busy(false);
-      self.avatars = avatars;
+      match msg {
+        Message::Avatars(avatars) => {
+          self.avatars = avatars;
 
-      let mut avatar = self.avatar.clone();
-      if avatar.is_empty() {
-        // Get the avatar from the config file.
-        if let Some(last_avatar) = config::get_exp_avatar(frame.storage().expect(NONE_ERR)) {
-          avatar = last_avatar;
+          let mut avatar = self.avatar.clone();
+          if avatar.is_empty() {
+            // Get the avatar from the config file.
+            if let Some(last_avatar) = config::get_exp_avatar(frame.storage().expect(NONE_ERR)) {
+              avatar = last_avatar;
+            }
+          }
+
+          if self.avatars.binary_search(&avatar).is_err() {
+            avatar.clear();
+          }
+
+          if avatar.is_empty() {
+            // Get the first avatar.
+            if let Some(first) = self.avatars.first() {
+              avatar = first.clone();
+            }
+          }
+
+          self.set_avatar(frame.storage_mut().expect(NONE_ERR), avatar);
+        }
+        Message::AdvExp(exp) => {
+          if let Some(exp) = exp {
+            self.avatar_plan.lock().expect(FAIL_ERR).adv_exp = exp;
+          }
         }
       }
-
-      if self.avatars.binary_search(&avatar).is_err() {
-        avatar.clear();
-      }
-
-      if avatar.is_empty() {
-        // Get the first avatar.
-        if let Some(first) = self.avatars.first() {
-          avatar = first.clone();
-        }
-      }
-
-      self.set_avatar(frame.storage_mut().expect(NONE_ERR), avatar);
     }
 
     // Tool bar.
@@ -97,10 +107,8 @@ impl Experience {
       ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
         // Adventurer level.
         ui.scope(|ui| {
-          const LABEL_COLOR: Color32 = Color32::from_rgb(154, 187, 154);
           let x_spacing = ui.spacing().item_spacing.x;
-          let mut plan = self.avatar_plan.lock().expect(FAIL_ERR);
-          let value = &mut plan.adv_lvl;
+          let adv_info = self.get_adv_info();
 
           // Spacing adjustment occurs to the left of experience since the layout here is right to left.
           ui.spacing_mut().item_spacing.x *= 0.5;
@@ -111,19 +119,11 @@ impl Experience {
             Vec2::new(107.0, ui.available_height()),
             Layout::left_to_right(Align::Center),
             |ui| {
-              let value = *value;
-              let next = (value + 1).min(200);
-              let exp = LEVEL_EXP[next as usize - 1] - LEVEL_EXP[value as usize - 1];
-              if exp > 0 {
-                let text = if exp > 0 {
-                  exp.to_formatted_string(&self.locale)
-                } else {
-                  String::new()
-                };
-
+              if let Some(adv_info) = &adv_info {
+                let text = adv_info.exp.to_formatted_string(&self.locale);
                 let response = Label::new(text).sense(Sense::click()).ui(ui);
                 if response.on_hover_text_at_pointer("Click to copy").clicked() {
-                  util::set_clipboard_contents(format!("{exp}"));
+                  util::set_clipboard_contents(format!("{}", adv_info.exp));
                 }
               }
             },
@@ -132,11 +132,15 @@ impl Experience {
           ui.spacing_mut().item_spacing.x = x_spacing;
           ui.label("Next");
 
-          ui.spacing_mut().item_spacing.x *= 0.5;
-          ui.add(DragValue::new(value).clamp_range(LVL_RANGE));
-
-          ui.spacing_mut().item_spacing.x = x_spacing;
-          ui.label(RichText::from("Adv Lvl").color(LABEL_COLOR));
+          let hover_text = "Type /xp in-game and then click this button";
+          let button_text = if let Some(adv_info) = &adv_info {
+            format!("Adv Lvl {}", adv_info.lvl)
+          } else {
+            String::from("Adv Lvl ?")
+          };
+          if ui.button(button_text).on_hover_text(hover_text).clicked() {
+            self.request_adv_exp(ui.ctx());
+          }
         });
 
         // Avatar combo-box.
@@ -299,7 +303,7 @@ impl Experience {
 
   pub fn save(&self, storage: &mut dyn Storage) {
     let plan = self.avatar_plan.lock().expect(FAIL_ERR);
-    config::set_avatar_plan(storage, &self.avatar, &plan);
+    config::set_avatar_plan(storage, &self.avatar, &plan.skill_lvls);
   }
 
   fn request_avatars(&mut self, ctx: &Context) {
@@ -319,7 +323,7 @@ impl Experience {
     let ctx = ctx.clone();
     let future = log_data::get_avatars(self.log_path.clone(), cancel);
     let future = async move {
-      let avatars = future.await;
+      let avatars = Message::Avatars(future.await);
       tx.unbounded_send(avatars).expect(FAIL_ERR);
       ctx.request_repaint();
     };
@@ -329,27 +333,107 @@ impl Experience {
   }
 
   fn set_avatar(&mut self, storage: &mut dyn Storage, avatar: String) {
-    if self.avatar != avatar {
-      let mut plan = self.avatar_plan.lock().expect(FAIL_ERR);
+    if self.avatar == avatar {
+      return;
+    }
 
-      // Store the values.
-      config::set_avatar_plan(storage, &self.avatar, &plan);
+    // Cancel any previous adventurer experience request.
+    if let Some(mut cancel) = self.channel.cancel_adv_exp.take() {
+      cancel.cancel();
+    }
 
-      // Store the new avatar name.
-      config::set_exp_avatar(storage, avatar.clone());
+    let mut plan = self.avatar_plan.lock().expect(FAIL_ERR);
 
-      // Get the values for the new avatar.
-      *plan = config::get_avatar_plan(storage, &avatar).unwrap_or(AvatarPlan::new());
+    // Store the values.
+    config::set_avatar_plan(storage, &self.avatar, &plan.skill_lvls);
 
-      self.avatar = avatar;
+    // Store the new avatar name.
+    config::set_exp_avatar(storage, avatar.clone());
+
+    // Get the values for the new avatar.
+    plan.skill_lvls = config::get_avatar_plan(storage, &avatar).unwrap_or(HashMap::new());
+    plan.adv_exp = 0;
+
+    self.avatar = avatar;
+  }
+
+  fn request_adv_exp(&mut self, ctx: &Context) {
+    if self.avatar.is_empty() {
+      return;
+    }
+
+    // Cancel any previous request.
+    if let Some(mut cancel) = self.channel.cancel_adv_exp.take() {
+      cancel.cancel();
+    }
+
+    let cancel = Cancel::default();
+    self.channel.cancel_adv_exp = Some(cancel.clone());
+
+    // Show the busy cursor.
+    self.state.set_busy(true);
+
+    // Setup the future.
+    let tx = self.channel.tx.clone();
+    let ctx = ctx.clone();
+    let future = log_data::get_adv_exp(self.log_path.clone(), self.avatar.clone(), cancel);
+    let future = async move {
+      let avatars = Message::AdvExp(future.await);
+      tx.unbounded_send(avatars).expect(FAIL_ERR);
+      ctx.request_repaint();
+    };
+
+    // Execute the future on a pooled thread.
+    self.threads.spawn_ok(future);
+  }
+
+  fn get_adv_info(&self) -> Option<AdvInfo> {
+    let exp = self.avatar_plan.lock().expect(FAIL_ERR).adv_exp;
+    if exp > 0 {
+      let lvl = util::find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1;
+      if lvl < 200 {
+        return Some(AdvInfo {
+          lvl,
+          exp: LEVEL_EXP[lvl as usize] - exp,
+        });
+      } else {
+        return Some(AdvInfo { lvl, exp: 0 });
+      }
+    }
+
+    None
+  }
+}
+
+struct AdvInfo {
+  lvl: i32,
+  exp: i64,
+}
+
+pub struct AvatarPlan {
+  pub adv_exp: i64,
+  pub skill_lvls: HashMap<u32, (i32, i32)>,
+}
+
+impl AvatarPlan {
+  pub fn new() -> Self {
+    AvatarPlan {
+      adv_exp: 0,
+      skill_lvls: HashMap::new(),
     }
   }
 }
 
+enum Message {
+  Avatars(Vec<String>),
+  AdvExp(Option<i64>),
+}
+
 struct Channel {
-  tx: mpsc::UnboundedSender<Vec<String>>,
-  rx: mpsc::UnboundedReceiver<Vec<String>>,
+  tx: mpsc::UnboundedSender<Message>,
+  rx: mpsc::UnboundedReceiver<Message>,
   cancel_avatars: Option<Cancel>,
+  cancel_adv_exp: Option<Cancel>,
 }
 
 fn get_skill_lvl_mut(levels: &mut HashMap<u32, (i32, i32)>, id: u32) -> &mut (i32, i32) {

@@ -1,6 +1,6 @@
 use crate::{
   skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup},
-  util::{FAIL_ERR, LEVEL_EXP, LVL_RANGE, NONE_ERR, SKILL_EXP},
+  util::{self, FAIL_ERR, LEVEL_EXP, LVL_RANGE, NONE_ERR, SKILL_EXP},
 };
 use serde_json::Value;
 use std::{borrow::Cow, fs::File, io::Write, ops::Range, path::PathBuf, sync::RwLock};
@@ -130,7 +130,7 @@ impl GameData {
   pub fn get_adv_lvl(&self) -> i32 {
     let ae = self.character.get(AE).expect(NONE_ERR);
     let exp = ae.to_i64().expect(NONE_ERR);
-    find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1
+    util::find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1
   }
 
   pub fn set_adv_lvl(&mut self, lvl: i32) {
@@ -141,7 +141,7 @@ impl GameData {
   pub fn get_prd_lvl(&self) -> i32 {
     let pe = self.character.get(PE).expect(NONE_ERR);
     let exp = pe.to_i64().expect(NONE_ERR);
-    find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1
+    util::find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1
   }
 
   pub fn set_prd_lvl(&mut self, lvl: i32) {
@@ -375,7 +375,7 @@ impl Item {
 fn get_skill_lvl(sk2: &Value, info: &SkillInfo) -> Option<i32> {
   let exp = sk2.get(format!("{}", info.id))?.get(X)?;
   let exp = (exp.to_i64()? as f64 / info.mul) as i64;
-  let idx = find_min(exp, &SKILL_EXP)?;
+  let idx = util::find_min(exp, &SKILL_EXP)?;
 
   Some(idx as i32 + 1)
 }
@@ -423,19 +423,6 @@ impl ToI64 for Value {
       Value::Number(val) => val.as_i64(),
       Value::String(text) => text.parse().ok(),
       _ => None,
-    }
-  }
-}
-
-fn find_min<T: Ord>(value: T, values: &[T]) -> Option<usize> {
-  match values.binary_search(&value) {
-    Ok(idx) => Some(idx),
-    Err(idx) => {
-      if idx > 0 {
-        Some(idx - 1)
-      } else {
-        None
-      }
     }
   }
 }

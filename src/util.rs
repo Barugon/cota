@@ -85,6 +85,19 @@ macro_rules! f64_to_string {
   };
 }
 
+pub fn find_min<T: Ord>(value: T, values: &[T]) -> Option<usize> {
+  match values.binary_search(&value) {
+    Ok(idx) => Some(idx),
+    Err(idx) => {
+      if idx > 0 {
+        Some(idx - 1)
+      } else {
+        None
+      }
+    }
+  }
+}
+
 pub fn set_clipboard_contents(text: String) {
   let mut ctx: ClipboardContext = ok!(ClipboardProvider::new());
   err!(ctx.set_contents(text));
