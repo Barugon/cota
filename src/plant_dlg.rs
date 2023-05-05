@@ -94,7 +94,9 @@ impl PlantDlg {
               ui.add(widget);
 
               // Date.
-              let widget = DatePickerButton::new(&mut self.date).id_source("plant_date_picker");
+              let widget = DatePickerButton::new(&mut self.date)
+                .id_source("plant_date_picker")
+                .show_icon(false);
               ui.spacing_mut().item_spacing.x = item_spacing.x;
               ui.add(widget);
 

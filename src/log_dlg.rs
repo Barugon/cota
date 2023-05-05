@@ -3,7 +3,10 @@ use crate::{
   util::{self, AppState, Cancel, Search, NONE_ERR},
 };
 use eframe::{
-  egui::{Context, Key, RichText, ScrollArea, TextEdit, TextFormat, Ui, Window},
+  egui::{
+    scroll_area::ScrollBarVisibility, Context, Key, RichText, ScrollArea, TextEdit, TextFormat, Ui,
+    Window,
+  },
   emath::Align2,
   epaint::{
     text::{LayoutJob, LayoutSection},
@@ -66,7 +69,7 @@ impl LogDlg {
               ScrollArea::vertical()
             }
             .max_height(available.height() * 0.75)
-            .always_show_scroll(true)
+            .scroll_bar_visibility(ScrollBarVisibility::AlwaysVisible)
             .show(ui, |ui| {
               ui.add_sized(
                 ui.available_size(),
