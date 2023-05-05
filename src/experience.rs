@@ -110,27 +110,17 @@ impl Experience {
           let x_spacing = ui.spacing().item_spacing.x;
           let adv_info = self.get_adv_info();
 
-          // Spacing adjustment occurs to the left of experience since the layout here is right to left.
-          ui.spacing_mut().item_spacing.x *= 0.5;
+          if let Some(adv_info) = &adv_info {
+            ui.spacing_mut().item_spacing.x *= 0.5;
+            let text = adv_info.exp.to_formatted_string(&self.locale);
+            let response = Label::new(text).sense(Sense::click()).ui(ui);
+            if response.on_hover_text_at_pointer("Click to copy").clicked() {
+              util::set_clipboard_contents(format!("{}", adv_info.exp));
+            }
 
-          // This allocates enough space for the maximum experience value size and uses left to right
-          // layout internally to keep the experience label left justified.
-          ui.allocate_ui_with_layout(
-            Vec2::new(107.0, ui.available_height()),
-            Layout::left_to_right(Align::Center),
-            |ui| {
-              if let Some(adv_info) = &adv_info {
-                let text = adv_info.exp.to_formatted_string(&self.locale);
-                let response = Label::new(text).sense(Sense::click()).ui(ui);
-                if response.on_hover_text_at_pointer("Click to copy").clicked() {
-                  util::set_clipboard_contents(format!("{}", adv_info.exp));
-                }
-              }
-            },
-          );
-
-          ui.spacing_mut().item_spacing.x = x_spacing;
-          ui.label("Next");
+            ui.spacing_mut().item_spacing.x = x_spacing;
+            ui.label("Next");
+          }
 
           let hover_text = "Type /xp in-game and then click this button";
           let button_text = if let Some(adv_info) = &adv_info {
