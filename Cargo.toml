@@ -10,9 +10,9 @@ version = "5.3.5"
 chrono = {version = "0.4", features = ["serde"]}
 clipboard = "0.5"
 dirs = "5.0"
-eframe = {version = "0.21", features = ["persistence"]}
-egui_extras = {version = "0.21", features = ["image", "datepicker"]}
-egui_file = "0.8"
+eframe = {git = "https://github.com/Barugon/egui.git", branch = "combined_changes", features = ["persistence"]}
+egui_extras = {git = "https://github.com/Barugon/egui.git", branch = "combined_changes", features = ["image", "datepicker"]}
+egui_file = {git = "https://github.com/Barugon/egui_file.git", branch = "local_egui"}
 futures = {version = "0.3", features = ["thread-pool"]}
 image = {version = "0.24", features = ["png"]}
 notify-rust = "4"
