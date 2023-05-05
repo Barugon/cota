@@ -26,7 +26,7 @@ pub struct Experience {
   avatars: Vec<String>,
   adventurer_skills: Vec<SkillInfoGroup>,
   producer_skills: Vec<SkillInfoGroup>,
-  avatar_plan: Mutex<AvatarPlan>,
+  level_info: Mutex<LevelInfo>,
   selected: SkillInfo,
   locale: Locale,
   init: bool,
@@ -54,7 +54,7 @@ impl Experience {
       avatars: Vec::new(),
       adventurer_skills,
       producer_skills,
-      avatar_plan: Mutex::new(AvatarPlan::new()),
+      level_info: Mutex::new(LevelInfo::new()),
       selected: Default::default(),
       locale,
       init: true,
@@ -96,7 +96,7 @@ impl Experience {
         }
         Message::AdvExp(exp) => {
           if let Some(exp) = exp {
-            self.avatar_plan.lock().expect(FAIL_ERR).adv_exp = exp;
+            self.level_info.lock().expect(FAIL_ERR).adv_exp = exp;
           }
         }
       }
@@ -225,9 +225,9 @@ impl Experience {
                       });
                     })
                     .body(|mut body| {
-                      let mut plan = self.avatar_plan.lock().expect(FAIL_ERR);
+                      let mut info = self.level_info.lock().expect(FAIL_ERR);
                       for skill in &skill_group.skills {
-                        let level = get_skill_lvl_mut(&mut plan.skill_lvls, skill.id);
+                        let level = get_skill_lvl_mut(&mut info.skill_lvls, skill.id);
                         body.row(row_size, |mut row| {
                           row.col(|ui| {
                             let text = RichText::from(skill.name);
@@ -292,8 +292,8 @@ impl Experience {
   }
 
   pub fn save(&self, storage: &mut dyn Storage) {
-    let plan = self.avatar_plan.lock().expect(FAIL_ERR);
-    config::set_avatar_plan(storage, &self.avatar, &plan.skill_lvls);
+    let skills = self.level_info.lock().expect(FAIL_ERR);
+    config::set_avatar_skills(storage, &self.avatar, &skills.skill_lvls);
   }
 
   fn request_avatars(&mut self, ctx: &Context) {
@@ -332,17 +332,17 @@ impl Experience {
       cancel.cancel();
     }
 
-    let mut plan = self.avatar_plan.lock().expect(FAIL_ERR);
+    let mut info = self.level_info.lock().expect(FAIL_ERR);
 
     // Store the values.
-    config::set_avatar_plan(storage, &self.avatar, &plan.skill_lvls);
+    config::set_avatar_skills(storage, &self.avatar, &info.skill_lvls);
 
     // Store the new avatar name.
     config::set_exp_avatar(storage, avatar.clone());
 
     // Get the values for the new avatar.
-    plan.skill_lvls = config::get_avatar_plan(storage, &avatar).unwrap_or(HashMap::new());
-    plan.adv_exp = 0;
+    info.skill_lvls = config::get_avatar_skills(storage, &avatar).unwrap_or(HashMap::new());
+    info.adv_exp = 0;
 
     self.avatar = avatar;
   }
@@ -378,7 +378,7 @@ impl Experience {
   }
 
   fn get_adv_info(&self) -> Option<AdvInfo> {
-    let exp = self.avatar_plan.lock().expect(FAIL_ERR).adv_exp;
+    let exp = self.level_info.lock().expect(FAIL_ERR).adv_exp;
     if exp > 0 {
       let lvl = util::find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1;
       if lvl < 200 {
@@ -400,14 +400,14 @@ struct AdvInfo {
   exp: i64,
 }
 
-pub struct AvatarPlan {
+pub struct LevelInfo {
   pub adv_exp: i64,
   pub skill_lvls: HashMap<u32, (i32, i32)>,
 }
 
-impl AvatarPlan {
+impl LevelInfo {
   pub fn new() -> Self {
-    AvatarPlan {
+    LevelInfo {
       adv_exp: 0,
       skill_lvls: HashMap::new(),
     }
