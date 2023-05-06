@@ -581,7 +581,7 @@ fn get_stats_text(line: &str, ts: i64, file_date: NaiveDate) -> Option<&str> {
 fn get_adv_xp(line: &str) -> Option<i64> {
   let text = get_log_text(line);
   if text.starts_with(ADV_EXP_KEY) {
-    let text = text[ADV_EXP_KEY.len()..].replace(&[',', '.'], Default::default());
+    let text = text[ADV_EXP_KEY.len()..].replace([',', '.'], Default::default());
     return text.parse().ok();
   }
 
