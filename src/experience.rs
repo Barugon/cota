@@ -298,6 +298,18 @@ impl Experience {
     config::set_avatar_skills(storage, &self.avatar, &self.level_info.skill_lvls);
   }
 
+  pub fn on_exit(&mut self) {
+    // Cancel all async operations on exit.
+    let cancelers = [
+      self.channel.cancel_avatars.take(),
+      self.channel.cancel_adv_exp.take(),
+    ];
+
+    for mut cancel in cancelers.into_iter().flatten() {
+      cancel.cancel();
+    }
+  }
+
   fn request_avatars(&mut self, ctx: &Context) {
     // Cancel any previous request.
     if let Some(mut cancel) = self.channel.cancel_avatars.take() {
