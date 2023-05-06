@@ -15,7 +15,7 @@ use eframe::{
     TopBottomPanel, Ui, Visuals,
   },
   emath::Align2,
-  epaint::{self, Color32, Vec2},
+  epaint::{self, Color32, Pos2, Vec2},
   glow, Storage,
 };
 use futures::executor::ThreadPoolBuilder;
@@ -79,22 +79,29 @@ fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> 
 
 fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool {
   let response = ui.button(text);
-  if response.clicked() || close {
+  let clicked = response.clicked();
+  if clicked || close {
     ui.close_menu();
   } else if let Some(hotkey) = hotkey {
     let cursor_pos = response.ctx.input(|state| state.pointer.hover_pos());
     if let Some(pos) = cursor_pos {
       // Show the hotkey as a tooltip even if the menu item is disabled.
       if response.rect.contains(pos) && response.ctx.layer_id_at(pos) == Some(response.layer_id) {
-        let pos = Some(pos + epaint::vec2(16.0, 16.0));
-        containers::show_tooltip_at(&response.ctx, response.id.with("_hotkey"), pos, |ui| {
-          ui.label(hotkey);
-        });
+        let offset = (28.0 - response.rect.height()) * 0.5;
+        let pos = Pos2::new(response.rect.right(), response.rect.top() - offset);
+        containers::show_tooltip_at(
+          &response.ctx,
+          response.id.with("_hotkey"),
+          Some(pos),
+          |ui| {
+            ui.label(hotkey);
+          },
+        );
       }
     }
   }
 
-  response.clicked()
+  clicked
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

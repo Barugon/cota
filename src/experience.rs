@@ -114,7 +114,7 @@ impl Experience {
             ui.spacing_mut().item_spacing.x *= 0.5;
             let text = adv_info.exp.to_formatted_string(&self.locale);
             let response = Label::new(text).sense(Sense::click()).ui(ui);
-            if response.on_hover_text_at_pointer("Click to copy").clicked() {
+            if response.on_hover_text("Click to copy").clicked() {
               util::set_clipboard_contents(format!("{}", adv_info.exp));
             }
 
@@ -266,7 +266,7 @@ impl Experience {
                                 (text, exp)
                               };
                               let response = Label::new(text).sense(Sense::click()).ui(ui);
-                              if response.on_hover_text_at_pointer("Click to copy").clicked() {
+                              if response.on_hover_text("Click to copy").clicked() {
                                 util::set_clipboard_contents(format!("{exp}"));
                               }
                             }
