@@ -187,8 +187,8 @@ impl Farming {
       });
   }
 
-  pub fn stop_timer(&mut self) {
-    // Cancel the thread.
+  pub fn on_exit(&mut self) {
+    // Cancel the timer thread.
     if let Some(mut cancel) = self.cancel.take() {
       cancel.cancel();
     }
