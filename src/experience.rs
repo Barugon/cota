@@ -122,7 +122,7 @@ impl Experience {
             ui.label("Next");
           }
 
-          let hover_text = "Type /xp in-game and then click this button";
+          let hover_text = "Type /xp in-game then click this button";
           let button_text = if let Some(adv_info) = &adv_info {
             format!("Adv Lvl {}", adv_info.lvl)
           } else {
