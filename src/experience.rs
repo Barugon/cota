@@ -107,11 +107,11 @@ impl Experience {
       ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
         ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
           // Adventurer level.
-          let x_spacing = ui.spacing().item_spacing.x;
           let adv_info = self.get_adv_info();
-
           if let Some(adv_info) = &adv_info {
+            let x_spacing = ui.spacing().item_spacing.x;
             ui.spacing_mut().item_spacing.x *= 0.5;
+
             let text = adv_info.exp.to_formatted_string(&self.locale);
             let response = Label::new(text).sense(Sense::click()).ui(ui);
             if response.on_hover_text("Click to copy").clicked() {
