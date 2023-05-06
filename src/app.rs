@@ -87,7 +87,8 @@ fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool
     if let Some(pos) = cursor_pos {
       // Show the hotkey as a tooltip even if the menu item is disabled.
       if response.rect.contains(pos) && response.ctx.layer_id_at(pos) == Some(response.layer_id) {
-        let offset = (28.0 - response.rect.height()) * 0.5;
+        const TOOLTIP_SIZE: f32 = 28.0;
+        let offset = (TOOLTIP_SIZE - response.rect.height()) * 0.5;
         let pos = Pos2::new(response.rect.right(), response.rect.top() - offset);
         containers::show_tooltip_at(
           &response.ctx,
