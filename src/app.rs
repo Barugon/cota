@@ -11,7 +11,7 @@ use crate::{
 };
 use eframe::{
   egui::{
-    containers, menu, style::Margin, CentralPanel, Context, CursorIcon, Event, Frame, Key,
+    containers, menu, style::Margin, CentralPanel, Context, CursorIcon, Event, Frame, Key, Label,
     TopBottomPanel, Ui, Visuals,
   },
   emath::Align2,
@@ -95,7 +95,7 @@ fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool
           response.id.with("_hotkey"),
           Some(pos),
           |ui| {
-            ui.label(hotkey);
+            ui.add_enabled(response.enabled(), Label::new(hotkey));
           },
         );
       }
