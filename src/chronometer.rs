@@ -179,20 +179,20 @@ impl Chronometer {
 
           // Cabalist.
           ui.label(RichText::from(CABALISTS[index]).color(cabalist_color))
-            .on_hover_text_at_pointer(&next);
+            .on_hover_text(&next);
 
           // Town (virtue).
           ui.centered_and_justified(|ui| {
             let text = format!("{} ({:?})", TOWNS[siege.virtue() as usize], siege.virtue());
             ui.label(RichText::from(text).color(town_color))
-              .on_hover_text_at_pointer(&next);
+              .on_hover_text(&next);
           });
 
           // Remaining time.
           ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             let text = util::get_countdown_text(Default::default(), siege.remain_secs());
             ui.label(RichText::from(text).color(remain_color))
-              .on_hover_text_at_pointer(next);
+              .on_hover_text(next);
           });
           ui.end_row();
         }

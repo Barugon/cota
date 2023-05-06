@@ -332,7 +332,7 @@ pub fn scroll_bar_size(ui: &Ui) -> f32 {
   spacing.scroll_bar_inner_margin + spacing.scroll_bar_width + spacing.scroll_bar_outer_margin
 }
 
-/// Get the size (height) of a Button.
+/// Get the size (height) of a button.
 pub fn button_size(ui: &Ui) -> f32 {
   text_size(ui) + ui.spacing().button_padding[1] * 2.0
 }

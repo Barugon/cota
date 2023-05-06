@@ -55,14 +55,14 @@ impl Offline {
     // Tool bar.
     ui.horizontal(|ui| {
       if image_button(&self.load_image, ui)
-        .on_hover_text_at_pointer("Load Save-game")
+        .on_hover_text("Load Save-game")
         .clicked()
       {
         self.load_request = true;
       }
       ui.add_enabled_ui(self.changed(), |ui| {
         if image_button(&self.store_image, ui)
-          .on_hover_text_at_pointer("Store Save-game")
+          .on_hover_text("Store Save-game")
           .clicked()
         {
           self.store();
