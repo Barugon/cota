@@ -582,7 +582,7 @@ fn get_adv_xp(line: &str) -> Option<i64> {
   let text = get_log_text(line);
   if text.starts_with(ADV_EXP_KEY) {
     let text = text[ADV_EXP_KEY.len()..].replace(&[',', '.'], Default::default());
-    return Some(text.parse().ok()?);
+    return text.parse().ok();
   }
 
   None
