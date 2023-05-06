@@ -586,7 +586,7 @@ impl eframe::App for App {
   }
 
   fn on_exit(&mut self, _: Option<&glow::Context>) {
-    self.chronometer.stop_timer();
+    self.chronometer.on_exit();
     self.experience.on_exit();
     self.farming.on_exit();
     self.stats.on_exit();
