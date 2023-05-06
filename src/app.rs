@@ -355,6 +355,8 @@ impl eframe::App for App {
                 if menu_item(ui, close_menu, "Set Log Folder...", None) {
                   self.choose_folder_path(ctx);
                 }
+
+                ui.separator();
               }
               Page::Offline => {
                 if menu_item(ui, close_menu, "Load Save-game...", None) {
