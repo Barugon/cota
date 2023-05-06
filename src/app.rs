@@ -351,6 +351,11 @@ impl eframe::App for App {
         menu::bar(ui, |ui| {
           ui.menu_button("File", |ui| {
             match self.page {
+              Page::Experience => {
+                if menu_item(ui, close_menu, "Set Log Folder...", None) {
+                  self.choose_folder_path(ctx);
+                }
+              }
               Page::Offline => {
                 if menu_item(ui, close_menu, "Load Save-game...", None) {
                   let storage = frame.storage_mut().expect(NONE_ERR);
@@ -448,6 +453,7 @@ impl eframe::App for App {
               egui_file::DialogType::SelectFolder => {
                 let storage = frame.storage_mut().expect(NONE_ERR);
                 config::set_log_path(storage, &path);
+                self.experience.set_log_path(ctx, path.clone());
                 self.stats.set_log_path(ctx, path);
               }
               egui_file::DialogType::OpenFile => {
