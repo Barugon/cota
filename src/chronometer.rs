@@ -225,6 +225,10 @@ impl Chronometer {
       timer_cancel.cancel();
     }
   }
+
+  pub fn on_exit(&mut self) {
+    self.stop_timer();
+  }
 }
 
 const RIFT_COUNT: usize = 8;
