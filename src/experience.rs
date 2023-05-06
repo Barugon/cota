@@ -105,8 +105,8 @@ impl Experience {
     // Tool bar.
     ui.horizontal(|ui| {
       ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-        // Adventurer level.
-        ui.scope(|ui| {
+        ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
+          // Adventurer level.
           let x_spacing = ui.spacing().item_spacing.x;
           let adv_info = self.get_adv_info();
 
@@ -132,9 +132,8 @@ impl Experience {
             self.request_adv_exp(ui.ctx());
           }
         });
-
-        // Avatar combo-box.
         ui.add_enabled_ui(!self.avatars.is_empty(), |ui| {
+          // Avatar combo-box.
           let mut avatar_changed = None;
           ComboBox::from_id_source("exp_avatar_combo")
             .selected_text(&self.avatar)
@@ -177,6 +176,11 @@ impl Experience {
     ui.allocate_ui(size, |ui| {
       self.show_skill_category(ui, SkillCategory::Producer);
     });
+  }
+
+  pub fn set_log_path(&mut self, ctx: &Context, log_path: PathBuf) {
+    self.log_path = log_path;
+    self.request_avatars(ctx);
   }
 
   fn show_skill_category(&mut self, ui: &mut Ui, category: SkillCategory) {
