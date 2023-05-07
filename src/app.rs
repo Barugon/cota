@@ -373,15 +373,14 @@ impl eframe::App for App {
       ui.horizontal_centered(|ui| {
         menu::bar(ui, |ui| {
           ui.menu_button("File", |ui| {
-            match self.page {
-              Page::Experience => {
-                if menu_item(ui, close_menu, "Set Log Folder...", None) {
-                  self.choose_folder_path(ctx);
-                }
+            if menu_item(ui, close_menu, "Set Log Folder...", None) {
+              self.choose_folder_path(ctx);
+            }
 
-                ui.separator();
-              }
+            match self.page {
               Page::Offline => {
+                ui.separator();
+
                 if menu_item(ui, close_menu, "Load Save-game...", None) {
                   self.choose_load_path(ctx);
                 }
@@ -399,13 +398,9 @@ impl eframe::App for App {
                     self.choose_store_path(ctx);
                   }
                 });
-
-                ui.separator();
               }
               Page::Stats => {
-                if menu_item(ui, close_menu, "Set Log Folder...", None) {
-                  self.choose_folder_path(ctx);
-                }
+                ui.separator();
 
                 let enabled = !self.stats.avatar().is_empty();
                 ui.add_enabled_ui(enabled, |ui| {
@@ -423,11 +418,11 @@ impl eframe::App for App {
                 if menu_item(ui, close_menu, "Reload Stats", Some("F5")) {
                   self.stats.reload(ui.ctx());
                 }
-
-                ui.separator();
               }
               _ => (),
             }
+
+            ui.separator();
 
             if menu_item(ui, close_menu, "Quit", Some(cmd!("Q"))) {
               frame.close();
