@@ -1,4 +1,4 @@
-use crate::util::{AppState, APP_AUTHORS, APP_ICON, APP_NAME, APP_TITLE, APP_VERSION};
+use crate::util::{AppState, APP_AUTHORS, APP_ICON, APP_NAME, APP_TITLE, APP_VERSION, FAIL_ERR};
 use eframe::{
   egui::{Context, Key, RichText, Window},
   emath::Align2,
@@ -15,8 +15,7 @@ pub struct AboutDlg {
 impl AboutDlg {
   pub fn new(state: AppState) -> Self {
     let logo_id = format!("{APP_NAME}_logo");
-    let logo =
-      RetainedImage::from_image_bytes(logo_id, APP_ICON).expect("Unable to decode app icon");
+    let logo = RetainedImage::from_image_bytes(logo_id, APP_ICON).expect(FAIL_ERR);
     let visible = false;
 
     Self {
