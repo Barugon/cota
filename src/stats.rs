@@ -1,11 +1,11 @@
 use crate::{
-  config,
+  config::Config,
   dps_dlg::DPSDlg,
   log_data::{self, StatsData},
   log_dlg::LogDlg,
   notes_dlg::NotesDlg,
   search_dlg::SearchDlg,
-  util::{self, AppState, Cancel, Search, FAIL_ERR, NONE_ERR},
+  util::{self, AppState, Cancel, Search, FAIL_ERR},
 };
 use eframe::{
   egui::{ComboBox, Context, Layout, RichText, Ui},
@@ -22,6 +22,7 @@ use std::{
 };
 
 pub struct Stats {
+  config: Config,
   resist_stats: HashMap<&'static str, (Resist, f64)>,
 
   // Threading.
@@ -57,7 +58,13 @@ pub struct Stats {
 }
 
 impl Stats {
-  pub fn new(log_path: PathBuf, threads: ThreadPool, state: AppState, locale: Locale) -> Self {
+  pub fn new(
+    log_path: PathBuf,
+    threads: ThreadPool,
+    config: Config,
+    state: AppState,
+    locale: Locale,
+  ) -> Self {
     let resist_stats = HashMap::from([
       ("AirAttunement", (Resist::Air, 0.5)),
       ("AirResistance", (Resist::Air, 1.0)),
@@ -111,6 +118,7 @@ impl Stats {
     let dps_dlg = DPSDlg::new(state.clone(), threads.clone(), locale);
 
     Stats {
+      config,
       resist_stats,
       threads,
       channel,
@@ -132,7 +140,7 @@ impl Stats {
     }
   }
 
-  pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
+  pub fn show(&mut self, ui: &mut Ui) {
     if mem::take(&mut self.init) {
       self.request_avatars(ui.ctx());
     }
@@ -152,7 +160,7 @@ impl Stats {
     if !self.notes_dlg.show(ui.ctx()) {
       if let Some(text) = self.notes_dlg.take_text() {
         if !self.avatar.is_empty() {
-          config::set_notes(frame.storage_mut().expect(NONE_ERR), &self.avatar, text);
+          self.config.set_notes(&self.avatar, text);
         }
       }
     }
@@ -170,7 +178,7 @@ impl Stats {
           // Determine the current avatar.
           if let Some(first) = self.avatars.first() {
             // Check if the avatar is in the configuration.
-            if let Some(avatar) = config::get_stats_avatar(frame.storage().expect(NONE_ERR)) {
+            if let Some(avatar) = self.config.get_stats_avatar() {
               if self.avatars.binary_search(&avatar).is_ok() {
                 self.avatar = avatar;
               }
@@ -178,7 +186,7 @@ impl Stats {
 
             // If the avatar wasn't set then use the first avatar.
             if self.avatar.is_empty() {
-              config::set_stats_avatar(frame.storage_mut().expect(NONE_ERR), first.clone());
+              self.config.set_stats_avatar(first.clone());
               self.avatar = first.clone();
             }
           }
@@ -209,7 +217,7 @@ impl Stats {
         // Notes button.
         ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
           if ui.button("Notes").clicked() {
-            let text = config::get_notes(frame.storage().expect(NONE_ERR), &self.avatar);
+            let text = self.config.get_notes(&self.avatar);
             let text = text.unwrap_or_default();
             self.notes_dlg.open(&self.avatar, text);
           }
@@ -250,7 +258,7 @@ impl Stats {
                   .clicked()
                   && self.avatar != *avatar
                 {
-                  config::set_stats_avatar(frame.storage_mut().expect(NONE_ERR), avatar.clone());
+                  self.config.set_stats_avatar(avatar.clone());
                   self.avatar = avatar.clone();
                   avatar_changed = true;
                 }
