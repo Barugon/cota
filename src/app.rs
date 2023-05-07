@@ -1,13 +1,13 @@
 use crate::{
   about_dlg::AboutDlg,
   chronometer::Chronometer,
-  config,
+  config::Config,
   confirm_dlg::{Choice, ConfirmDlg, Hence},
   experience::Experience,
   farming::Farming,
   offline::Offline,
   stats::{Stats, StatsFilter},
-  util::{self, AppState, FAIL_ERR, NONE_ERR},
+  util::{self, AppState, FAIL_ERR},
 };
 use eframe::{
   egui::{
@@ -16,7 +16,7 @@ use eframe::{
   },
   emath::Align2,
   epaint::{self, Color32, Pos2, Vec2},
-  glow, Storage,
+  glow,
 };
 use futures::executor::ThreadPoolBuilder;
 use std::{ffi::OsStr, path::Path};
@@ -115,6 +115,9 @@ enum Page {
 }
 
 pub struct App {
+  config: Config,
+  window_pos: Option<Pos2>,
+
   // State.
   state: AppState,
   page: Page,
@@ -137,7 +140,7 @@ impl App {
     epaint::vec2(480.0, 640.0)
   }
 
-  pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+  pub fn new(cc: &eframe::CreationContext<'_>, config: Config) -> Self {
     cc.egui_ctx.set_visuals(Visuals::dark());
     let mut style = (*cc.egui_ctx.style()).clone();
 
@@ -164,13 +167,18 @@ impl App {
     let page = Page::Chronometer;
 
     // Tab pages.
-    let storage = cc.storage.expect(NONE_ERR);
-    let log_path = config::get_log_path(storage).unwrap_or_default();
+    let log_path = config.get_log_path().unwrap_or_default();
     let mut chronometer = Chronometer::new(threads.clone(), state.clone());
-    let experience = Experience::new(log_path.clone(), threads.clone(), state.clone(), locale);
-    let farming = Farming::new(cc.egui_ctx.clone(), storage, state.clone());
+    let experience = Experience::new(
+      log_path.clone(),
+      threads.clone(),
+      config.clone(),
+      state.clone(),
+      locale,
+    );
+    let farming = Farming::new(cc.egui_ctx.clone(), config.clone(), state.clone());
     let offline = Offline::new(state.clone());
-    let stats = Stats::new(log_path, threads, state.clone(), locale);
+    let stats = Stats::new(log_path, threads, config.clone(), state.clone(), locale);
 
     // Start the chronometer timer.
     chronometer.start_timer(cc.egui_ctx.clone());
@@ -181,6 +189,8 @@ impl App {
     let file_dlg = None;
 
     App {
+      config,
+      window_pos: None,
       state,
       page,
       chronometer,
@@ -286,7 +296,7 @@ impl App {
     self.file_dlg = Some(file_dlg);
   }
 
-  fn choose_load_path(&mut self, ctx: &Context, storage: &dyn Storage) {
+  fn choose_load_path(&mut self, ctx: &Context) {
     if self.offline.changed() {
       // Current save-game is modified, deal with that first.
       if let Some(file_name) = self.offline.file_name() {
@@ -295,7 +305,7 @@ impl App {
       }
     }
 
-    let Some(path) = config::get_save_path(storage) else { return; };
+    let Some(path) = self.config.get_save_path() else { return; };
     let filter = Box::new(|path: &Path| -> bool {
       return path.extension() == Some(OsStr::new("sota"));
     });
@@ -337,10 +347,15 @@ impl App {
 
 impl eframe::App for App {
   fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
+    let info = frame.info();
+    if info.window_info.position != self.window_pos {
+      self.window_pos = info.window_info.position;
+      self.config.set_window_pos(self.window_pos);
+    }
+
     // Process load request from the offline page.
     if self.offline.load_request() {
-      let storage = frame.storage_mut().expect(NONE_ERR);
-      self.choose_load_path(ctx, storage);
+      self.choose_load_path(ctx);
     }
 
     // Set the progress cursor if the app is busy.
@@ -368,8 +383,7 @@ impl eframe::App for App {
               }
               Page::Offline => {
                 if menu_item(ui, close_menu, "Load Save-game...", None) {
-                  let storage = frame.storage_mut().expect(NONE_ERR);
-                  self.choose_load_path(ctx, storage);
+                  self.choose_load_path(ctx);
                 }
 
                 let enabled = self.offline.changed();
@@ -461,16 +475,14 @@ impl eframe::App for App {
           if let Some(path) = file_dlg.path() {
             match file_dlg.dialog_type() {
               egui_file::DialogType::SelectFolder => {
-                let storage = frame.storage_mut().expect(NONE_ERR);
-                config::set_log_path(storage, &path);
+                self.config.set_log_path(&path);
                 self.experience.set_log_path(ctx, path.clone());
                 self.stats.set_log_path(ctx, path);
               }
               egui_file::DialogType::OpenFile => {
                 let folder = path.with_file_name(String::default());
                 if self.offline.load(path) {
-                  let storage = frame.storage_mut().expect(NONE_ERR);
-                  config::set_save_path(storage, &folder);
+                  self.config.set_save_path(&folder);
                 }
               }
               egui_file::DialogType::SaveFile => self.offline.store_as(path),
@@ -489,10 +501,7 @@ impl eframe::App for App {
         _ => (),
       }
       match self.confirm_dlg.take_hence() {
-        Some(Hence::Load) => {
-          let storage = frame.storage_mut().expect(NONE_ERR);
-          self.choose_load_path(ctx, storage)
-        }
+        Some(Hence::Load) => self.choose_load_path(ctx),
         Some(Hence::Exit) => frame.close(),
         None => (),
       }
@@ -555,16 +564,12 @@ impl eframe::App for App {
       // Tab pages.
       match self.page {
         Page::Chronometer => self.chronometer.show(ui),
-        Page::Experience => self.experience.show(ui, frame),
-        Page::Farming => self.farming.show(ui, frame),
+        Page::Experience => self.experience.show(ui),
+        Page::Farming => self.farming.show(ui),
         Page::Offline => self.offline.show(ui),
-        Page::Stats => self.stats.show(ui, frame),
+        Page::Stats => self.stats.show(ui),
       }
     });
-  }
-
-  fn persist_egui_memory(&self) -> bool {
-    false
   }
 
   fn on_close_event(&mut self) -> bool {
@@ -580,10 +585,6 @@ impl eframe::App for App {
     }
 
     false
-  }
-
-  fn save(&mut self, storage: &mut dyn Storage) {
-    self.experience.save(storage);
   }
 
   fn on_exit(&mut self, _: Option<&glow::Context>) {

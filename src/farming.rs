@@ -1,13 +1,12 @@
 use crate::{
-  config,
+  config::Config,
   plant_dlg::PlantDlg,
   plant_info::{Event, Plant},
-  util::{AppState, Cancel, FAIL_ERR, NONE_ERR},
+  util::{AppState, Cancel, FAIL_ERR},
 };
 use eframe::{
   egui::{Context, Label, ScrollArea, Ui, WidgetText},
   epaint::Color32,
-  Storage,
 };
 use notify_rust::Notification;
 use std::{
@@ -20,6 +19,7 @@ use std::{
 };
 
 pub struct Farming {
+  config: Config,
   plant_dlg: PlantDlg,
   plants: Arc<Mutex<Vec<Plant>>>,
   persist: Arc<AtomicBool>,
@@ -28,13 +28,14 @@ pub struct Farming {
 }
 
 impl Farming {
-  pub fn new(ctx: Context, storage: &dyn Storage, state: AppState) -> Self {
+  pub fn new(ctx: Context, config: Config, state: AppState) -> Self {
     let plant_dlg = PlantDlg::new(state);
-    let plants = config::get_plants(storage).unwrap_or_default();
+    let plants = config.get_plants().unwrap_or_default();
     let plants = Arc::new(Mutex::new(plants));
     let persist = Arc::new(AtomicBool::new(false));
     let cancel = Cancel::default();
     Self {
+      config,
       plant_dlg,
       plants: plants.clone(),
       persist: persist.clone(),
@@ -87,7 +88,7 @@ impl Farming {
     }
   }
 
-  pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
+  pub fn show(&mut self, ui: &mut Ui) {
     if !self.plant_dlg.show(ui.ctx()) {
       if let Some(plant_info) = self.plant_dlg.take_result() {
         self.plants.lock().expect(FAIL_ERR).push(plant_info);
@@ -182,7 +183,7 @@ impl Farming {
 
         if self.persist.swap(false, Ordering::Relaxed) {
           // Persist the timers.
-          config::set_plants(frame.storage_mut().expect(NONE_ERR), &lock);
+          self.config.set_plants(&lock);
         }
       });
   }

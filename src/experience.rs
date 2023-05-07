@@ -1,5 +1,6 @@
 use crate::{
-  config, log_data,
+  config::Config,
+  log_data,
   skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup},
   util::{self, AppState, Cancel, FAIL_ERR, LEVEL_EXP, NONE_ERR, SKILL_EXP},
 };
@@ -10,7 +11,6 @@ use eframe::{
   },
   emath::{Align, Vec2},
   epaint::Color32,
-  Storage,
 };
 use egui_extras::{Column, TableBuilder};
 use futures::{channel::mpsc, executor::ThreadPool};
@@ -18,6 +18,7 @@ use num_format::{Locale, ToFormattedString};
 use std::{collections::HashMap, mem, path::PathBuf};
 
 pub struct Experience {
+  config: Config,
   state: AppState,
   threads: ThreadPool,
   channel: Channel,
@@ -33,7 +34,13 @@ pub struct Experience {
 }
 
 impl Experience {
-  pub fn new(log_path: PathBuf, threads: ThreadPool, state: AppState, locale: Locale) -> Self {
+  pub fn new(
+    log_path: PathBuf,
+    threads: ThreadPool,
+    config: Config,
+    state: AppState,
+    locale: Locale,
+  ) -> Self {
     let (tx, rx) = mpsc::unbounded();
     let channel = Channel {
       tx,
@@ -46,6 +53,7 @@ impl Experience {
     let producer_skills = skill_info::parse_skill_info_groups(SkillCategory::Producer);
 
     Experience {
+      config,
       state,
       threads,
       channel,
@@ -61,7 +69,7 @@ impl Experience {
     }
   }
 
-  pub fn show(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
+  pub fn show(&mut self, ui: &mut Ui) {
     if mem::take(&mut self.init) {
       self.request_avatars(ui.ctx());
     }
@@ -76,7 +84,7 @@ impl Experience {
           let mut avatar = self.avatar.clone();
           if avatar.is_empty() {
             // Get the avatar from the config file.
-            if let Some(last_avatar) = config::get_exp_avatar(frame.storage().expect(NONE_ERR)) {
+            if let Some(last_avatar) = self.config.get_exp_avatar() {
               avatar = last_avatar;
             }
           }
@@ -92,7 +100,7 @@ impl Experience {
             }
           }
 
-          self.set_avatar(frame.storage_mut().expect(NONE_ERR), avatar);
+          self.set_avatar(avatar);
         }
         Message::AdvExp(exp) => {
           if let Some(exp) = exp {
@@ -148,7 +156,7 @@ impl Experience {
             });
 
           if let Some(avatar) = avatar_changed {
-            self.set_avatar(frame.storage_mut().expect(NONE_ERR), avatar)
+            self.set_avatar(avatar)
           }
         });
       });
@@ -294,11 +302,16 @@ impl Experience {
     });
   }
 
-  pub fn save(&self, storage: &mut dyn Storage) {
-    config::set_avatar_skills(storage, &self.avatar, &self.level_info.skill_lvls);
+  pub fn save(&mut self) {
+    let avatar = &self.avatar;
+    let skill_lvls = &self.level_info.skill_lvls;
+    self.config.set_avatar_skills(avatar, skill_lvls);
   }
 
   pub fn on_exit(&mut self) {
+    // Save the current level values.
+    self.save();
+
     // Cancel all async operations on exit.
     let cancelers = [
       self.channel.cancel_avatars.take(),
@@ -336,7 +349,7 @@ impl Experience {
     self.threads.spawn_ok(future);
   }
 
-  fn set_avatar(&mut self, storage: &mut dyn Storage, avatar: String) {
+  fn set_avatar(&mut self, avatar: String) {
     if self.avatar == avatar {
       return;
     }
@@ -347,13 +360,18 @@ impl Experience {
     }
 
     // Store the values.
-    config::set_avatar_skills(storage, &self.avatar, &self.level_info.skill_lvls);
+    self
+      .config
+      .set_avatar_skills(&self.avatar, &self.level_info.skill_lvls);
 
     // Store the new avatar name.
-    config::set_exp_avatar(storage, avatar.clone());
+    self.config.set_exp_avatar(avatar.clone());
 
     // Get the values for the new avatar.
-    let skills = config::get_avatar_skills(storage, &avatar).unwrap_or(HashMap::new());
+    let skills = self
+      .config
+      .get_avatar_skills(&avatar)
+      .unwrap_or(HashMap::new());
 
     self.level_info.skill_lvls = skills;
     self.level_info.adv_exp = 0;

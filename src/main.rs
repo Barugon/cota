@@ -27,12 +27,16 @@ mod stats;
 mod towns_dlg;
 
 use app::App;
-use util::{APP_ICON, APP_TITLE, FAIL_ERR};
+use config::Config;
+use eframe::AppCreator;
+use util::{APP_ICON, APP_TITLE, FAIL_ERR, NONE_ERR};
 
 fn main() {
+  let config = Config::new().expect(NONE_ERR);
   let icon = image::load_from_memory(APP_ICON).expect(FAIL_ERR);
   let options = eframe::NativeOptions {
     resizable: false,
+    initial_window_pos: config.get_window_pos(),
     initial_window_size: Some(App::inner_window_size()),
     max_window_size: Some(App::inner_window_size()),
     min_window_size: Some(App::inner_window_size()),
@@ -44,5 +48,6 @@ fn main() {
     ..Default::default()
   };
 
-  eframe::run_native(APP_TITLE, options, Box::new(|cc| Box::new(App::new(cc)))).expect(FAIL_ERR);
+  let creator: AppCreator = Box::new(move |cc| Box::new(App::new(cc, config)));
+  eframe::run_native(APP_TITLE, options, creator).expect(FAIL_ERR);
 }
