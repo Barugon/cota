@@ -511,6 +511,15 @@ impl eframe::App for App {
   }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Page {
+  Chronometer,
+  Experience,
+  Farming,
+  Offline,
+  Stats,
+}
+
 fn top_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
   const MENU: &str = "Menu";
   TopBottomPanel::top(MENU)
@@ -579,13 +588,4 @@ fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool
   }
 
   clicked
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum Page {
-  Chronometer,
-  Experience,
-  Farming,
-  Offline,
-  Stats,
 }
