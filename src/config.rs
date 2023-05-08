@@ -5,8 +5,7 @@ use crate::{
 use eframe::epaint::Pos2;
 use std::{
   collections::HashMap,
-  fs::File,
-  io::BufReader,
+  fs::{self, File},
   path::{Path, PathBuf},
   sync::{Arc, RwLock},
 };
@@ -27,7 +26,7 @@ struct ItemStore {
 }
 
 impl ItemStore {
-  fn store(&mut self) {
+  fn persist(&mut self) {
     if self.modified {
       let file = File::create(&self.path).expect(FAIL_ERR);
       ron::ser::to_writer_pretty(file, &self.items, Default::default()).expect(FAIL_ERR);
@@ -38,7 +37,7 @@ impl ItemStore {
 
 impl Drop for ItemStore {
   fn drop(&mut self) {
-    self.store();
+    self.persist();
   }
 }
 
@@ -251,8 +250,7 @@ impl Config {
   }
 
   fn load(path: &Path) -> HashMap<String, String> {
-    let Some(file) = File::open(path).ok() else { return HashMap::new() };
-    let reader = BufReader::new(file);
-    ok!(ron::de::from_reader(reader), HashMap::new())
+    let Ok(bytes) = fs::read(path) else { return HashMap::new() };
+    ok!(ron::de::from_bytes(&bytes), HashMap::new())
   }
 }
