@@ -203,6 +203,15 @@ impl Config {
     self.set(&key, text);
   }
 
+  fn path() -> Option<PathBuf> {
+    dirs::config_dir().map(|path| path.join(APP_NAME).with_extension("ron"))
+  }
+
+  fn load(path: &Path) -> HashMap<String, String> {
+    let Ok(bytes) = fs::read(path) else { return HashMap::new() };
+    ok!(ron::de::from_bytes(&bytes), HashMap::new())
+  }
+
   fn get(&self, key: &str) -> Option<String> {
     let lock = self.store.read().expect(FAIL_ERR);
     Some(lock.items.get(key)?.to_owned())
@@ -218,10 +227,6 @@ impl Config {
     let mut lock = self.store.write().expect(FAIL_ERR);
     lock.items.remove(key);
     lock.modified = true;
-  }
-
-  fn path() -> Option<PathBuf> {
-    dirs::config_dir().map(|path| path.join(APP_NAME).with_extension("ron"))
   }
 
   fn get_sota_config_path() -> Option<PathBuf> {
@@ -247,10 +252,5 @@ impl Config {
       }
     }
     dirs::home_dir()
-  }
-
-  fn load(path: &Path) -> HashMap<String, String> {
-    let Ok(bytes) = fs::read(path) else { return HashMap::new() };
-    ok!(ron::de::from_bytes(&bytes), HashMap::new())
   }
 }
