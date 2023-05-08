@@ -1,6 +1,6 @@
 [package]
 authors = ["Barugon"]
-build = "icon.rs"
+build = "win_icon.rs"
 description = "Companion of the Avatar"
 edition = "2021"
 license = "GPL-3.0-or-later"
