@@ -38,7 +38,7 @@ macro_rules! cmd {
 pub struct App {
   // State.
   config: Config,
-  window_pos: Option<Pos2>,
+  win_pos: Option<Pos2>,
   state: AppState,
   page: Page,
 
@@ -82,6 +82,7 @@ impl App {
       .expect(FAIL_ERR);
 
     // State.
+    let win_pos = cc.integration_info.window_info.position;
     let locale = util::get_locale();
     let state = AppState::default();
     let page = Page::Chronometer;
@@ -110,7 +111,7 @@ impl App {
 
     App {
       config,
-      window_pos: None,
+      win_pos,
       state,
       page,
       chronometer,
@@ -269,9 +270,12 @@ impl App {
 impl eframe::App for App {
   fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
     let info = frame.info();
-    if info.window_info.position != self.window_pos {
-      self.window_pos = info.window_info.position;
-      self.config.set_window_pos(self.window_pos);
+    if info.window_info.position.is_some()
+      && info.window_info.position != Some(Pos2::default())
+      && info.window_info.position != self.win_pos
+    {
+      self.win_pos = info.window_info.position;
+      self.config.set_window_pos(self.win_pos);
     }
 
     // Process load request from the offline page.

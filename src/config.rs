@@ -225,8 +225,9 @@ impl Config {
 
   fn remove(&mut self, key: &str) {
     let mut lock = self.store.write().expect(FAIL_ERR);
-    lock.items.remove(key);
-    lock.modified = true;
+    if lock.items.remove(key).is_some() {
+      lock.modified = true;
+    }
   }
 
   fn get_sota_config_path() -> Option<PathBuf> {
