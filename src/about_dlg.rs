@@ -32,7 +32,7 @@ impl AboutDlg {
       let available = ctx.available_rect();
       let mut open = true;
 
-      Window::new(RichText::from(format!("👍  About {APP_NAME}")).strong())
+      Window::new(RichText::from("👍  About CotA").strong())
         .open(&mut open)
         .collapsible(false)
         .current_pos([0.0, 24.0])
