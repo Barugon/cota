@@ -309,7 +309,7 @@ impl Experience {
   }
 
   pub fn on_exit(&mut self) {
-    // Save the current level values.
+    // Save the current values.
     self.save();
 
     // Cancel all async operations on exit.
@@ -359,10 +359,8 @@ impl Experience {
       cancel.cancel();
     }
 
-    // Store the values.
-    self
-      .config
-      .set_avatar_skills(&self.avatar, &self.level_info.skill_lvls);
+    // Save the current values.
+    self.save();
 
     // Store the new avatar name.
     self.config.set_exp_avatar(avatar.clone());
