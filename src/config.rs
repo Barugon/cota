@@ -143,7 +143,13 @@ impl Config {
       return;
     }
 
+    // Remove the entry if notes is empty.
     let key = format!("{avatar} {NOTES_KEY}");
+    if notes.is_empty() {
+      self.remove(&key);
+      return;
+    }
+
     self.set(&key, notes);
   }
 
@@ -154,6 +160,12 @@ impl Config {
   }
 
   pub fn set_plants(&mut self, plants: &Vec<Plant>) {
+    // Remove the entry if plants is empty.
+    if plants.is_empty() {
+      self.remove(PLANTS_KEY);
+      return;
+    }
+
     let text = ok!(ron::to_string(plants));
     self.set(PLANTS_KEY, text);
   }
@@ -181,8 +193,14 @@ impl Config {
       .map(|(id, levels)| (*id, *levels))
       .collect();
 
-    let text = ok!(ron::to_string(&skills));
+    // Remove the entry if skills is empty.
     let key = format!("{avatar} {AVATAR_SKILLS}");
+    if skills.is_empty() {
+      self.remove(&key);
+      return;
+    }
+
+    let text = ok!(ron::to_string(&skills));
     self.set(&key, text);
   }
 
@@ -194,6 +212,12 @@ impl Config {
   fn set(&mut self, key: &str, item: String) {
     let mut lock = self.store.write().expect(FAIL_ERR);
     lock.items.insert(key.to_owned(), item);
+    lock.modified = true;
+  }
+
+  fn remove(&mut self, key: &str) {
+    let mut lock = self.store.write().expect(FAIL_ERR);
+    lock.items.remove(key);
     lock.modified = true;
   }
 
