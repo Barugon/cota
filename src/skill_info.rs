@@ -38,8 +38,8 @@ impl SkillInfoGroup {
 /// Parse the CSV for adventurer or producer skills.
 pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
   let text = match category {
-    SkillCategory::Adventurer => include_str!("res/adventurer_skills.csv"),
-    SkillCategory::Producer => include_str!("res/producer_skills.csv"),
+    SkillCategory::Adventurer => include_str!("../res/adventurer_skills.csv"),
+    SkillCategory::Producer => include_str!("../res/producer_skills.csv"),
   };
   let mut skill_groups = Vec::new();
   let mut skill_group = SkillInfoGroup::default();

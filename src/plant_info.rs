@@ -22,7 +22,7 @@ impl Seed {
 
 /// Parse the seeds CSV.
 pub fn parse_seeds() -> Vec<(&'static str, Seed)> {
-  const SEEDS: &str = include_str!("res/seeds.csv");
+  const SEEDS: &str = include_str!("../res/seeds.csv");
   let mut result = Vec::new();
   for line in SEEDS.lines() {
     let mut iter = line.split(',');

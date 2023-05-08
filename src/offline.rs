@@ -24,8 +24,8 @@ pub struct Offline {
 
 impl Offline {
   pub fn new(state: AppState) -> Self {
-    const LOAD_ICON: &[u8] = include_bytes!("res/load.png");
-    const STORE_ICON: &[u8] = include_bytes!("res/store.png");
+    const LOAD_ICON: &[u8] = include_bytes!("../res/load.png");
+    const STORE_ICON: &[u8] = include_bytes!("../res/store.png");
 
     let load_image = RetainedImage::from_image_bytes("load_image", LOAD_ICON).expect(FAIL_ERR);
     let store_image = RetainedImage::from_image_bytes("store_image", STORE_ICON).expect(FAIL_ERR);
