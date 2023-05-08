@@ -35,90 +35,10 @@ macro_rules! cmd {
   };
 }
 
-fn top_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
-  const MENU: &str = "Menu";
-  TopBottomPanel::top(MENU)
-    .frame(
-      Frame::none()
-        .inner_margin(Margin::symmetric(8.0, 2.0))
-        .fill(Color32::from_gray(40)),
-    )
-    .show(ctx, contents);
-}
-
-fn central_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
-  CentralPanel::default()
-    .frame(
-      Frame::none()
-        .inner_margin(Margin::same(8.0))
-        .fill(Color32::from_gray(32)),
-    )
-    .show(ctx, contents);
-}
-
-fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
-  let (id, margin) = match page {
-    // We need a little more vertical space for the chronometer status area so that it looks good.
-    Page::Chronometer => ("chronometer_status", Margin::symmetric(8.0, 6.0)),
-    // The experience page doesn't have a status area.
-    Page::Experience => unreachable!(),
-    // The farming page doesn't have a status area.
-    Page::Farming => unreachable!(),
-    Page::Offline => ("offline_status", Margin::symmetric(8.0, 2.0)),
-    Page::Stats => ("stats_status", Margin::symmetric(8.0, 2.0)),
-  };
-
-  TopBottomPanel::bottom(id)
-    .frame(
-      Frame::none()
-        .inner_margin(margin)
-        .fill(Color32::from_gray(40)),
-    )
-    .show(ctx, contents);
-}
-
-fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool {
-  let response = ui.button(text);
-  let clicked = response.clicked();
-  if clicked || close {
-    ui.close_menu();
-  } else if let Some(hotkey) = hotkey {
-    let cursor_pos = response.ctx.input(|state| state.pointer.hover_pos());
-    if let Some(pos) = cursor_pos {
-      // Show the hotkey as a tooltip even if the menu item is disabled.
-      if response.rect.contains(pos) && response.ctx.layer_id_at(pos) == Some(response.layer_id) {
-        const TOOLTIP_SIZE: f32 = 28.0;
-        let offset = (TOOLTIP_SIZE - response.rect.height()) * 0.5;
-        let pos = Pos2::new(response.rect.right(), response.rect.top() - offset);
-        containers::show_tooltip_at(
-          &response.ctx,
-          response.id.with("_hotkey"),
-          Some(pos),
-          |ui| {
-            ui.add_enabled(response.enabled(), Label::new(hotkey));
-          },
-        );
-      }
-    }
-  }
-
-  clicked
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum Page {
-  Chronometer,
-  Experience,
-  Farming,
-  Offline,
-  Stats,
-}
-
 pub struct App {
+  // State.
   config: Config,
   window_pos: Option<Pos2>,
-
-  // State.
   state: AppState,
   page: Page,
 
@@ -272,6 +192,7 @@ impl App {
         }
       }
     });
+
     handled
   }
 
@@ -588,4 +509,83 @@ impl eframe::App for App {
     self.farming.on_exit();
     self.stats.on_exit();
   }
+}
+
+fn top_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
+  const MENU: &str = "Menu";
+  TopBottomPanel::top(MENU)
+    .frame(
+      Frame::none()
+        .inner_margin(Margin::symmetric(8.0, 2.0))
+        .fill(Color32::from_gray(40)),
+    )
+    .show(ctx, contents);
+}
+
+fn central_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
+  CentralPanel::default()
+    .frame(
+      Frame::none()
+        .inner_margin(Margin::same(8.0))
+        .fill(Color32::from_gray(32)),
+    )
+    .show(ctx, contents);
+}
+
+fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
+  let (id, margin) = match page {
+    // We need a little more vertical space for the chronometer status area so that it looks good.
+    Page::Chronometer => ("chronometer_status", Margin::symmetric(8.0, 6.0)),
+    // The experience page doesn't have a status area.
+    Page::Experience => unreachable!(),
+    // The farming page doesn't have a status area.
+    Page::Farming => unreachable!(),
+    Page::Offline => ("offline_status", Margin::symmetric(8.0, 2.0)),
+    Page::Stats => ("stats_status", Margin::symmetric(8.0, 2.0)),
+  };
+
+  TopBottomPanel::bottom(id)
+    .frame(
+      Frame::none()
+        .inner_margin(margin)
+        .fill(Color32::from_gray(40)),
+    )
+    .show(ctx, contents);
+}
+
+fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool {
+  let response = ui.button(text);
+  let clicked = response.clicked();
+  if clicked || close {
+    ui.close_menu();
+  } else if let Some(hotkey) = hotkey {
+    let cursor_pos = response.ctx.input(|state| state.pointer.hover_pos());
+    if let Some(pos) = cursor_pos {
+      // Show the hotkey as a tooltip even if the menu item is disabled.
+      if response.rect.contains(pos) && response.ctx.layer_id_at(pos) == Some(response.layer_id) {
+        const TOOLTIP_SIZE: f32 = 28.0;
+        let offset = (TOOLTIP_SIZE - response.rect.height()) * 0.5;
+        let pos = Pos2::new(response.rect.right(), response.rect.top() - offset);
+        containers::show_tooltip_at(
+          &response.ctx,
+          response.id.with("_hotkey"),
+          Some(pos),
+          |ui| {
+            ui.add_enabled(response.enabled(), Label::new(hotkey));
+          },
+        );
+      }
+    }
+  }
+
+  clicked
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Page {
+  Chronometer,
+  Experience,
+  Farming,
+  Offline,
+  Stats,
 }
