@@ -1,3 +1,3 @@
 fn main() {
-  embed_resource::compile("src/res/icon.rc");
+  embed_resource::compile("res/icon.rc");
 }
