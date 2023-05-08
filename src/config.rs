@@ -28,7 +28,7 @@ struct ItemStore {
 impl ItemStore {
   fn persist(&mut self) {
     if self.modified {
-      let file = File::create(&self.path).expect(FAIL_ERR);
+      let file = ok!(File::create(&self.path));
       ron::ser::to_writer_pretty(file, &self.items, Default::default()).expect(FAIL_ERR);
       self.modified = false;
     }
