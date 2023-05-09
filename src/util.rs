@@ -351,47 +351,26 @@ mod tests {
   #[test]
   fn test_find_ignore_case() {
     let text = "Test for 'tschüß' in this text";
-    let result = find_ignore_case(text, "TSCHÜSS");
-    assert!(result.is_some());
-
-    let range = result.expect(NONE_ERR);
-    assert!(range.start == 10);
-
     let len = "tschüß".len();
-    assert!(range.end == range.start + len);
+    let result = find_ignore_case(text, "TSCHÜSS");
+    assert_eq!(result, Some(10..10 + len));
 
     let text = "Is 'TSCHÜSS' present?";
-    let result = find_ignore_case(text, "tschüß");
-    assert!(result.is_some());
-
-    let range = result.expect(NONE_ERR);
-    assert!(range.start == 4);
-
     let len = "TSCHÜSS".len();
-    assert!(range.end == range.start + len);
+    let result = find_ignore_case(text, "tschüß");
+    assert_eq!(result, Some(4..4 + len));
 
     let text = "Find 'ghi\u{307}j'";
-    let result = find_ignore_case(text, "ghİj");
-    assert!(result.is_some());
-
-    let range = result.expect(NONE_ERR);
-    assert!(range.start == 6);
-
     let len = "ghi\u{307}j".len();
-    assert!(range.end == range.start + len);
+    let result = find_ignore_case(text, "ghİj");
+    assert_eq!(result, Some(6..6 + len));
 
     let text = "Abc aBc abC";
     let result = find_ignore_case(text, "abc");
-    assert!(result.is_some());
-
-    let range = result.expect(NONE_ERR);
-    assert!(range.start == 0 && range.end == 3);
+    assert_eq!(result, Some(0..3));
 
     let text = "cbA cBa abC";
     let result = find_ignore_case(text, "abc");
-    assert!(result.is_some());
-
-    let range = result.expect(NONE_ERR);
-    assert!(range.start == 8 && range.end == 11);
+    assert_eq!(result, Some(8..11));
   }
 }
