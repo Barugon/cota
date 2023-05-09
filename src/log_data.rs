@@ -581,7 +581,7 @@ fn get_stats_text(line: &str, ts: i64, file_date: NaiveDate) -> Option<&str> {
 fn get_adv_xp(line: &str) -> Option<i64> {
   let text = get_log_text(line);
   if let Some(text) = text.strip_prefix(ADV_EXP_KEY) {
-    let text = text.replace([',', '.', '\'', '\u{a0}'], Default::default());
+    let text = util::remove_separators(text);
     return text.parse().ok();
   }
 
