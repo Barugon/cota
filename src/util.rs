@@ -294,29 +294,7 @@ pub fn get_locale() -> Locale {
 
 /// Replace a single occurrence of a comma or arabic decimal with a period.
 pub fn replace_decimal(text: &str) -> String {
-  const ARABIC_DECIMAL: char = '\u{66b}';
-  const COMMA: char = ',';
-  const PERIOD: char = '.';
-
-  // The output can never be larger than the input.
-  let mut result = String::with_capacity(text.len());
-  let mut iter = text.chars();
-
-  for ch in &mut iter {
-    match ch {
-      COMMA | ARABIC_DECIMAL => {
-        result.push(PERIOD);
-        break;
-      }
-      _ => result.push(ch),
-    }
-  }
-
-  for ch in &mut iter {
-    result.push(ch);
-  }
-
-  result
+  text.replacen([',', '\u{66b}'], ".", 1)
 }
 
 /// Convert a timestamp into a date & time string.
