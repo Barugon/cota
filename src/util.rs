@@ -297,6 +297,11 @@ pub fn replace_decimal(text: &str) -> String {
   text.replacen([',', '\u{66b}'], ".", 1)
 }
 
+/// Remove all digit grouping separators.
+pub fn remove_separators(text: &str) -> String {
+  text.replace([',', '.', '\'', '\u{a0}'], Default::default())
+}
+
 /// Convert a timestamp into a date & time string.
 pub fn timestamp_to_string(ts: Option<i64>) -> String {
   let Some(ts) = ts else { return String::new() };
@@ -333,6 +338,14 @@ mod tests {
     assert_eq!("123.4", replace_decimal("123\u{66b}4"));
     assert_eq!("123.", replace_decimal("123\u{66b}"));
     assert_eq!(".4", replace_decimal("\u{66b}4"));
+  }
+
+  #[test]
+  fn test_remove_separators() {
+    assert_eq!("123456789", remove_separators("123,456,789"));
+    assert_eq!("123456789", remove_separators("123.456.789"));
+    assert_eq!("123456789", remove_separators("123'456'789"));
+    assert_eq!("123456789", remove_separators("123\u{a0}456\u{a0}789"));
   }
 
   #[test]
