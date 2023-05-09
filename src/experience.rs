@@ -409,7 +409,7 @@ impl Experience {
   fn get_adv_info(&self) -> Option<AdvInfo> {
     let exp = self.level_info.adv_exp;
     if exp > 0 {
-      let lvl = util::find_min(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1;
+      let lvl = util::floor_search(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1;
       if lvl < 200 {
         return Some(AdvInfo {
           lvl,
