@@ -85,7 +85,7 @@ macro_rules! f64_to_string {
   };
 }
 
-pub fn find_min<T: Ord>(value: T, values: &[T]) -> Option<usize> {
+pub fn floor_search<T: Ord>(value: T, values: &[T]) -> Option<usize> {
   match values.binary_search(&value) {
     Ok(idx) => Some(idx),
     Err(idx) => {
