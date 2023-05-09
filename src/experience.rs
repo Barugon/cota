@@ -74,7 +74,7 @@ impl Experience {
       self.request_avatars(ui.ctx());
     }
 
-    // Check for avatars.
+    // Process messages.
     while let Ok(Some(msg)) = self.channel.rx.try_next() {
       self.state.set_busy(false);
       match msg {
@@ -115,11 +115,11 @@ impl Experience {
       ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
         ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
           // Adventurer level.
-          let adv_info = self.get_adv_info();
-          if let Some(adv_info) = &adv_info {
+          let button_text = if let Some(adv_info) = self.get_adv_info() {
             let x_spacing = ui.spacing().item_spacing.x;
             ui.spacing_mut().item_spacing.x *= 0.5;
 
+            // Display the experience to next adventurer level.
             let text = adv_info.exp.to_formatted_string(&self.locale);
             let response = Label::new(text).sense(Sense::click()).ui(ui);
             if response.on_hover_text("Click to copy").clicked() {
@@ -128,14 +128,14 @@ impl Experience {
 
             ui.spacing_mut().item_spacing.x = x_spacing;
             ui.label("Next");
-          }
 
-          let hover_text = "Type /xp in-game then click this button";
-          let button_text = if let Some(adv_info) = &adv_info {
+            // Format the button text.
             format!("Adv Lvl {}", adv_info.lvl)
           } else {
             String::from("Adv Lvl ?")
           };
+
+          let hover_text = "Type /xp in-game then click this button";
           if ui.button(button_text).on_hover_text(hover_text).clicked() {
             self.request_adv_exp(ui.ctx());
           }
