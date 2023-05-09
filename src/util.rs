@@ -297,7 +297,7 @@ pub fn replace_decimal(text: &str) -> String {
   text.replacen([',', '\u{66b}'], ".", 1)
 }
 
-/// Remove all digit grouping separators.
+/// Remove all digit grouping separators (comma, period, single quote and non-breaking space).
 pub fn remove_separators(text: &str) -> String {
   text.replace([',', '.', '\'', '\u{a0}'], Default::default())
 }
