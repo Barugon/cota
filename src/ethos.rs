@@ -53,7 +53,7 @@ pub const VIRTUES: &[Virtue] = &[
   Virtue::Spirituality,
 ];
 
-pub const TOWNS: [&str; VIRTUES.len()] = [
+pub static TOWNS: [&str; VIRTUES.len()] = [
   "Kiln",
   "Northwood",
   "Jaanaford",
@@ -73,7 +73,7 @@ pub const CABALISTS: &[&str] = &[
 ];
 
 /// Orbital periods and zone times.
-pub const PLANETARY_ORBITS: [(i64, f64); CABALISTS.len()] = [
+pub static PLANETARY_ORBITS: [(i64, f64); CABALISTS.len()] = [
   // Dolus.
   (
     DECEIT_SECS,
@@ -126,5 +126,5 @@ const DISHONOR_SECS: i64 = HOUR_SECS * 2;
 const CARNALITY_SECS: i64 = HOUR_SECS * 23;
 const VANITY_SECS: i64 = HOUR_SECS * 29;
 
-const CONSTELLATION_ZONE: f64 = 1.0 / TOWNS.len() as f64;
+const CONSTELLATION_ZONE: f64 = 1.0 / VIRTUES.len() as f64;
 const CONSTELLATION_RATE: f64 = 1.0 / FORTNIGHT_SECS as f64;

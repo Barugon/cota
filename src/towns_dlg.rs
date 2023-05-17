@@ -34,7 +34,7 @@ impl TownsDlg {
 
     let towns = {
       // Convert the sieges into a by-town array.
-      let mut towns: [(bool, [bool; CABALISTS.len()]); TOWNS.len()] = Default::default();
+      let mut towns: [(bool, [bool; CABALISTS.len()]); VIRTUES.len()] = Default::default();
       for (cabalist_index, siege) in sieges.iter().enumerate() {
         let town_index = siege.virtue() as usize;
         towns[town_index].0 = true;
