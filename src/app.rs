@@ -11,7 +11,7 @@ use crate::{
 };
 use eframe::{
   egui::{
-    containers, menu, style::Margin, CentralPanel, Context, CursorIcon, Event, Frame, Key, Label,
+    menu, style::Margin, Button, CentralPanel, Context, CursorIcon, Event, Frame, Key,
     TopBottomPanel, Ui, Visuals,
   },
   emath::Align2,
@@ -567,27 +567,16 @@ fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> 
 }
 
 fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool {
-  let response = ui.button(text);
+  let widget = if let Some(hotkey) = hotkey {
+    Button::new(text).wrap(false).shortcut_text(hotkey)
+  } else {
+    Button::new(text).wrap(false)
+  };
+
+  let response = ui.add(widget);
   let clicked = response.clicked();
   if clicked || close {
     ui.close_menu();
-  } else if let Some(hotkey) = hotkey {
-    let cursor_pos = response.ctx.input(|state| state.pointer.hover_pos());
-    if let Some(pos) = cursor_pos {
-      // Show the hotkey as a tooltip even if the menu item is disabled.
-      if response.rect.contains(pos) && response.ctx.layer_id_at(pos) == Some(response.layer_id) {
-        let offset = (util::tooltip_size() - response.rect.height()) * 0.5;
-        let pos = Pos2::new(response.rect.right(), response.rect.top() - offset);
-        containers::show_tooltip_at(
-          &response.ctx,
-          response.id.with("_hotkey"),
-          Some(pos),
-          |ui| {
-            ui.add_enabled(response.enabled(), Label::new(hotkey));
-          },
-        );
-      }
-    }
   }
 
   clicked
