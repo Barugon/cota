@@ -326,11 +326,6 @@ pub fn text_size(ui: &Ui) -> f32 {
   TextStyle::Body.resolve(ui.style()).size
 }
 
-/// The size (height) of a single-line tooltip.
-pub const fn tooltip_size() -> f32 {
-  28.0
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
