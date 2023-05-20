@@ -112,53 +112,48 @@ impl Experience {
 
     // Tool bar.
     ui.horizontal(|ui| {
-      ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-        ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
-          // Adventurer level.
-          let button_text = if let Some(adv_info) = self.get_adv_info() {
-            let x_spacing = ui.spacing().item_spacing.x;
-            ui.spacing_mut().item_spacing.x *= 0.5;
-
-            // Display the experience to next adventurer level.
-            let text = adv_info.exp.to_formatted_string(&self.locale);
-            let response = Label::new(text).sense(Sense::click()).ui(ui);
-            if response.on_hover_text("Click to copy").clicked() {
-              util::set_clipboard_contents(format!("{}", adv_info.exp));
-            }
-
-            ui.spacing_mut().item_spacing.x = x_spacing;
-            ui.label("Next");
-
-            // Format the button text.
-            format!("Adv Lvl {}", adv_info.lvl)
-          } else {
-            String::from("Adv Lvl ?")
-          };
-
-          let hover_text = "Type /xp in-game then click this button";
-          if ui.button(button_text).on_hover_text(hover_text).clicked() {
-            self.request_adv_exp(ui.ctx());
-          }
-        });
-        ui.add_enabled_ui(!self.avatars.is_empty(), |ui| {
-          // Avatar combo-box.
-          let mut avatar_changed = None;
-          ComboBox::from_id_source("exp_avatar_combo")
-            .selected_text(&self.avatar)
-            .width(ui.available_width())
-            .show_ui(ui, |ui| {
-              for avatar in &self.avatars {
-                let response = ui.selectable_label(self.avatar == *avatar, avatar);
-                if response.clicked() && self.avatar != *avatar {
-                  avatar_changed = Some(avatar.clone());
-                }
+      ui.add_enabled_ui(!self.avatars.is_empty(), |ui| {
+        // Avatar combo-box.
+        let mut avatar_changed = None;
+        ComboBox::from_id_source("exp_avatar_combo")
+          .selected_text(&self.avatar)
+          .width(234.0)
+          .show_ui(ui, |ui| {
+            for avatar in &self.avatars {
+              let response = ui.selectable_label(self.avatar == *avatar, avatar);
+              if response.clicked() && self.avatar != *avatar {
+                avatar_changed = Some(avatar.clone());
               }
-            });
+            }
+          });
 
-          if let Some(avatar) = avatar_changed {
-            self.set_avatar(avatar)
+        if let Some(avatar) = avatar_changed {
+          self.set_avatar(avatar)
+        }
+      });
+      ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
+        // Adventurer level.
+        let (button_text, exp) = if let Some(adv_info) = self.get_adv_info() {
+          (format!("Adv Lvl {}", adv_info.lvl), Some(adv_info.exp))
+        } else {
+          (String::from("Adv Lvl ?"), None)
+        };
+
+        let hover_text = "Type /xp in-game then click this button";
+        if ui.button(button_text).on_hover_text(hover_text).clicked() {
+          self.request_adv_exp(ui.ctx());
+        }
+
+        if let Some(exp) = exp {
+          ui.spacing_mut().item_spacing.x *= 0.5;
+          ui.label("Next");
+
+          let text = exp.to_formatted_string(&self.locale);
+          let response = Label::new(text).sense(Sense::click()).ui(ui);
+          if response.on_hover_text("Click to copy").clicked() {
+            util::set_clipboard_contents(format!("{}", exp));
           }
-        });
+        }
       });
     });
 
