@@ -4,8 +4,8 @@ use crate::{
 };
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
 use eframe::{
-  egui::{ComboBox, Context, DragValue, Key, Layout, RichText, TextEdit, Window},
-  emath::{Align, Align2},
+  egui::{ComboBox, Context, DragValue, Key, RichText, TextEdit, Window},
+  emath::Align2,
   epaint::Color32,
 };
 use egui_extras::DatePickerButton;
@@ -69,84 +69,80 @@ impl PlantDlg {
           let item_spacing = ui.spacing().item_spacing;
 
           ui.horizontal(|ui| {
-            // Seed label. This needs to be first so that we can fill the remaining space with the seed combo.
+            // Seed.
             ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
             ui.label(RichText::from("Seed").color(LABEL_COLOR));
+            let text = if let Some(index) = self.seed_index {
+              self.seed_names[index]
+            } else {
+              Default::default()
+            };
             ui.spacing_mut().item_spacing.x = item_spacing.x;
-
-            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-              // Minute.
-              let widget = DragValue::new(&mut self.min)
-                .custom_formatter(|val, _| format!("{val:02}"))
-                .clamp_range(0..=59)
-                .speed(0.125);
-              ui.spacing_mut().item_spacing.x = 1.0;
-              ui.spacing_mut().interact_size.x = 23.0;
-              ui.add(widget);
-              ui.label(":");
-
-              // Hour.
-              let widget = DragValue::new(&mut self.hour)
-                .custom_formatter(|val, _| format!("{val:02}"))
-                .clamp_range(0..=23)
-                .speed(0.125);
-              ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
-              ui.add(widget);
-
-              // Date.
-              let widget = DatePickerButton::new(&mut self.date)
-                .id_source("plant_date_picker")
-                .show_icon(false);
-              ui.spacing_mut().item_spacing.x = item_spacing.x;
-              ui.add(widget);
-
-              // Environment.
-              let text = if let Some(environment) = self.environment {
-                format!("{environment:?}")
-              } else {
-                Default::default()
-              };
-              ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
-              ComboBox::from_id_source("environment_combo")
-                .selected_text(text)
-                .show_ui(ui, |ui| {
-                  let selected = self.environment == Some(Environment::Greenhouse);
-                  if ui.selectable_label(selected, "Greenhouse").clicked() && !selected {
-                    self.environment = Some(Environment::Greenhouse);
+            ComboBox::from_id_source("seed_combo")
+              .selected_text(text)
+              .width(157.0)
+              .show_ui(ui, |ui| {
+                for index in 0..self.seed_names.len() {
+                  let text = self.seed_names[index];
+                  let selected = Some(index) == self.seed_index;
+                  if ui.selectable_label(selected, text).clicked() && !selected {
+                    self.seed_index = Some(index);
                   }
+                }
+              });
 
-                  let selected = self.environment == Some(Environment::Outside);
-                  if ui.selectable_label(selected, "Outside").clicked() && !selected {
-                    self.environment = Some(Environment::Outside);
-                  }
+            // Environment.
+            ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
+            ui.label(RichText::from("Env").color(LABEL_COLOR));
+            let text = if let Some(environment) = self.environment {
+              format!("{environment:?}")
+            } else {
+              Default::default()
+            };
+            ui.spacing_mut().item_spacing.x = item_spacing.x;
+            ComboBox::from_id_source("environment_combo")
+              .selected_text(text)
+              .show_ui(ui, |ui| {
+                let selected = self.environment == Some(Environment::Greenhouse);
+                if ui.selectable_label(selected, "Greenhouse").clicked() && !selected {
+                  self.environment = Some(Environment::Greenhouse);
+                }
 
-                  let selected = self.environment == Some(Environment::Inside);
-                  if ui.selectable_label(selected, "Inside").clicked() && !selected {
-                    self.environment = Some(Environment::Inside);
-                  }
-                });
-              ui.spacing_mut().item_spacing.x = item_spacing.x;
-              ui.label(RichText::from("Env").color(LABEL_COLOR));
+                let selected = self.environment == Some(Environment::Outside);
+                if ui.selectable_label(selected, "Outside").clicked() && !selected {
+                  self.environment = Some(Environment::Outside);
+                }
 
-              // Seed combo.
-              let text = if let Some(index) = self.seed_index {
-                self.seed_names[index]
-              } else {
-                Default::default()
-              };
-              ComboBox::from_id_source("seed_combo")
-                .selected_text(text)
-                .width(ui.available_width())
-                .show_ui(ui, |ui| {
-                  for index in 0..self.seed_names.len() {
-                    let text = self.seed_names[index];
-                    let selected = Some(index) == self.seed_index;
-                    if ui.selectable_label(selected, text).clicked() && !selected {
-                      self.seed_index = Some(index);
-                    }
-                  }
-                });
-            });
+                let selected = self.environment == Some(Environment::Inside);
+                if ui.selectable_label(selected, "Inside").clicked() && !selected {
+                  self.environment = Some(Environment::Inside);
+                }
+              });
+
+            // Date.
+            let widget = DatePickerButton::new(&mut self.date)
+              .id_source("plant_date_picker")
+              .show_icon(false);
+            ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
+            ui.add(widget);
+
+            // Hour.
+            ui.spacing_mut().interact_size.x = 23.0;
+            let widget = DragValue::new(&mut self.hour)
+              .custom_formatter(|val, _| format!("{val:02}"))
+              .clamp_range(0..=23)
+              .speed(0.125);
+            ui.spacing_mut().item_spacing.x = 1.0;
+            ui.add(widget);
+            ui.label(":");
+
+            // Minute.
+            let widget = DragValue::new(&mut self.min)
+              .custom_formatter(|val, _| format!("{val:02}"))
+              .clamp_range(0..=59)
+              .speed(0.125);
+            ui.spacing_mut().item_spacing.x = item_spacing.x;
+            ui.add(widget);
           });
 
           ui.add_space(3.0);

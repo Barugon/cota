@@ -212,62 +212,59 @@ impl Stats {
 
     // Tool bar.
     ui.horizontal(|ui| {
-      // Layout right to left so that the avatar combo-box can fill the remaining space.
-      ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-        // Notes button.
-        ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
-          if ui.button("Notes").clicked() {
-            let text = self.config.get_notes(&self.avatar);
-            let text = text.unwrap_or_default();
-            self.notes_dlg.open(&self.avatar, text);
-          }
-        });
-
-        // Date combo-box.
-        ui.add_enabled_ui(!self.dates.is_empty(), |ui| {
-          let mut date_changed = false;
-          ComboBox::from_id_source("date_combo")
-            .selected_text(util::timestamp_to_string(self.date))
-            .show_ui(ui, |ui| {
-              // This is here to keep the date text from wrapping when the scroll bar is visible.
-              ui.set_min_width(137.0);
-              for date in &self.dates {
-                let date = Some(*date);
-                let text = util::timestamp_to_string(date);
-                if ui.selectable_label(self.date == date, text).clicked() && self.date != date {
-                  self.date = date;
-                  date_changed = true;
-                }
+      // Avatar combo-box.
+      ui.add_enabled_ui(!self.avatars.is_empty(), |ui| {
+        let mut avatar_changed = false;
+        ComboBox::from_id_source("avatar_combo")
+          .selected_text(&self.avatar)
+          .width(250.0)
+          .show_ui(ui, |ui| {
+            for avatar in &self.avatars {
+              if ui
+                .selectable_label(self.avatar == *avatar, avatar)
+                .clicked()
+                && self.avatar != *avatar
+              {
+                self.config.set_stats_avatar(avatar.clone());
+                self.avatar = avatar.clone();
+                avatar_changed = true;
               }
-            });
-          if date_changed {
-            self.request_stats(ui.ctx());
-          }
-        });
+            }
+          });
+        if avatar_changed {
+          self.request_dates(ui.ctx());
+        }
+      });
 
-        // Avatar combo-box.
-        ui.add_enabled_ui(!self.avatars.is_empty(), |ui| {
-          let mut avatar_changed = false;
-          ComboBox::from_id_source("avatar_combo")
-            .selected_text(&self.avatar)
-            .width(ui.available_width())
-            .show_ui(ui, |ui| {
-              for avatar in &self.avatars {
-                if ui
-                  .selectable_label(self.avatar == *avatar, avatar)
-                  .clicked()
-                  && self.avatar != *avatar
-                {
-                  self.config.set_stats_avatar(avatar.clone());
-                  self.avatar = avatar.clone();
-                  avatar_changed = true;
-                }
+      // Date combo-box.
+      ui.add_enabled_ui(!self.dates.is_empty(), |ui| {
+        let mut date_changed = false;
+        ComboBox::from_id_source("date_combo")
+          .selected_text(util::timestamp_to_string(self.date))
+          .show_ui(ui, |ui| {
+            // This is here to keep the date text from wrapping when the scroll bar is visible.
+            ui.set_min_width(137.0);
+            for date in &self.dates {
+              let date = Some(*date);
+              let text = util::timestamp_to_string(date);
+              if ui.selectable_label(self.date == date, text).clicked() && self.date != date {
+                self.date = date;
+                date_changed = true;
               }
-            });
-          if avatar_changed {
-            self.request_dates(ui.ctx());
-          }
-        });
+            }
+          });
+        if date_changed {
+          self.request_stats(ui.ctx());
+        }
+      });
+
+      // Notes button.
+      ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
+        if ui.button("Notes").clicked() {
+          let text = self.config.get_notes(&self.avatar);
+          let text = text.unwrap_or_default();
+          self.notes_dlg.open(&self.avatar, text);
+        }
       });
     });
 
