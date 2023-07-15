@@ -1,6 +1,6 @@
 use crate::{
   log_data,
-  util::{self, AppState, Cancel, Search, NONE_ERR},
+  util::{self, AppState, Cancel, Search, Wrest},
 };
 use eframe::{
   egui::{
@@ -148,7 +148,7 @@ fn layout_text(text: String, search: Search, font: FontId, color: Color32) -> La
     // Highlight the date/time.
     if let Some(date) = log_data::get_log_date(line) {
       const DATE_COLOR: Color32 = Color32::from_rgb(180, 154, 102);
-      let pos = util::offset(&text, date).expect(NONE_ERR);
+      let pos = util::offset(&text, date).wrest();
       sections.push(LayoutSection {
         leading_space: 0.0,
         byte_range: pos..pos + date.len(),
@@ -158,7 +158,7 @@ fn layout_text(text: String, search: Search, font: FontId, color: Color32) -> La
 
     let mut line = log_data::get_log_text(line);
     loop {
-      let pos = util::offset(&text, line).expect(NONE_ERR);
+      let pos = util::offset(&text, line).wrest();
       if let Some(find) = search.find_in(line) {
         let start = pos + find.start;
         let end = pos + find.end;

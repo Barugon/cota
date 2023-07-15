@@ -1,6 +1,6 @@
 use crate::{
   plant_info::Plant,
-  util::{APP_NAME, FAIL_ERR},
+  util::{Wrest, APP_NAME},
 };
 use eframe::epaint::Pos2;
 use std::{
@@ -29,7 +29,7 @@ impl ItemStore {
   fn persist(&mut self) {
     if self.modified {
       let file = ok!(File::create(&self.path));
-      ron::ser::to_writer_pretty(file, &self.items, Default::default()).expect(FAIL_ERR);
+      ron::ser::to_writer_pretty(file, &self.items, Default::default()).wrest();
       self.modified = false;
     }
   }
@@ -62,7 +62,7 @@ impl Config {
   }
 
   pub fn get_window_pos(&self) -> Option<Pos2> {
-    let lock = self.store.read().expect(FAIL_ERR);
+    let lock = self.store.read().wrest();
     let text = lock.items.get(WINDOW_POS_KEY)?;
     let pos: Option<(f32, f32)> = ok!(ron::from_str(text), None);
     pos.map(|pos| pos.into())
@@ -153,7 +153,7 @@ impl Config {
   }
 
   pub fn get_plants(&self) -> Option<Vec<Plant>> {
-    let lock = self.store.read().expect(FAIL_ERR);
+    let lock = self.store.read().wrest();
     let text = lock.items.get(PLANTS_KEY)?;
     Some(ok!(ron::from_str(text), None))
   }
@@ -175,7 +175,7 @@ impl Config {
     }
 
     let key = format!("{avatar} {AVATAR_SKILLS}");
-    let lock = self.store.read().expect(FAIL_ERR);
+    let lock = self.store.read().wrest();
     let text = lock.items.get(&key)?;
     Some(ok!(ron::from_str(text), None))
   }
@@ -213,18 +213,18 @@ impl Config {
   }
 
   fn get(&self, key: &str) -> Option<String> {
-    let lock = self.store.read().expect(FAIL_ERR);
+    let lock = self.store.read().wrest();
     Some(lock.items.get(key)?.to_owned())
   }
 
   fn set(&mut self, key: &str, item: String) {
-    let mut lock = self.store.write().expect(FAIL_ERR);
+    let mut lock = self.store.write().wrest();
     lock.items.insert(key.to_owned(), item);
     lock.modified = true;
   }
 
   fn remove(&mut self, key: &str) {
-    let mut lock = self.store.write().expect(FAIL_ERR);
+    let mut lock = self.store.write().wrest();
     if lock.items.remove(key).is_some() {
       lock.modified = true;
     }

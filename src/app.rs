@@ -7,7 +7,7 @@ use crate::{
   farming::Farming,
   offline::Offline,
   stats::{Stats, StatsFilter},
-  util::{self, AppState, FAIL_ERR},
+  util::{self, AppState, Wrest},
 };
 use eframe::{
   egui::{
@@ -76,10 +76,7 @@ impl App {
 
     // Threading.
     let count = std::cmp::max(2, num_cpus::get());
-    let threads = ThreadPoolBuilder::new()
-      .pool_size(count)
-      .create()
-      .expect(FAIL_ERR);
+    let threads = ThreadPoolBuilder::new().pool_size(count).create().wrest();
 
     // State.
     let win_pos = cc.integration_info.window_info.position;

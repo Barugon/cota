@@ -1,6 +1,6 @@
 use crate::{
   log_data::{self, DPSTally, Span},
-  util::{AppState, Cancel, FAIL_ERR, NONE_ERR},
+  util::{AppState, Cancel, Wrest},
 };
 use chrono::{Local, NaiveDateTime, NaiveTime, Timelike};
 use eframe::{
@@ -37,8 +37,8 @@ impl DPSDlg {
 
     // Default to the whole day for the search date/time span.
     let date = Local::now().naive_local().date();
-    let begin = NaiveDateTime::new(date, NaiveTime::from_hms_opt(0, 0, 0).expect(NONE_ERR));
-    let end = NaiveDateTime::new(date, NaiveTime::from_hms_opt(23, 59, 59).expect(NONE_ERR));
+    let begin = NaiveDateTime::new(date, NaiveTime::from_hms_opt(0, 0, 0).wrest());
+    let end = NaiveDateTime::new(date, NaiveTime::from_hms_opt(23, 59, 59).wrest());
     let span = Span { begin, end };
 
     DPSDlg {
@@ -188,7 +188,7 @@ impl DPSDlg {
     let span = self.span.clone();
     let future = log_data::tally_dps(log_path, avatar, span, cancel);
     let future = async move {
-      tx.unbounded_send(future.await).expect(FAIL_ERR);
+      tx.unbounded_send(future.await).wrest();
       ctx.request_repaint();
     };
 
@@ -240,7 +240,7 @@ fn show_date_time(ui: &mut Ui, date_time: &NaiveDateTime, id: &str) -> Option<Na
   ui.spacing_mut().item_spacing.x = 1.0;
   ui.spacing_mut().interact_size.x = 23.0;
   if ui.add(widget).changed() {
-    result = Some(date_time.with_hour(hour).expect(NONE_ERR));
+    result = Some(date_time.with_hour(hour).wrest());
   }
   ui.label(":");
 
@@ -251,7 +251,7 @@ fn show_date_time(ui: &mut Ui, date_time: &NaiveDateTime, id: &str) -> Option<Na
     .clamp_range(0..=59)
     .speed(0.125);
   if ui.add(widget).changed() {
-    result = Some(date_time.with_minute(min).expect(NONE_ERR));
+    result = Some(date_time.with_minute(min).wrest());
   }
   ui.label(":");
 
@@ -263,7 +263,7 @@ fn show_date_time(ui: &mut Ui, date_time: &NaiveDateTime, id: &str) -> Option<Na
     .speed(0.125);
   ui.spacing_mut().item_spacing.x = x_spacing;
   if ui.add(widget).changed() {
-    result = Some(date_time.with_second(sec).expect(NONE_ERR));
+    result = Some(date_time.with_second(sec).wrest());
   }
   ui.spacing_mut().interact_size.x = x_interact;
 
