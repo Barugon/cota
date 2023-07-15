@@ -11,9 +11,6 @@ use std::{
   },
 };
 
-pub static FAIL_ERR: &str = "Should always be Ok";
-pub static NONE_ERR: &str = "Should always be Some";
-
 pub static APP_ICON: &[u8] = include_bytes!("../res/icon.png");
 pub static APP_NAME: &str = env!("CARGO_PKG_NAME");
 pub static APP_TITLE: &str = env!("CARGO_PKG_DESCRIPTION");
@@ -83,6 +80,22 @@ macro_rules! f64_to_string {
       .trim_end_matches('.')
       .replacen('.', $locale.decimal(), 1)
   };
+}
+
+pub trait Wrest<T> {
+  fn wrest(self) -> T;
+}
+
+impl<T> Wrest<T> for Option<T> {
+  fn wrest(self) -> T {
+    self.expect("Should always be Some")
+  }
+}
+
+impl<T, E: std::fmt::Debug> Wrest<T> for Result<T, E> {
+  fn wrest(self) -> T {
+    self.expect("Should always be Ok")
+  }
 }
 
 pub fn floor_search<T: Ord>(value: T, values: &[T]) -> Option<usize> {

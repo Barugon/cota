@@ -29,11 +29,11 @@ mod towns_dlg;
 use app::App;
 use config::Config;
 use eframe::AppCreator;
-use util::{APP_ICON, APP_TITLE, FAIL_ERR, NONE_ERR};
+use util::{Wrest, APP_ICON, APP_TITLE};
 
 fn main() {
-  let config = Config::new().expect(NONE_ERR);
-  let icon = image::load_from_memory(APP_ICON).expect(FAIL_ERR);
+  let config = Config::new().wrest();
+  let icon = image::load_from_memory(APP_ICON).wrest();
   let options = eframe::NativeOptions {
     resizable: false,
     initial_window_pos: config.get_window_pos(),
@@ -49,5 +49,5 @@ fn main() {
   };
 
   let creator: AppCreator = Box::new(move |cc| Box::new(App::new(cc, config)));
-  eframe::run_native(APP_TITLE, options, creator).expect(FAIL_ERR);
+  eframe::run_native(APP_TITLE, options, creator).wrest();
 }

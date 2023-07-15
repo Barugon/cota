@@ -5,7 +5,7 @@ use crate::{
   log_dlg::LogDlg,
   notes_dlg::NotesDlg,
   search_dlg::SearchDlg,
-  util::{self, AppState, Cancel, Search, FAIL_ERR},
+  util::{self, AppState, Cancel, Search, Wrest},
 };
 use eframe::{
   egui::{ComboBox, Context, Layout, RichText, Ui},
@@ -472,7 +472,7 @@ impl Stats {
     let future = log_data::get_avatars(self.log_path.clone(), cancel);
     let future = async move {
       let msg = Message::Avatars(future.await);
-      tx.unbounded_send(msg).expect(FAIL_ERR);
+      tx.unbounded_send(msg).wrest();
       ctx.request_repaint();
     };
 
@@ -507,7 +507,7 @@ impl Stats {
       let ctx = ctx.clone();
       let future = async move {
         let msg = Message::Dates(future.await);
-        tx.unbounded_send(msg).expect(FAIL_ERR);
+        tx.unbounded_send(msg).wrest();
         ctx.request_repaint();
       };
 
@@ -542,7 +542,7 @@ impl Stats {
         let future = log_data::get_stats(self.log_path.clone(), self.avatar.clone(), date, cancel);
         let future = async move {
           let msg = Message::Stats(future.await);
-          tx.unbounded_send(msg).expect(FAIL_ERR);
+          tx.unbounded_send(msg).wrest();
           ctx.request_repaint();
         };
 
@@ -575,7 +575,7 @@ impl Stats {
     let future = log_data::find_log_entries(log_path, avatar, search.clone(), cancel);
     let future = async move {
       let msg = Message::Search(future.await, search);
-      tx.unbounded_send(msg).expect(FAIL_ERR);
+      tx.unbounded_send(msg).wrest();
       ctx.request_repaint();
     };
 

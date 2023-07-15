@@ -2,7 +2,7 @@ use crate::{
   config::Config,
   log_data,
   skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup},
-  util::{self, AppState, Cancel, FAIL_ERR, LEVEL_EXP, NONE_ERR, SKILL_EXP},
+  util::{self, AppState, Cancel, Wrest, LEVEL_EXP, SKILL_EXP},
 };
 use eframe::{
   egui::{
@@ -336,7 +336,7 @@ impl Experience {
     let future = log_data::get_avatars(self.log_path.clone(), cancel);
     let future = async move {
       let avatars = Message::Avatars(future.await);
-      tx.unbounded_send(avatars).expect(FAIL_ERR);
+      tx.unbounded_send(avatars).wrest();
       ctx.request_repaint();
     };
 
@@ -393,7 +393,7 @@ impl Experience {
     let future = log_data::get_adv_exp(self.log_path.clone(), self.avatar.clone(), cancel);
     let future = async move {
       let avatars = Message::AdvExp(future.await);
-      tx.unbounded_send(avatars).expect(FAIL_ERR);
+      tx.unbounded_send(avatars).wrest();
       ctx.request_repaint();
     };
 
@@ -404,7 +404,7 @@ impl Experience {
   fn get_adv_info(&self) -> Option<AdvInfo> {
     let exp = self.level_info.adv_exp;
     if exp > 0 {
-      let lvl = util::floor_search(exp, &LEVEL_EXP).expect(NONE_ERR) as i32 + 1;
+      let lvl = util::floor_search(exp, &LEVEL_EXP).wrest() as i32 + 1;
       if lvl < 200 {
         return Some(AdvInfo {
           lvl,

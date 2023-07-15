@@ -1,4 +1,4 @@
-use crate::util::{FAIL_ERR, NONE_ERR};
+use crate::util::Wrest;
 
 #[derive(Clone, Copy, Debug)]
 pub enum SkillCategory {
@@ -58,13 +58,13 @@ pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
         skill_group = SkillInfoGroup::new(group);
       }
 
-      let name = fields.next().expect(NONE_ERR);
-      let mul = fields.next().expect(NONE_ERR).parse().expect(FAIL_ERR);
-      let id = fields.next().expect(NONE_ERR).parse().expect(FAIL_ERR);
+      let name = fields.next().wrest();
+      let mul = fields.next().wrest().parse().wrest();
+      let id = fields.next().wrest().parse().wrest();
 
       while let Some(id) = fields.next() {
-        let id = id.parse().expect(FAIL_ERR);
-        let lvl = fields.next().expect(NONE_ERR).parse().expect(FAIL_ERR);
+        let id = id.parse().wrest();
+        let lvl = fields.next().wrest().parse().wrest();
         tmp_reqs.push(Requires { id, lvl });
       }
 

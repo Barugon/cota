@@ -1,6 +1,6 @@
 use crate::{
   plant_info::{self, Environment, Plant, Seed},
-  util::{AppState, NONE_ERR},
+  util::{AppState, Wrest},
 };
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
 use eframe::{
@@ -184,7 +184,7 @@ impl PlantDlg {
     if self.visible {
       let Some(index) = self.seed_index else { return };
       let Some(environment) = self.environment else { return };
-      let time = NaiveTime::from_hms_opt(self.hour, self.min, 0).expect(NONE_ERR);
+      let time = NaiveTime::from_hms_opt(self.hour, self.min, 0).wrest();
       self.result = Some(Plant::new(
         self.description.clone(),
         self.date.and_time(time),

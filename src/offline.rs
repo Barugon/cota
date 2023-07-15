@@ -2,7 +2,7 @@ use self::game_info::GameInfo;
 use crate::{
   game_data::GameData,
   items_dlg::ItemsDlg,
-  util::{AppState, FAIL_ERR, LVL_RANGE},
+  util::{AppState, Wrest, LVL_RANGE},
 };
 use eframe::{
   egui::{Button, DragValue, ImageButton, Response, RichText, Ui, WidgetText},
@@ -27,8 +27,8 @@ impl Offline {
     const LOAD_ICON: &[u8] = include_bytes!("../res/load.png");
     const STORE_ICON: &[u8] = include_bytes!("../res/store.png");
 
-    let load_image = RetainedImage::from_image_bytes("load_image", LOAD_ICON).expect(FAIL_ERR);
-    let store_image = RetainedImage::from_image_bytes("store_image", STORE_ICON).expect(FAIL_ERR);
+    let load_image = RetainedImage::from_image_bytes("load_image", LOAD_ICON).wrest();
+    let store_image = RetainedImage::from_image_bytes("store_image", STORE_ICON).wrest();
     let game = None;
     let error = None;
     let changed = false;
@@ -238,7 +238,7 @@ mod game_info {
   use crate::{
     game_data::{GameData, Item, SkillLvl, SkillLvlGroup},
     skill_info::SkillCategory,
-    util::{button_size, NONE_ERR},
+    util::{button_size, Wrest},
   };
   use eframe::{
     egui::{
@@ -299,7 +299,7 @@ mod game_info {
                 set
               } else {
                 tree.insert(req.id, HashSet::new());
-                tree.get_mut(&req.id).expect(NONE_ERR)
+                tree.get_mut(&req.id).wrest()
               };
               set.insert(skill.info.id);
             }
@@ -470,7 +470,7 @@ mod game_info {
         Some(id) => {
           // Make sure this skill meets the minimum level for skills that require it.
           let min = self.get_skill_min_level(id);
-          let skill = self.skills.get_mut(id).expect(NONE_ERR);
+          let skill = self.skills.get_mut(id).wrest();
           skill.level = skill.level.max(min);
 
           // Clone the skill so that we can borrow self as mutable again.
@@ -612,7 +612,7 @@ mod game_info {
       if let Some(set) = self.skills.tree.get(&id) {
         // We need to check all the skills that depend on this one.
         for child_id in set {
-          let skill = self.skills.get(*child_id).expect(NONE_ERR);
+          let skill = self.skills.get(*child_id).wrest();
           if skill.level > 0 {
             for req in &skill.info.reqs {
               if req.id == id && req.lvl > min {
@@ -631,7 +631,7 @@ mod game_info {
       }
 
       for req in &skill.info.reqs {
-        let req_skill = self.skills.get_mut(req.id).expect(NONE_ERR);
+        let req_skill = self.skills.get_mut(req.id).wrest();
         if req_skill.level < req.lvl {
           let enabling = req_skill.level == 0;
           req_skill.level = req.lvl;
