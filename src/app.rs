@@ -392,17 +392,17 @@ impl eframe::App for App {
           if let Some(path) = file_dlg.path() {
             match file_dlg.dialog_type() {
               egui_file::DialogType::SelectFolder => {
-                self.config.set_log_path(&path);
-                self.experience.set_log_path(ctx, path.clone());
-                self.stats.set_log_path(ctx, path);
+                self.config.set_log_path(path);
+                self.experience.set_log_path(ctx, path.to_owned());
+                self.stats.set_log_path(ctx, path.to_owned());
               }
               egui_file::DialogType::OpenFile => {
                 let folder = path.with_file_name(String::default());
-                if self.offline.load(path) {
+                if self.offline.load(path.to_owned()) {
                   self.config.set_save_path(&folder);
                 }
               }
-              egui_file::DialogType::SaveFile => self.offline.store_as(path),
+              egui_file::DialogType::SaveFile => self.offline.store_as(path.to_owned()),
             }
           }
         }
