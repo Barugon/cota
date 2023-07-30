@@ -29,7 +29,7 @@ pub struct Farming {
 
 impl Farming {
   pub fn new(ctx: Context, config: Config, state: AppState) -> Self {
-    let plant_dlg = PlantDlg::new(state);
+    let plant_dlg = PlantDlg::new(config.clone(), state);
     let plants = config.get_plants().unwrap_or_default();
     let plants = Arc::new(Mutex::new(plants));
     let persist = Arc::new(AtomicBool::new(false));
@@ -98,7 +98,7 @@ impl Farming {
 
     // Tool bar.
     ui.horizontal(|ui| {
-      if ui.button("Add Timer").clicked() {
+      if ui.button("Add Crop Timer").clicked() {
         self.plant_dlg.open();
       }
     });

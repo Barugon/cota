@@ -1,16 +1,19 @@
+use std::{collections::BTreeSet, mem};
+
 use crate::{
+  config::Config,
   plant_info::{self, Environment, Plant, Seed},
   util::{AppState, Wrest},
 };
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
 use eframe::{
-  egui::{ComboBox, Context, DragValue, Key, RichText, TextEdit, Window},
+  egui::{ComboBox, Context, DragValue, Key, RichText, ScrollArea, TextEdit, Window},
   emath::Align2,
   epaint::Color32,
 };
 use egui_extras::DatePickerButton;
 
-#[derive(Default)]
+// #[derive(Default)]
 pub struct PlantDlg {
   state: AppState,
   date: NaiveDate,
@@ -21,20 +24,29 @@ pub struct PlantDlg {
   seed_index: Option<usize>,
   environment: Option<Environment>,
   description: String,
+  descriptions: Descriptions,
   result: Option<Plant>,
   visible: bool,
 }
 
 impl PlantDlg {
-  pub fn new(state: AppState) -> Self {
+  pub fn new(config: Config, state: AppState) -> Self {
     let seeds = plant_info::parse_seeds();
     let seed_types = seeds.iter().map(|seed| seed.1).collect();
     let seed_names = seeds.iter().map(|seed| seed.0).collect();
     Self {
       state,
+      date: NaiveDate::default(),
+      hour: 0,
+      min: 0,
       seed_types,
       seed_names,
-      ..Default::default()
+      seed_index: None,
+      environment: None,
+      description: String::new(),
+      descriptions: Descriptions::load(config),
+      result: None,
+      visible: false,
     }
   }
 
@@ -57,12 +69,12 @@ impl PlantDlg {
       let available = ctx.available_rect();
       let mut open = true;
 
-      Window::new(RichText::from("⏰  Add Timer").strong())
+      Window::new(RichText::from("⏰  Add Crop Timer").strong())
         .open(&mut open)
         .collapsible(false)
         .current_pos([0.0, 24.0])
         .anchor(Align2::CENTER_TOP, [0.0, 0.0])
-        .default_size([available.width(), 200.0])
+        .default_size([available.width(), 0.0])
         .resizable(false)
         .show(ctx, |ui| {
           const LABEL_COLOR: Color32 = Color32::from_rgb(154, 187, 154);
@@ -154,6 +166,35 @@ impl PlantDlg {
             ui.add_sized(ui.available_size(), widget);
           });
 
+          ui.horizontal(|ui| {
+            // Additional information list.
+            ScrollArea::vertical()
+              .min_scrolled_height(available.height() * 0.2)
+              .show(ui, |ui| {
+                ui.columns(1, |col| {
+                  let mut remove = None;
+                  for text in &self.descriptions.list {
+                    let response = col[0].selectable_label(false, text);
+                    if response
+                      .context_menu(|ui| {
+                        if ui.button("Remove").clicked() {
+                          remove = Some(text.to_owned());
+                          ui.close_menu();
+                        }
+                      })
+                      .clicked()
+                    {
+                      self.description = text.to_owned();
+                    }
+                  }
+
+                  if let Some(remove) = remove.take() {
+                    self.descriptions.remove(&remove);
+                  }
+                });
+              });
+          });
+
           ui.separator();
           ui.horizontal(|ui| {
             let enabled = self.seed_index.is_some() && self.environment.is_some();
@@ -185,8 +226,9 @@ impl PlantDlg {
       let Some(index) = self.seed_index else { return };
       let Some(environment) = self.environment else { return };
       let time = NaiveTime::from_hms_opt(self.hour, self.min, 0).wrest();
+      self.descriptions.insert(self.description.clone());
       self.result = Some(Plant::new(
-        self.description.clone(),
+        mem::take(&mut self.description),
         self.date.and_time(time),
         self.seed_names[index].to_owned(),
         self.seed_types[index],
@@ -209,6 +251,45 @@ impl PlantDlg {
       self.accept();
     } else if ctx.input(|state| state.key_pressed(Key::Escape)) {
       self.reject();
+    }
+  }
+}
+
+struct Descriptions {
+  #[allow(unused)]
+  config: Config,
+  list: BTreeSet<String>,
+  modified: bool,
+}
+
+impl Descriptions {
+  fn load(config: Config) -> Self {
+    let list = config.get_crop_descriptions().unwrap_or_default();
+    Descriptions {
+      config,
+      list,
+      modified: false,
+    }
+  }
+
+  fn insert(&mut self, text: String) {
+    if self.list.insert(text) {
+      self.modified = true;
+    }
+  }
+
+  fn remove(&mut self, text: &str) {
+    if self.list.remove(text) {
+      self.modified = true;
+    }
+  }
+}
+
+impl Drop for Descriptions {
+  fn drop(&mut self) {
+    if self.modified {
+      self.config.set_crop_descriptions(&self.list);
+      self.modified = false;
     }
   }
 }
