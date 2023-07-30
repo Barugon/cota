@@ -4,7 +4,7 @@ use crate::{
 };
 use eframe::epaint::Pos2;
 use std::{
-  collections::HashMap,
+  collections::{BTreeSet, HashMap},
   fs::{self, File},
   path::{Path, PathBuf},
   sync::{Arc, RwLock},
@@ -17,6 +17,7 @@ const STATS_AVATAR_KEY: &str = "stats_avatar";
 const EXP_AVATAR_KEY: &str = "experience_avatar";
 const AVATAR_SKILLS: &str = "skills";
 const PLANTS_KEY: &str = "plants";
+const DESCRIPTIONS_KEY: &str = "crop_descriptions";
 const NOTES_KEY: &str = "notes";
 
 struct ItemStore {
@@ -167,6 +168,23 @@ impl Config {
 
     let text = ok!(ron::to_string(plants));
     self.set(PLANTS_KEY, text);
+  }
+
+  pub fn get_crop_descriptions(&self) -> Option<BTreeSet<String>> {
+    let lock = self.store.read().wrest();
+    let text = lock.items.get(DESCRIPTIONS_KEY)?;
+    Some(ok!(ron::from_str(text), None))
+  }
+
+  pub fn set_crop_descriptions(&mut self, descriptions: &BTreeSet<String>) {
+    // Remove the entry if the set is empty.
+    if descriptions.is_empty() {
+      self.remove(DESCRIPTIONS_KEY);
+      return;
+    }
+
+    let text = ok!(ron::to_string(descriptions));
+    self.set(DESCRIPTIONS_KEY, text);
   }
 
   pub fn get_avatar_skills(&self, avatar: &str) -> Option<HashMap<u32, (i32, i32)>> {
