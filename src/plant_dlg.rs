@@ -273,7 +273,7 @@ impl Descriptions {
   }
 
   fn insert(&mut self, text: String) {
-    if self.list.insert(text) {
+    if !text.is_empty() && self.list.insert(text) {
       self.modified = true;
     }
   }
