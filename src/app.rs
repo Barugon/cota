@@ -7,7 +7,7 @@ use crate::{
   farming::Farming,
   offline::Offline,
   stats::{Stats, StatsFilter},
-  util::{self, AppState, Wrest},
+  util::{self, AppState, Page, Wrest},
 };
 use eframe::{
   egui::{
@@ -82,7 +82,7 @@ impl App {
     let win_pos = cc.integration_info.window_info.position;
     let locale = util::get_locale();
     let state = AppState::default();
-    let page = Page::Chronometer;
+    let page = config.get_page().unwrap_or(Page::Chronometer);
 
     // Tab pages.
     let log_path = config.get_log_path().unwrap_or_default();
@@ -453,26 +453,31 @@ impl eframe::App for App {
         let button = ui.selectable_value(&mut self.page, Page::Chronometer, "Chronometer");
         if button.clicked() {
           self.chronometer.start_timer(ctx.clone());
+          self.config.set_page(Page::Chronometer);
         }
 
         let button = ui.selectable_value(&mut self.page, Page::Experience, "Experience");
         if button.clicked() {
           self.chronometer.stop_timer();
+          self.config.set_page(Page::Experience);
         }
 
         let button = ui.selectable_value(&mut self.page, Page::Farming, "Farming");
         if button.clicked() {
           self.chronometer.stop_timer();
+          self.config.set_page(Page::Farming);
         }
 
         let button = ui.selectable_value(&mut self.page, Page::Offline, "Offline");
         if button.clicked() {
           self.chronometer.stop_timer();
+          self.config.set_page(Page::Offline);
         }
 
         let button = ui.selectable_value(&mut self.page, Page::Stats, "Stats");
         if button.clicked() {
           self.chronometer.stop_timer();
+          self.config.set_page(Page::Stats);
         }
       });
 
@@ -510,15 +515,6 @@ impl eframe::App for App {
     self.farming.on_exit();
     self.stats.on_exit();
   }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum Page {
-  Chronometer,
-  Experience,
-  Farming,
-  Offline,
-  Stats,
 }
 
 fn top_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {

@@ -3,6 +3,7 @@ use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::egui::{TextStyle, Ui};
 use num_format::Locale;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use std::{
   ops::{Range, RangeInclusive},
   sync::{
@@ -80,6 +81,15 @@ macro_rules! f64_to_string {
       .trim_end_matches('.')
       .replacen('.', $locale.decimal(), 1)
   };
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum Page {
+  Chronometer,
+  Experience,
+  Farming,
+  Offline,
+  Stats,
 }
 
 pub trait Wrest<T> {

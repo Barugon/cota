@@ -1,6 +1,6 @@
 use crate::{
   plant_info::Plant,
-  util::{Wrest, APP_NAME},
+  util::{Page, Wrest, APP_NAME},
 };
 use eframe::epaint::Pos2;
 use std::{
@@ -19,6 +19,7 @@ const AVATAR_SKILLS: &str = "skills";
 const PLANTS_KEY: &str = "plants";
 const DESCRIPTIONS_KEY: &str = "crop_descriptions";
 const NOTES_KEY: &str = "notes";
+const PAGE_KEY: &str = "page";
 
 struct ItemStore {
   path: PathBuf,
@@ -73,6 +74,18 @@ impl Config {
     let pos: Option<(f32, f32)> = pos.map(|pos| pos.into());
     let text = ok!(ron::to_string(&pos));
     self.set(WINDOW_POS_KEY, text);
+  }
+
+  pub fn get_page(&self) -> Option<Page> {
+    let lock = self.store.read().wrest();
+    let text = lock.items.get(PAGE_KEY)?;
+    Some(ok!(ron::from_str(text), None))
+  }
+
+  pub fn set_page(&mut self, page: Page) {
+    let text = ok!(ron::to_string(&page));
+    self.set(PAGE_KEY, text);
+    self.persist();
   }
 
   pub fn get_log_path(&self) -> Option<PathBuf> {
