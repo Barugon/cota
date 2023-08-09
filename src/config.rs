@@ -85,6 +85,7 @@ impl Config {
   pub fn set_log_path(&mut self, folder: &Path) {
     if let Some(folder) = folder.to_str() {
       self.set(LOG_PATH_KEY, folder.to_owned());
+      self.persist();
     } else {
       println!("Unable to convert path to string: {folder:?}");
     }
@@ -100,6 +101,7 @@ impl Config {
   pub fn set_save_path(&mut self, folder: &Path) {
     if let Some(folder) = folder.to_str() {
       self.set(SAVE_PATH_KEY, folder.to_owned());
+      self.persist();
     } else {
       println!("Unable to convert path to string: {folder:?}");
     }
@@ -115,6 +117,7 @@ impl Config {
     }
 
     self.set(STATS_AVATAR_KEY, avatar);
+    self.persist();
   }
 
   pub fn get_exp_avatar(&self) -> Option<String> {
@@ -127,6 +130,7 @@ impl Config {
     }
 
     self.set(EXP_AVATAR_KEY, avatar);
+    self.persist();
   }
 
   pub fn get_notes(&self, avatar: &str) -> Option<String> {
@@ -151,6 +155,7 @@ impl Config {
     }
 
     self.set(&key, notes);
+    self.persist();
   }
 
   pub fn get_plants(&self) -> Option<Vec<Plant>> {
@@ -163,11 +168,13 @@ impl Config {
     // Remove the entry if plants is empty.
     if plants.is_empty() {
       self.remove(PLANTS_KEY);
+      self.persist();
       return;
     }
 
     let text = ok!(ron::to_string(plants));
     self.set(PLANTS_KEY, text);
+    self.persist();
   }
 
   pub fn get_crop_descriptions(&self) -> Option<BTreeSet<String>> {
@@ -180,11 +187,13 @@ impl Config {
     // Remove the entry if the set is empty.
     if descriptions.is_empty() {
       self.remove(DESCRIPTIONS_KEY);
+      self.persist();
       return;
     }
 
     let text = ok!(ron::to_string(descriptions));
     self.set(DESCRIPTIONS_KEY, text);
+    self.persist();
   }
 
   pub fn get_avatar_skills(&self, avatar: &str) -> Option<HashMap<u32, (i32, i32)>> {
@@ -214,11 +223,13 @@ impl Config {
     let key = format!("{avatar} {AVATAR_SKILLS}");
     if skills.is_empty() {
       self.remove(&key);
+      self.persist();
       return;
     }
 
     let text = ok!(ron::to_string(&skills));
     self.set(&key, text);
+    self.persist();
   }
 
   fn path() -> Option<PathBuf> {
@@ -246,6 +257,10 @@ impl Config {
     if lock.items.remove(key).is_some() {
       lock.modified = true;
     }
+  }
+
+  fn persist(&mut self) {
+    self.store.write().wrest().persist();
   }
 
   fn get_sota_config_path() -> Option<PathBuf> {
