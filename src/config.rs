@@ -24,22 +24,12 @@ const PAGE_KEY: &str = "page";
 struct ItemStore {
   path: PathBuf,
   items: HashMap<String, String>,
-  modified: bool,
 }
 
 impl ItemStore {
   fn persist(&mut self) {
-    if self.modified {
-      let file = ok!(File::create(&self.path));
-      ron::ser::to_writer_pretty(file, &self.items, Default::default()).wrest();
-      self.modified = false;
-    }
-  }
-}
-
-impl Drop for ItemStore {
-  fn drop(&mut self) {
-    self.persist();
+    let file = ok!(File::create(&self.path));
+    ron::ser::to_writer_pretty(file, &self.items, Default::default()).wrest();
   }
 }
 
@@ -52,12 +42,7 @@ impl Config {
   pub fn new() -> Option<Self> {
     let path = Self::path()?;
     let items = Self::load(&path);
-    let store = ItemStore {
-      path,
-      items,
-      modified: false,
-    };
-
+    let store = ItemStore { path, items };
     Some(Self {
       store: Arc::new(RwLock::new(store)),
     })
@@ -85,20 +70,19 @@ impl Config {
   pub fn set_page(&mut self, page: Page) {
     let text = ok!(ron::to_string(&page));
     self.set(PAGE_KEY, text);
-    self.persist();
   }
 
   pub fn get_log_path(&self) -> Option<PathBuf> {
     if let Some(folder) = self.get(LOG_PATH_KEY) {
       return Some(PathBuf::from(folder));
     }
+
     Self::get_default_log_path()
   }
 
   pub fn set_log_path(&mut self, folder: &Path) {
     if let Some(folder) = folder.to_str() {
       self.set(LOG_PATH_KEY, folder.to_owned());
-      self.persist();
     } else {
       println!("Unable to convert path to string: {folder:?}");
     }
@@ -108,13 +92,13 @@ impl Config {
     if let Some(folder) = self.get(SAVE_PATH_KEY) {
       return Some(PathBuf::from(folder));
     }
+
     Self::get_default_save_path()
   }
 
   pub fn set_save_path(&mut self, folder: &Path) {
     if let Some(folder) = folder.to_str() {
       self.set(SAVE_PATH_KEY, folder.to_owned());
-      self.persist();
     } else {
       println!("Unable to convert path to string: {folder:?}");
     }
@@ -130,7 +114,6 @@ impl Config {
     }
 
     self.set(STATS_AVATAR_KEY, avatar);
-    self.persist();
   }
 
   pub fn get_exp_avatar(&self) -> Option<String> {
@@ -143,7 +126,6 @@ impl Config {
     }
 
     self.set(EXP_AVATAR_KEY, avatar);
-    self.persist();
   }
 
   pub fn get_notes(&self, avatar: &str) -> Option<String> {
@@ -168,7 +150,6 @@ impl Config {
     }
 
     self.set(&key, notes);
-    self.persist();
   }
 
   pub fn get_plants(&self) -> Option<Vec<Plant>> {
@@ -181,13 +162,11 @@ impl Config {
     // Remove the entry if plants is empty.
     if plants.is_empty() {
       self.remove(PLANTS_KEY);
-      self.persist();
       return;
     }
 
     let text = ok!(ron::to_string(plants));
     self.set(PLANTS_KEY, text);
-    self.persist();
   }
 
   pub fn get_crop_descriptions(&self) -> Option<BTreeSet<String>> {
@@ -200,13 +179,11 @@ impl Config {
     // Remove the entry if the set is empty.
     if descriptions.is_empty() {
       self.remove(DESCRIPTIONS_KEY);
-      self.persist();
       return;
     }
 
     let text = ok!(ron::to_string(descriptions));
     self.set(DESCRIPTIONS_KEY, text);
-    self.persist();
   }
 
   pub fn get_avatar_skills(&self, avatar: &str) -> Option<HashMap<u32, (i32, i32)>> {
@@ -236,13 +213,11 @@ impl Config {
     let key = format!("{avatar} {AVATAR_SKILLS}");
     if skills.is_empty() {
       self.remove(&key);
-      self.persist();
       return;
     }
 
     let text = ok!(ron::to_string(&skills));
     self.set(&key, text);
-    self.persist();
   }
 
   fn path() -> Option<PathBuf> {
@@ -262,18 +237,14 @@ impl Config {
   fn set(&mut self, key: &str, item: String) {
     let mut lock = self.store.write().wrest();
     lock.items.insert(key.to_owned(), item);
-    lock.modified = true;
+    lock.persist();
   }
 
   fn remove(&mut self, key: &str) {
     let mut lock = self.store.write().wrest();
     if lock.items.remove(key).is_some() {
-      lock.modified = true;
+      lock.persist();
     }
-  }
-
-  fn persist(&mut self) {
-    self.store.write().wrest().persist();
   }
 
   fn get_sota_config_path() -> Option<PathBuf> {
