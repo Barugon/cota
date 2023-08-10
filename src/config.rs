@@ -1,6 +1,6 @@
 use crate::{
   plant_info::Plant,
-  util::{Page, Wrest, APP_NAME},
+  util::{Check, Page, APP_NAME},
 };
 use eframe::epaint::Pos2;
 use std::{
@@ -36,7 +36,7 @@ enum Message {
 impl ItemStore {
   fn persist(&self) {
     let file = ok!(File::create(&self.path));
-    ron::ser::to_writer_pretty(file, &self.items, Default::default()).wrest();
+    ron::ser::to_writer_pretty(file, &self.items, Default::default()).check();
   }
 }
 
@@ -47,9 +47,9 @@ struct ItemStoreThread {
 
 impl Drop for ItemStoreThread {
   fn drop(&mut self) {
-    self.tx.send(Message::Exit).wrest();
+    self.tx.send(Message::Exit).check();
     if let Some(handle) = self.thread.take() {
-      handle.join().wrest();
+      handle.join().check();
     }
   }
 }
@@ -70,7 +70,7 @@ impl Config {
       let store = store.clone();
       Some(thread::spawn(move || loop {
         // Wait for a message.
-        if rx.recv().wrest() == Message::Exit {
+        if rx.recv().check() == Message::Exit {
           return;
         }
 
@@ -81,7 +81,7 @@ impl Config {
           }
         }
 
-        store.read().wrest().persist();
+        store.read().check().persist();
       }))
     };
 
@@ -90,7 +90,7 @@ impl Config {
   }
 
   pub fn get_window_pos(&self) -> Option<Pos2> {
-    let lock = self.store.read().wrest();
+    let lock = self.store.read().check();
     let text = lock.items.get(WINDOW_POS_KEY)?;
     let pos: Option<(f32, f32)> = ok!(ron::from_str(text), None);
     pos.map(|pos| pos.into())
@@ -103,7 +103,7 @@ impl Config {
   }
 
   pub fn get_page(&self) -> Option<Page> {
-    let lock = self.store.read().wrest();
+    let lock = self.store.read().check();
     let text = lock.items.get(PAGE_KEY)?;
     Some(ok!(ron::from_str(text), None))
   }
@@ -194,7 +194,7 @@ impl Config {
   }
 
   pub fn get_plants(&self) -> Option<Vec<Plant>> {
-    let lock = self.store.read().wrest();
+    let lock = self.store.read().check();
     let text = lock.items.get(PLANTS_KEY)?;
     Some(ok!(ron::from_str(text), None))
   }
@@ -211,7 +211,7 @@ impl Config {
   }
 
   pub fn get_crop_descriptions(&self) -> Option<BTreeSet<String>> {
-    let lock = self.store.read().wrest();
+    let lock = self.store.read().check();
     let text = lock.items.get(DESCRIPTIONS_KEY)?;
     Some(ok!(ron::from_str(text), None))
   }
@@ -233,7 +233,7 @@ impl Config {
     }
 
     let key = format!("{avatar} {AVATAR_SKILLS}");
-    let lock = self.store.read().wrest();
+    let lock = self.store.read().check();
     let text = lock.items.get(&key)?;
     Some(ok!(ron::from_str(text), None))
   }
@@ -271,25 +271,25 @@ impl Config {
   }
 
   fn get(&self, key: &str) -> Option<String> {
-    let lock = self.store.read().wrest();
+    let lock = self.store.read().check();
     Some(lock.items.get(key)?.to_owned())
   }
 
   fn set(&mut self, key: &str, item: String) {
-    let mut lock = self.store.write().wrest();
+    let mut lock = self.store.write().check();
     lock.items.insert(key.to_owned(), item);
     self.persist();
   }
 
   fn remove(&mut self, key: &str) {
-    let mut lock = self.store.write().wrest();
+    let mut lock = self.store.write().check();
     if lock.items.remove(key).is_some() {
       self.persist();
     }
   }
 
   fn persist(&self) {
-    self.thread.tx.send(Message::Persist).wrest();
+    self.thread.tx.send(Message::Persist).check();
   }
 
   fn get_sota_config_path() -> Option<PathBuf> {

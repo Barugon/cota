@@ -1,4 +1,4 @@
-use crate::util::Wrest;
+use crate::util::Check;
 
 #[derive(Clone, Copy, Debug)]
 pub enum SkillCategory {
@@ -58,13 +58,13 @@ pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
         skill_group = SkillInfoGroup::new(group);
       }
 
-      let name = fields.next().wrest();
-      let mul = fields.next().wrest().parse().wrest();
-      let id = fields.next().wrest().parse().wrest();
+      let name = fields.next().check();
+      let mul = fields.next().check().parse().check();
+      let id = fields.next().check().parse().check();
 
       while let Some(id) = fields.next() {
-        let id = id.parse().wrest();
-        let lvl = fields.next().wrest().parse().wrest();
+        let id = id.parse().check();
+        let lvl = fields.next().check().parse().check();
         tmp_reqs.push(Requires { id, lvl });
       }
 
