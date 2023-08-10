@@ -8,56 +8,13 @@ use std::{
   fs::{self, File},
   path::{Path, PathBuf},
   sync::{mpsc, Arc, RwLock},
-  thread::{self, JoinHandle},
+  thread,
 };
-
-const WINDOW_POS_KEY: &str = "window_pos";
-const LOG_PATH_KEY: &str = "log_path";
-const SAVE_PATH_KEY: &str = "save_path";
-const STATS_AVATAR_KEY: &str = "stats_avatar";
-const EXP_AVATAR_KEY: &str = "experience_avatar";
-const AVATAR_SKILLS: &str = "skills";
-const PLANTS_KEY: &str = "plants";
-const DESCRIPTIONS_KEY: &str = "crop_descriptions";
-const NOTES_KEY: &str = "notes";
-const PAGE_KEY: &str = "page";
-
-struct ItemStore {
-  path: PathBuf,
-  items: HashMap<String, String>,
-}
-
-#[derive(Eq, PartialEq)]
-enum Message {
-  Persist,
-  Exit,
-}
-
-impl ItemStore {
-  fn persist(&self) {
-    let file = ok!(File::create(&self.path));
-    ron::ser::to_writer_pretty(file, &self.items, Default::default()).check();
-  }
-}
-
-struct ItemStoreThread {
-  thread: Option<JoinHandle<()>>,
-  tx: mpsc::Sender<Message>,
-}
-
-impl Drop for ItemStoreThread {
-  fn drop(&mut self) {
-    self.tx.send(Message::Exit).check();
-    if let Some(handle) = self.thread.take() {
-      handle.join().check();
-    }
-  }
-}
 
 #[derive(Clone)]
 pub struct Config {
   store: Arc<RwLock<ItemStore>>,
-  thread: Arc<ItemStoreThread>,
+  tx: mpsc::Sender<()>,
 }
 
 impl Config {
@@ -65,28 +22,22 @@ impl Config {
     let path = Self::path()?;
     let items = Self::load(&path);
     let store = Arc::new(RwLock::new(ItemStore { path, items }));
-    let (tx, rx) = mpsc::channel::<Message>();
-    let thread = {
+    let (tx, rx) = mpsc::channel();
+    thread::spawn({
       let store = store.clone();
-      Some(thread::spawn(move || loop {
-        // Wait for a message.
-        if rx.recv().check() == Message::Exit {
-          return;
+      move || {
+        // Exit when the connection is closed.
+        while rx.recv().is_ok() {
+          // Clear out superfluous requests.
+          while rx.try_recv().is_ok() {}
+
+          // Persist the config data.
+          store.read().check().persist();
         }
+      }
+    });
 
-        // Only the most recent persist message is needed.
-        while let Ok(msg) = rx.try_recv() {
-          if msg == Message::Exit {
-            return;
-          }
-        }
-
-        store.read().check().persist();
-      }))
-    };
-
-    let thread = Arc::new(ItemStoreThread { thread, tx });
-    Some(Self { store, thread })
+    Some(Self { store, tx })
   }
 
   pub fn get_window_pos(&self) -> Option<Pos2> {
@@ -289,7 +240,7 @@ impl Config {
   }
 
   fn persist(&self) {
-    self.thread.tx.send(Message::Persist).check();
+    self.tx.send(()).check();
   }
 
   fn get_sota_config_path() -> Option<PathBuf> {
@@ -315,5 +266,28 @@ impl Config {
       }
     }
     dirs::home_dir()
+  }
+}
+
+const WINDOW_POS_KEY: &str = "window_pos";
+const LOG_PATH_KEY: &str = "log_path";
+const SAVE_PATH_KEY: &str = "save_path";
+const STATS_AVATAR_KEY: &str = "stats_avatar";
+const EXP_AVATAR_KEY: &str = "experience_avatar";
+const AVATAR_SKILLS: &str = "skills";
+const PLANTS_KEY: &str = "plants";
+const DESCRIPTIONS_KEY: &str = "crop_descriptions";
+const NOTES_KEY: &str = "notes";
+const PAGE_KEY: &str = "page";
+
+struct ItemStore {
+  path: PathBuf,
+  items: HashMap<String, String>,
+}
+
+impl ItemStore {
+  fn persist(&self) {
+    let file = ok!(File::create(&self.path));
+    ron::ser::to_writer_pretty(file, &self.items, Default::default()).check();
   }
 }
