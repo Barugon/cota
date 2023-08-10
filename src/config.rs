@@ -7,7 +7,8 @@ use std::{
   collections::{BTreeSet, HashMap},
   fs::{self, File},
   path::{Path, PathBuf},
-  sync::{Arc, RwLock},
+  sync::{mpsc, Arc, RwLock},
+  thread::{self, JoinHandle},
 };
 
 const WINDOW_POS_KEY: &str = "window_pos";
@@ -26,26 +27,66 @@ struct ItemStore {
   items: HashMap<String, String>,
 }
 
+#[derive(Eq, PartialEq)]
+enum Message {
+  Persist,
+  Exit,
+}
+
 impl ItemStore {
-  fn persist(&mut self) {
+  fn persist(&self) {
     let file = ok!(File::create(&self.path));
     ron::ser::to_writer_pretty(file, &self.items, Default::default()).wrest();
+  }
+}
+
+struct ItemStoreThread {
+  thread: Option<JoinHandle<()>>,
+  tx: mpsc::Sender<Message>,
+}
+
+impl Drop for ItemStoreThread {
+  fn drop(&mut self) {
+    self.tx.send(Message::Exit).wrest();
+    if let Some(handle) = self.thread.take() {
+      handle.join().wrest();
+    }
   }
 }
 
 #[derive(Clone)]
 pub struct Config {
   store: Arc<RwLock<ItemStore>>,
+  thread: Arc<ItemStoreThread>,
 }
 
 impl Config {
   pub fn new() -> Option<Self> {
     let path = Self::path()?;
     let items = Self::load(&path);
-    let store = ItemStore { path, items };
-    Some(Self {
-      store: Arc::new(RwLock::new(store)),
-    })
+    let store = Arc::new(RwLock::new(ItemStore { path, items }));
+    let (tx, rx) = mpsc::channel::<Message>();
+    let thread = {
+      let store = store.clone();
+      Some(thread::spawn(move || loop {
+        // Wait for a message.
+        if rx.recv().wrest() == Message::Exit {
+          return;
+        }
+
+        // Only the most recent persist message is needed.
+        while let Ok(msg) = rx.try_recv() {
+          if msg == Message::Exit {
+            return;
+          }
+        }
+
+        store.read().wrest().persist();
+      }))
+    };
+
+    let thread = Arc::new(ItemStoreThread { thread, tx });
+    Some(Self { store, thread })
   }
 
   pub fn get_window_pos(&self) -> Option<Pos2> {
@@ -237,14 +278,18 @@ impl Config {
   fn set(&mut self, key: &str, item: String) {
     let mut lock = self.store.write().wrest();
     lock.items.insert(key.to_owned(), item);
-    lock.persist();
+    self.persist();
   }
 
   fn remove(&mut self, key: &str) {
     let mut lock = self.store.write().wrest();
     if lock.items.remove(key).is_some() {
-      lock.persist();
+      self.persist();
     }
+  }
+
+  fn persist(&self) {
+    self.thread.tx.send(Message::Persist).wrest();
   }
 
   fn get_sota_config_path() -> Option<PathBuf> {
