@@ -92,18 +92,20 @@ pub enum Page {
   Stats,
 }
 
-pub trait Wrest<T> {
-  fn wrest(self) -> T;
+pub trait Check<T> {
+  fn check(self) -> T;
 }
 
-impl<T> Wrest<T> for Option<T> {
-  fn wrest(self) -> T {
+impl<T> Check<T> for Option<T> {
+  /// Ensure that a returned `Option` is `Some`.
+  fn check(self) -> T {
     self.expect("Should always be Some")
   }
 }
 
-impl<T, E: std::fmt::Debug> Wrest<T> for Result<T, E> {
-  fn wrest(self) -> T {
+impl<T, E: std::fmt::Debug> Check<T> for Result<T, E> {
+  /// Ensure that a returned `Result` is `Ok`.
+  fn check(self) -> T {
     self.expect("Should always be Ok")
   }
 }
