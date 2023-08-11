@@ -26,7 +26,7 @@ impl Config {
     thread::spawn({
       let store = store.clone();
       move || {
-        // Exit when the connection is closed.
+        // Wait for a message. Exit when the connection is closed.
         while rx.recv().is_ok() {
           // Clear out superfluous requests.
           while rx.try_recv().is_ok() {}
