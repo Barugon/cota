@@ -20,6 +20,7 @@ static DESCRIPTIONS_KEY: &str = "crop_descriptions";
 static NOTES_KEY: &str = "notes";
 static PAGE_KEY: &str = "page";
 
+/// Companion of the Avatar configuration storage.
 #[derive(Clone)]
 pub struct Config {
   storage: Storage,
@@ -81,6 +82,7 @@ impl Config {
 
   pub fn set_page(&mut self, page: Page) {
     self.storage.set_as(PAGE_KEY, &page);
+    self.storage.store();
   }
 
   pub fn get_log_path(&self) -> Option<PathBuf> {
@@ -94,6 +96,7 @@ impl Config {
   pub fn set_log_path(&mut self, path: &Path) {
     if let Some(path) = path.to_str() {
       self.storage.set(LOG_PATH_KEY, path.to_owned());
+      self.storage.store();
     } else {
       println!("Unable to convert path to string: {path:?}");
     }
@@ -110,6 +113,7 @@ impl Config {
   pub fn set_save_path(&mut self, path: &Path) {
     if let Some(path) = path.to_str() {
       self.storage.set(SAVE_PATH_KEY, path.to_owned());
+      self.storage.store();
     } else {
       println!("Unable to convert path to string: {path:?}");
     }
@@ -125,6 +129,7 @@ impl Config {
     }
 
     self.storage.set(STATS_AVATAR_KEY, avatar);
+    self.storage.store();
   }
 
   pub fn get_exp_avatar(&self) -> Option<String> {
@@ -137,6 +142,7 @@ impl Config {
     }
 
     self.storage.set(EXP_AVATAR_KEY, avatar);
+    self.storage.store();
   }
 
   pub fn get_notes(&self, avatar: &str) -> Option<String> {
@@ -157,10 +163,11 @@ impl Config {
     let key = format!("{avatar} {NOTES_KEY}");
     if notes.is_empty() {
       self.storage.remove(&key);
-      return;
+    } else {
+      self.storage.set(&key, notes);
     }
 
-    self.storage.set(&key, notes);
+    self.storage.store();
   }
 
   pub fn get_plants(&self) -> Option<Vec<Plant>> {
@@ -171,10 +178,11 @@ impl Config {
     // Remove the entry if plants is empty.
     if plants.is_empty() {
       self.storage.remove(PLANTS_KEY);
-      return;
+    } else {
+      self.storage.set_as(PLANTS_KEY, plants);
     }
 
-    self.storage.set_as(PLANTS_KEY, plants);
+    self.storage.store();
   }
 
   pub fn get_crop_descriptions(&self) -> Option<BTreeSet<String>> {
@@ -182,13 +190,14 @@ impl Config {
   }
 
   pub fn set_crop_descriptions(&mut self, descriptions: &BTreeSet<String>) {
-    // Remove the entry if the set is empty.
+    // Remove the entry if descriptions is empty.
     if descriptions.is_empty() {
       self.storage.remove(DESCRIPTIONS_KEY);
-      return;
+    } else {
+      self.storage.set_as(DESCRIPTIONS_KEY, descriptions);
     }
 
-    self.storage.set_as(DESCRIPTIONS_KEY, descriptions);
+    self.storage.store();
   }
 
   pub fn get_avatar_skills(&self, avatar: &str) -> Option<HashMap<u32, (i32, i32)>> {
@@ -216,9 +225,10 @@ impl Config {
     let key = format!("{avatar} {AVATAR_SKILLS}");
     if skills.is_empty() {
       self.storage.remove(&key);
-      return;
+    } else {
+      self.storage.set_as(&key, &skills);
     }
 
-    self.storage.set_as(&key, &skills);
+    self.storage.store();
   }
 }
