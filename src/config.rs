@@ -36,6 +36,31 @@ impl Config {
     dirs::config_dir().map(|path| path.join(APP_NAME).with_extension("ron"))
   }
 
+  fn get_sota_config_path() -> Option<PathBuf> {
+    let path = dirs::config_dir()?;
+    Some(path.join("Portalarium").join("Shroud of the Avatar"))
+  }
+
+  fn get_default_log_path() -> Option<PathBuf> {
+    if let Some(path) = Self::get_sota_config_path() {
+      let path = path.join("ChatLogs");
+      if path.is_dir() {
+        return Some(path);
+      }
+    }
+    dirs::home_dir()
+  }
+
+  fn get_default_save_path() -> Option<PathBuf> {
+    if let Some(path) = Self::get_sota_config_path() {
+      let path = path.join("SavedGames");
+      if path.is_dir() {
+        return Some(path);
+      }
+    }
+    dirs::home_dir()
+  }
+
   pub fn get_window_pos(&self) -> Option<Pos2> {
     let pos: (f32, f32) = self.storage.get_as(WINDOW_POS_KEY)?;
     Some(pos.into())
@@ -195,30 +220,5 @@ impl Config {
     }
 
     self.storage.set_as(&key, &skills);
-  }
-
-  fn get_sota_config_path() -> Option<PathBuf> {
-    let path = dirs::config_dir()?;
-    Some(path.join("Portalarium").join("Shroud of the Avatar"))
-  }
-
-  fn get_default_log_path() -> Option<PathBuf> {
-    if let Some(path) = Self::get_sota_config_path() {
-      let path = path.join("ChatLogs");
-      if path.is_dir() {
-        return Some(path);
-      }
-    }
-    dirs::home_dir()
-  }
-
-  fn get_default_save_path() -> Option<PathBuf> {
-    if let Some(path) = Self::get_sota_config_path() {
-      let path = path.join("SavedGames");
-      if path.is_dir() {
-        return Some(path);
-      }
-    }
-    dirs::home_dir()
   }
 }
