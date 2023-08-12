@@ -259,37 +259,23 @@ struct Descriptions {
   #[allow(unused)]
   config: Config,
   list: BTreeSet<String>,
-  modified: bool,
 }
 
 impl Descriptions {
   fn load(config: Config) -> Self {
     let list = config.get_crop_descriptions().unwrap_or_default();
-    Descriptions {
-      config,
-      list,
-      modified: false,
-    }
+    Descriptions { config, list }
   }
 
   fn insert(&mut self, text: String) {
     if !text.is_empty() && self.list.insert(text) {
-      self.modified = true;
+      self.config.set_crop_descriptions(&self.list);
     }
   }
 
   fn remove(&mut self, text: &str) {
     if self.list.remove(text) {
-      self.modified = true;
-    }
-  }
-}
-
-impl Drop for Descriptions {
-  fn drop(&mut self) {
-    if self.modified {
       self.config.set_crop_descriptions(&self.list);
-      self.modified = false;
     }
   }
 }
