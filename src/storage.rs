@@ -3,7 +3,7 @@ use std::{
   fs::{self, File},
   path::{Path, PathBuf},
   sync::{mpsc, Arc, RwLock},
-  thread,
+  thread::{self, JoinHandle},
 };
 
 struct Items {
@@ -18,11 +18,34 @@ impl Items {
   }
 }
 
+struct ItemsThread {
+  thread: Option<JoinHandle<()>>,
+  tx: Option<mpsc::Sender<()>>,
+}
+
+impl ItemsThread {
+  fn store(&self) {
+    if let Some(tx) = &self.tx {
+      tx.send(()).unwrap();
+    }
+  }
+}
+
+impl Drop for ItemsThread {
+  fn drop(&mut self) {
+    // Close the connection by dropping the sender.
+    drop(self.tx.take().unwrap());
+
+    // Wait for the thread to exit.
+    self.thread.take().unwrap().join().unwrap();
+  }
+}
+
 /// Key/value persisted storage.
 #[derive(Clone)]
 pub struct Storage {
   items: Arc<RwLock<Items>>,
-  tx: mpsc::Sender<()>,
+  thread: Arc<ItemsThread>,
 }
 
 impl Storage {
@@ -30,7 +53,7 @@ impl Storage {
     let items = Self::load(&path);
     let items = Arc::new(RwLock::new(Items { path, items }));
     let (tx, rx) = mpsc::channel();
-    thread::spawn({
+    let thread = Some(thread::spawn({
       let items = items.clone();
       move || {
         // Wait for a message. Exit when the connection is closed.
@@ -42,9 +65,11 @@ impl Storage {
           items.read().unwrap().store();
         }
       }
-    });
+    }));
 
-    Some(Self { items, tx })
+    let tx = Some(tx);
+    let thread = Arc::new(ItemsThread { thread, tx });
+    Some(Self { items, thread })
   }
 
   fn load(path: &Path) -> HashMap<String, String> {
@@ -56,10 +81,6 @@ impl Storage {
     }
 
     HashMap::new()
-  }
-
-  fn store(&self) {
-    self.tx.send(()).unwrap();
   }
 
   /// Get an item.
@@ -90,7 +111,7 @@ impl Storage {
       }
     }
 
-    self.store();
+    self.thread.store();
   }
 
   /// Set an item as a specific type.
@@ -105,7 +126,7 @@ impl Storage {
   pub fn remove(&mut self, key: &str) {
     let mut lock = self.items.write().unwrap();
     if lock.items.remove(key).is_some() {
-      self.store();
+      self.thread.store();
     }
   }
 }
