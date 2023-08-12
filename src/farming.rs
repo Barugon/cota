@@ -123,6 +123,7 @@ impl Farming {
           let plant = &mut lock[index];
           let event = plant.current_event();
           let item_spacing = ui.spacing().item_spacing;
+          let mut events = plant.remaining_events();
 
           // Use a single column in order to force the scroll area to fill the entire available width.
           ui.columns(1, |col| {
@@ -143,14 +144,33 @@ impl Farming {
               ui.separator();
               ui.label(format!("{environment:?} {date_time}",));
 
-              // Next event.
-              let (event, date_time) = plant.next_event();
-              if event != Event::None {
-                let date_time = date_time.format("%Y-%m-%d %H:%M");
+              if !events.is_empty() {
                 ui.separator();
+              }
+
+              // Next event.
+              if let Some((event, date_time)) = events.pop() {
+                let date_time = date_time.format("%Y-%m-%d %H:%M");
                 ui.label(format!("{event:?} {date_time}"));
+                if !events.is_empty() {
+                  ui.separator();
+                }
               }
             });
+
+            if !events.is_empty() {
+              col[0].horizontal(|ui| {
+                // Remaining events.
+                while let Some((event, date_time)) = events.pop() {
+                  let date_time = date_time.format("%Y-%m-%d %H:%M");
+                  ui.label(format!("{event:?} {date_time}"));
+                  if !events.is_empty() {
+                    ui.separator();
+                  }
+                }
+              });
+            }
+
             col[0].horizontal(|ui| {
               match event {
                 Event::None => {
