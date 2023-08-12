@@ -48,7 +48,7 @@ pub enum Event {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Plant {
+pub struct CropTimer {
   description: String,
   date_time: NaiveDateTime,
   seed_name: String,
@@ -57,7 +57,7 @@ pub struct Plant {
   events: [Option<bool>; 3],
 }
 
-impl Plant {
+impl CropTimer {
   pub fn new(
     description: String,
     date_time: NaiveDateTime,

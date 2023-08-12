@@ -1,7 +1,7 @@
 use crate::{
   config::Config,
   plant_dlg::PlantDlg,
-  plant_info::{Event, Plant},
+  plant_info::{CropTimer, Event},
   util::{AppState, Cancel},
 };
 use eframe::{
@@ -21,7 +21,7 @@ use std::{
 pub struct Farming {
   config: Config,
   plant_dlg: PlantDlg,
-  plants: Arc<Mutex<Vec<Plant>>>,
+  timers: Arc<Mutex<Vec<CropTimer>>>,
   persist: Arc<AtomicBool>,
   cancel: Option<Cancel>,
   thread: Option<JoinHandle<()>>,
@@ -30,18 +30,16 @@ pub struct Farming {
 impl Farming {
   pub fn new(ctx: Context, config: Config, state: AppState) -> Self {
     let plant_dlg = PlantDlg::new(config.clone(), state);
-    let plants = config.get_plants().unwrap_or_default();
-    let plants = Arc::new(Mutex::new(plants));
+    let timers = config.get_crop_timers().unwrap_or_default();
+    let timers = Arc::new(Mutex::new(timers));
     let persist = Arc::new(AtomicBool::new(false));
     let cancel = Cancel::default();
-    Self {
-      config,
-      plant_dlg,
-      plants: plants.clone(),
-      persist: persist.clone(),
-      cancel: Some(cancel.clone()),
-      thread: Some(thread::spawn(move || loop {
-        let mut lock = plants.lock().unwrap();
+    let thread = Some(thread::spawn({
+      let timers = timers.clone();
+      let persist = persist.clone();
+      let cancel = cancel.clone();
+      move || loop {
+        let mut lock = timers.lock().unwrap();
         for plant in lock.iter_mut() {
           if plant.check() {
             // Popup a desktop notification.
@@ -84,14 +82,23 @@ impl Farming {
           // We need to sleep for some actual amount of time or this thread will peg one of the cores.
           thread::sleep(Duration::from_millis(10));
         }
-      })),
+      }
+    }));
+
+    Self {
+      config,
+      plant_dlg,
+      timers,
+      persist,
+      cancel: Some(cancel),
+      thread,
     }
   }
 
   pub fn show(&mut self, ui: &mut Ui) {
     if !self.plant_dlg.show(ui.ctx()) {
       if let Some(plant_info) = self.plant_dlg.take_result() {
-        self.plants.lock().unwrap().push(plant_info);
+        self.timers.lock().unwrap().push(plant_info);
         self.persist.store(true, Ordering::Relaxed);
       }
     }
@@ -109,7 +116,7 @@ impl Farming {
     ScrollArea::vertical()
       .id_source("farming_scroll_area")
       .show(ui, |ui| {
-        let mut lock = self.plants.lock().unwrap();
+        let mut lock = self.timers.lock().unwrap();
         let mut index = 0;
         while index < lock.len() {
           let mut delete = false;
@@ -183,7 +190,7 @@ impl Farming {
 
         if self.persist.swap(false, Ordering::Relaxed) {
           // Persist the timers.
-          self.config.set_plants(&lock);
+          self.config.set_crop_timers(&lock);
         }
       });
   }
