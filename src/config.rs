@@ -26,25 +26,25 @@ impl Config {
   }
 
   pub fn get_window_pos(&self) -> Option<Pos2> {
-    let text = self.storage.get(WINDOW_POS_KEY)?;
-    let pos: Option<(f32, f32)> = ok!(ron::from_str(&text), None);
-    pos.map(|pos| pos.into())
+    let pos: (f32, f32) = self.storage.get_as(WINDOW_POS_KEY)?;
+    Some(pos.into())
   }
 
   pub fn set_window_pos(&mut self, pos: Option<Pos2>) {
-    let pos: Option<(f32, f32)> = pos.map(|pos| pos.into());
-    let text = ok!(ron::to_string(&pos));
-    self.storage.set(WINDOW_POS_KEY, text);
+    if let Some(pos) = pos {
+      let pos: (f32, f32) = pos.into();
+      self.storage.set_as(WINDOW_POS_KEY, &pos);
+    } else {
+      self.storage.remove(WINDOW_POS_KEY);
+    }
   }
 
   pub fn get_page(&self) -> Option<Page> {
-    let text = self.storage.get(PAGE_KEY)?;
-    Some(ok!(ron::from_str(&text), None))
+    self.storage.get_as(PAGE_KEY)
   }
 
   pub fn set_page(&mut self, page: Page) {
-    let text = ok!(ron::to_string(&page));
-    self.storage.set(PAGE_KEY, text);
+    self.storage.set_as(PAGE_KEY, &page);
   }
 
   pub fn get_log_path(&self) -> Option<PathBuf> {
@@ -128,8 +128,7 @@ impl Config {
   }
 
   pub fn get_plants(&self) -> Option<Vec<Plant>> {
-    let text = self.storage.get(PLANTS_KEY)?;
-    Some(ok!(ron::from_str(&text), None))
+    self.storage.get_as(PLANTS_KEY)
   }
 
   pub fn set_plants(&mut self, plants: &Vec<Plant>) {
@@ -139,13 +138,11 @@ impl Config {
       return;
     }
 
-    let text = ok!(ron::to_string(plants));
-    self.storage.set(PLANTS_KEY, text);
+    self.storage.set_as(PLANTS_KEY, plants);
   }
 
   pub fn get_crop_descriptions(&self) -> Option<BTreeSet<String>> {
-    let text = self.storage.get(DESCRIPTIONS_KEY)?;
-    Some(ok!(ron::from_str(&text), None))
+    self.storage.get_as(DESCRIPTIONS_KEY)
   }
 
   pub fn set_crop_descriptions(&mut self, descriptions: &BTreeSet<String>) {
@@ -155,8 +152,7 @@ impl Config {
       return;
     }
 
-    let text = ok!(ron::to_string(descriptions));
-    self.storage.set(DESCRIPTIONS_KEY, text);
+    self.storage.set_as(DESCRIPTIONS_KEY, descriptions);
   }
 
   pub fn get_avatar_skills(&self, avatar: &str) -> Option<HashMap<u32, (i32, i32)>> {
@@ -165,8 +161,7 @@ impl Config {
     }
 
     let key = format!("{avatar} {AVATAR_SKILLS}");
-    let text = self.storage.get(&key)?;
-    Some(ok!(ron::from_str(&text), None))
+    self.storage.get_as(&key)
   }
 
   pub fn set_avatar_skills(&mut self, avatar: &str, skills: &HashMap<u32, (i32, i32)>) {
@@ -188,8 +183,7 @@ impl Config {
       return;
     }
 
-    let text = ok!(ron::to_string(&skills));
-    self.storage.set(&key, text);
+    self.storage.set_as(&key, &skills);
   }
 
   fn get_sota_config_path() -> Option<PathBuf> {

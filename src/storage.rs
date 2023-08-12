@@ -62,11 +62,26 @@ impl Storage {
     self.tx.send(()).unwrap();
   }
 
+  /// Get an item.
   pub fn get(&self, key: &str) -> Option<String> {
     let lock = self.items.read().unwrap();
     Some(lock.items.get(key)?.to_owned())
   }
 
+  /// Get an item as a specific type.
+  pub fn get_as<T: serde::de::DeserializeOwned>(&self, key: &str) -> Option<T> {
+    let lock = self.items.read().unwrap();
+    let text = lock.items.get(key)?;
+    match ron::from_str(text) {
+      Ok(val) => Some(val),
+      Err(err) => {
+        println!("{err}");
+        None
+      }
+    }
+  }
+
+  // Set an item.
   pub fn set(&mut self, key: &str, item: String) {
     let mut lock = self.items.write().unwrap();
     if let Some(old) = lock.items.insert(key.to_owned(), item) {
@@ -78,6 +93,15 @@ impl Storage {
     self.store();
   }
 
+  /// Set an item as a specific type.
+  pub fn set_as<T: serde::Serialize>(&mut self, key: &str, item: &T) {
+    match ron::to_string(item) {
+      Ok(text) => self.set(key, text),
+      Err(err) => println!("{err}"),
+    }
+  }
+
+  /// Remove an item.
   pub fn remove(&mut self, key: &str) {
     let mut lock = self.items.write().unwrap();
     if lock.items.remove(key).is_some() {
