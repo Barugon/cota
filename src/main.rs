@@ -24,16 +24,17 @@ mod plant_info;
 mod search_dlg;
 mod skill_info;
 mod stats;
+mod storage;
 mod towns_dlg;
 
 use app::App;
 use config::Config;
 use eframe::AppCreator;
-use util::{Check, APP_ICON, APP_TITLE};
+use util::{APP_ICON, APP_TITLE};
 
 fn main() {
-  let config = Config::new().check();
-  let icon = image::load_from_memory(APP_ICON).check();
+  let config = Config::new().unwrap();
+  let icon = image::load_from_memory(APP_ICON).unwrap();
   let options = eframe::NativeOptions {
     resizable: false,
     initial_window_pos: config.get_window_pos(),
@@ -49,5 +50,5 @@ fn main() {
   };
 
   let creator: AppCreator = Box::new(move |cc| Box::new(App::new(cc, config)));
-  eframe::run_native(APP_TITLE, options, creator).check();
+  eframe::run_native(APP_TITLE, options, creator).unwrap();
 }

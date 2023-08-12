@@ -1,4 +1,4 @@
-use crate::util::{Check, HOUR_SECS};
+use crate::util::HOUR_SECS;
 use chrono::{Duration, Local, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
@@ -28,7 +28,7 @@ pub fn parse_seeds() -> Vec<(&'static str, Seed)> {
     let mut iter = line.split(',');
     let Some(seed_name) = iter.next() else { break };
     let Some(seed_type) = iter.next() else { break };
-    result.push((seed_name, Seed::new(seed_type).check()));
+    result.push((seed_name, Seed::new(seed_type).unwrap()));
   }
   result
 }

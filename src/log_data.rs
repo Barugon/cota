@@ -1,4 +1,4 @@
-use crate::util::{self, Cancel, Check, Search};
+use crate::util::{self, Cancel, Search};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{channel::mpsc, executor::ThreadPool, future, StreamExt};
 use regex::Regex;
@@ -26,7 +26,7 @@ pub fn get_log_text(line: &str) -> &str {
 
     // Check if a chat timestamp was output.
     if let Some(time) = get_log_date(text.trim_start()) {
-      let pos = util::offset(text, time).check() + time.len();
+      let pos = util::offset(text, time).unwrap() + time.len();
       return &text[pos..];
     }
     return text;
@@ -164,7 +164,7 @@ pub async fn get_stats_timestamps(
       let tx = tx.clone();
       threads.spawn_ok(async move {
         let result = future.await;
-        tx.unbounded_send(result).check();
+        tx.unbounded_send(result).unwrap();
       });
     }
     drop(tx);
@@ -204,13 +204,13 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, ts: i64, cancel: Cance
 
             if let Some(mut stats) = get_stats_text(line, ts, date) {
               // Include subsequent lines that do not start with a square bracket.
-              let pos = util::offset(&text, stats).check();
+              let pos = util::offset(&text, stats).unwrap();
               let sub = &text[pos + stats.len()..];
               for line in sub.lines() {
                 if line.starts_with('[') {
                   break;
                 }
-                stats = &text[pos..util::offset(&text, line).check()];
+                stats = &text[pos..util::offset(&text, line).unwrap()];
               }
 
               return StatsData::new(stats.into());
@@ -413,7 +413,7 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
 
     // Read the log file.
     let path = log_path.join(filename);
-    let file_date = get_log_file_date(&path).check();
+    let file_date = get_log_file_date(&path).unwrap();
     if let Ok(text) = fs::read_to_string(path) {
       // Search for attack lines.
       for line in text.lines() {

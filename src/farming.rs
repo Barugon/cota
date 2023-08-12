@@ -2,7 +2,7 @@ use crate::{
   config::Config,
   plant_dlg::PlantDlg,
   plant_info::{Event, Plant},
-  util::{AppState, Cancel, Check},
+  util::{AppState, Cancel},
 };
 use eframe::{
   egui::{Context, Label, ScrollArea, Ui, WidgetText},
@@ -41,7 +41,7 @@ impl Farming {
       persist: persist.clone(),
       cancel: Some(cancel.clone()),
       thread: Some(thread::spawn(move || loop {
-        let mut lock = plants.lock().check();
+        let mut lock = plants.lock().unwrap();
         for plant in lock.iter_mut() {
           if plant.check() {
             // Popup a desktop notification.
@@ -91,7 +91,7 @@ impl Farming {
   pub fn show(&mut self, ui: &mut Ui) {
     if !self.plant_dlg.show(ui.ctx()) {
       if let Some(plant_info) = self.plant_dlg.take_result() {
-        self.plants.lock().check().push(plant_info);
+        self.plants.lock().unwrap().push(plant_info);
         self.persist.store(true, Ordering::Relaxed);
       }
     }
@@ -109,7 +109,7 @@ impl Farming {
     ScrollArea::vertical()
       .id_source("farming_scroll_area")
       .show(ui, |ui| {
-        let mut lock = self.plants.lock().check();
+        let mut lock = self.plants.lock().unwrap();
         let mut index = 0;
         while index < lock.len() {
           let mut delete = false;
@@ -196,7 +196,7 @@ impl Farming {
 
     // Wait for it to join.
     if let Some(thread) = self.thread.take() {
-      thread.join().check();
+      thread.join().unwrap();
     }
   }
 }

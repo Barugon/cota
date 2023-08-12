@@ -1,5 +1,3 @@
-use crate::util::Check;
-
 #[derive(Clone, Copy, Debug)]
 pub enum SkillCategory {
   Adventurer,
@@ -58,13 +56,13 @@ pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
         skill_group = SkillInfoGroup::new(group);
       }
 
-      let name = fields.next().check();
-      let mul = fields.next().check().parse().check();
-      let id = fields.next().check().parse().check();
+      let name = fields.next().unwrap();
+      let mul = fields.next().unwrap().parse().unwrap();
+      let id = fields.next().unwrap().parse().unwrap();
 
       while let Some(id) = fields.next() {
-        let id = id.parse().check();
-        let lvl = fields.next().check().parse().check();
+        let id = id.parse().unwrap();
+        let lvl = fields.next().unwrap().parse().unwrap();
         tmp_reqs.push(Requires { id, lvl });
       }
 
