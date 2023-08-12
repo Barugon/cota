@@ -9,6 +9,17 @@ use std::{
   path::{Path, PathBuf},
 };
 
+static WINDOW_POS_KEY: &str = "window_pos";
+static LOG_PATH_KEY: &str = "log_path";
+static SAVE_PATH_KEY: &str = "save_path";
+static STATS_AVATAR_KEY: &str = "stats_avatar";
+static EXP_AVATAR_KEY: &str = "experience_avatar";
+static AVATAR_SKILLS: &str = "skills";
+static PLANTS_KEY: &str = "plants";
+static DESCRIPTIONS_KEY: &str = "crop_descriptions";
+static NOTES_KEY: &str = "notes";
+static PAGE_KEY: &str = "page";
+
 #[derive(Clone)]
 pub struct Config {
   storage: Storage,
@@ -211,14 +222,3 @@ impl Config {
     dirs::home_dir()
   }
 }
-
-static WINDOW_POS_KEY: &str = "window_pos";
-static LOG_PATH_KEY: &str = "log_path";
-static SAVE_PATH_KEY: &str = "save_path";
-static STATS_AVATAR_KEY: &str = "stats_avatar";
-static EXP_AVATAR_KEY: &str = "experience_avatar";
-static AVATAR_SKILLS: &str = "skills";
-static PLANTS_KEY: &str = "plants";
-static DESCRIPTIONS_KEY: &str = "crop_descriptions";
-static NOTES_KEY: &str = "notes";
-static PAGE_KEY: &str = "page";
