@@ -105,12 +105,7 @@ impl Storage {
   // Set an item.
   pub fn set(&mut self, key: &str, item: String) {
     let mut lock = self.items.write().unwrap();
-    if let Some(old) = lock.items.insert(key.to_owned(), item) {
-      if lock.items.get(key).unwrap() == &old {
-        return;
-      }
-    }
-
+    lock.items.insert(key.to_owned(), item);
     self.thread.store();
   }
 
