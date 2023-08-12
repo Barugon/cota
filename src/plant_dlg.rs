@@ -3,7 +3,7 @@ use std::{collections::BTreeSet, mem};
 use crate::{
   config::Config,
   plant_info::{self, Environment, Plant, Seed},
-  util::{AppState, Check},
+  util::AppState,
 };
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
 use eframe::{
@@ -225,7 +225,7 @@ impl PlantDlg {
     if self.visible {
       let Some(index) = self.seed_index else { return };
       let Some(environment) = self.environment else { return };
-      let time = NaiveTime::from_hms_opt(self.hour, self.min, 0).check();
+      let time = NaiveTime::from_hms_opt(self.hour, self.min, 0).unwrap();
       self.descriptions.insert(self.description.clone());
       self.result = Some(Plant::new(
         mem::take(&mut self.description),

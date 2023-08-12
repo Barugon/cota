@@ -92,24 +92,6 @@ pub enum Page {
   Stats,
 }
 
-pub trait Check<T> {
-  fn check(self) -> T;
-}
-
-impl<T> Check<T> for Option<T> {
-  /// Ensure that a returned `Option` is `Some`.
-  fn check(self) -> T {
-    self.expect("Should always be Some")
-  }
-}
-
-impl<T, E: std::fmt::Debug> Check<T> for Result<T, E> {
-  /// Ensure that a returned `Result` is `Ok`.
-  fn check(self) -> T {
-    self.expect("Should always be Ok")
-  }
-}
-
 pub fn floor_search<T: Ord>(value: T, values: &[T]) -> Option<usize> {
   match values.binary_search(&value) {
     Ok(idx) => Some(idx),

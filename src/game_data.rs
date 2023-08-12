@@ -1,6 +1,6 @@
 use crate::{
   skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup},
-  util::{self, Check, LEVEL_EXP, LVL_RANGE, SKILL_EXP},
+  util::{self, LEVEL_EXP, LVL_RANGE, SKILL_EXP},
 };
 use serde_json::Value;
 use std::{borrow::Cow, fs::File, io::Write, ops::Range, path::PathBuf, sync::RwLock};
@@ -106,7 +106,7 @@ impl GameData {
       Ok(mut file) => match file.write_all(text.as_bytes()) {
         Ok(()) => {
           // Change the path.
-          *self.path.write().check() = path;
+          *self.path.write().unwrap() = path;
           Ok(())
         }
         Err(err) => Err(Cow::from(err.to_string())),
@@ -128,9 +128,9 @@ impl GameData {
   }
 
   pub fn get_adv_lvl(&self) -> i32 {
-    let ae = self.character.get(AE).check();
-    let exp = ae.to_i64().check();
-    util::floor_search(exp, &LEVEL_EXP).check() as i32 + 1
+    let ae = self.character.get(AE).unwrap();
+    let exp = ae.to_i64().unwrap();
+    util::floor_search(exp, &LEVEL_EXP).unwrap() as i32 + 1
   }
 
   pub fn set_adv_lvl(&mut self, lvl: i32) {
@@ -139,9 +139,9 @@ impl GameData {
   }
 
   pub fn get_prd_lvl(&self) -> i32 {
-    let pe = self.character.get(PE).check();
-    let exp = pe.to_i64().check();
-    util::floor_search(exp, &LEVEL_EXP).check() as i32 + 1
+    let pe = self.character.get(PE).unwrap();
+    let exp = pe.to_i64().unwrap();
+    util::floor_search(exp, &LEVEL_EXP).unwrap() as i32 + 1
   }
 
   pub fn set_prd_lvl(&mut self, lvl: i32) {
@@ -150,16 +150,16 @@ impl GameData {
   }
 
   pub fn get_file_path(&self) -> PathBuf {
-    self.path.read().check().clone()
+    self.path.read().unwrap().clone()
   }
 
   pub fn get_file_name(&self) -> String {
-    let path = self.path.read().check();
-    path.file_name().check().to_string_lossy().into()
+    let path = self.path.read().unwrap();
+    path.file_name().unwrap().to_string_lossy().into()
   }
 
   pub fn get_skills(&self, category: SkillCategory) -> Vec<SkillLvlGroup> {
-    let sk2 = self.character.get(SK2).check();
+    let sk2 = self.character.get(SK2).unwrap();
     let groups = skill_info::parse_skill_info_groups(category);
     let mut skills = Vec::with_capacity(groups.len());
     for group in groups {
@@ -170,7 +170,7 @@ impl GameData {
   }
 
   pub fn set_skills(&mut self, skills: &Vec<SkillLvlGroup>) {
-    let sk2 = self.character.get_mut(SK2).check();
+    let sk2 = self.character.get_mut(SK2).unwrap();
     for group in skills {
       for skill in &group.skills {
         set_skill_lvl(sk2, &self.date, skill);
@@ -179,8 +179,8 @@ impl GameData {
   }
 
   pub fn get_inventory_items(&self) -> Vec<Item> {
-    let inv = self.inventory.get(IN).check();
-    let items_map = inv.as_object().check();
+    let inv = self.inventory.get(IN).unwrap();
+    let items_map = inv.as_object().unwrap();
     let mut items = Vec::with_capacity(items_map.len());
     for (key, val) in items_map {
       if let Some(item) = Item::new(val, key) {
@@ -192,10 +192,10 @@ impl GameData {
   }
 
   pub fn set_inventory_items(&mut self, items: &Vec<Item>) {
-    let inv = self.inventory.get_mut(IN).check();
+    let inv = self.inventory.get_mut(IN).unwrap();
     for item in items {
-      let val = inv.get_mut(&item.id).check();
-      let val = val.get_mut(IN).check();
+      let val = inv.get_mut(&item.id).unwrap();
+      let val = val.get_mut(IN).unwrap();
       val[QN] = item.cnt.into();
       if let Some(dur) = &item.dur {
         val[HP] = dur.minor.into();
@@ -400,7 +400,7 @@ fn set_skill_lvl(sk2: &mut Value, date: &Value, skill: &SkillLvl) {
 }
 
 fn remove_skill(sk2: &mut Value, id: u32) {
-  let skills = sk2.as_object_mut().check();
+  let skills = sk2.as_object_mut().unwrap();
   skills.remove(&format!("{id}"));
 }
 
