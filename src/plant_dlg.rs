@@ -2,7 +2,7 @@ use std::{collections::BTreeSet, mem};
 
 use crate::{
   config::Config,
-  plant_info::{self, Environment, Plant, Seed},
+  plant_info::{self, CropTimer, Environment, Seed},
   util::AppState,
 };
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
@@ -25,7 +25,7 @@ pub struct PlantDlg {
   environment: Option<Environment>,
   description: String,
   descriptions: Descriptions,
-  result: Option<Plant>,
+  result: Option<CropTimer>,
   visible: bool,
 }
 
@@ -217,7 +217,7 @@ impl PlantDlg {
     self.visible
   }
 
-  pub fn take_result(&mut self) -> Option<Plant> {
+  pub fn take_result(&mut self) -> Option<CropTimer> {
     self.result.take()
   }
 
@@ -227,7 +227,7 @@ impl PlantDlg {
       let Some(environment) = self.environment else { return };
       let time = NaiveTime::from_hms_opt(self.hour, self.min, 0).unwrap();
       self.descriptions.insert(self.description.clone());
-      self.result = Some(Plant::new(
+      self.result = Some(CropTimer::new(
         mem::take(&mut self.description),
         self.date.and_time(time),
         self.seed_names[index].to_owned(),

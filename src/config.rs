@@ -1,5 +1,5 @@
 use crate::{
-  plant_info::Plant,
+  plant_info::CropTimer,
   storage::Storage,
   util::{Page, APP_NAME},
 };
@@ -15,8 +15,8 @@ static SAVE_PATH_KEY: &str = "save_path";
 static STATS_AVATAR_KEY: &str = "stats_avatar";
 static EXP_AVATAR_KEY: &str = "experience_avatar";
 static AVATAR_SKILLS: &str = "skills";
-static PLANTS_KEY: &str = "plants";
-static DESCRIPTIONS_KEY: &str = "crop_descriptions";
+static CROP_TIMERS_KEY: &str = "plants";
+static CROP_DESCRIPTIONS_KEY: &str = "crop_descriptions";
 static NOTES_KEY: &str = "notes";
 static PAGE_KEY: &str = "page";
 
@@ -170,31 +170,31 @@ impl Config {
     self.storage.store();
   }
 
-  pub fn get_plants(&self) -> Option<Vec<Plant>> {
-    self.storage.get_as(PLANTS_KEY)
+  pub fn get_crop_timers(&self) -> Option<Vec<CropTimer>> {
+    self.storage.get_as(CROP_TIMERS_KEY)
   }
 
-  pub fn set_plants(&mut self, plants: &Vec<Plant>) {
-    // Remove the entry if plants is empty.
-    if plants.is_empty() {
-      self.storage.remove(PLANTS_KEY);
+  pub fn set_crop_timers(&mut self, timers: &Vec<CropTimer>) {
+    // Remove the entry if timers is empty.
+    if timers.is_empty() {
+      self.storage.remove(CROP_TIMERS_KEY);
     } else {
-      self.storage.set_as(PLANTS_KEY, plants);
+      self.storage.set_as(CROP_TIMERS_KEY, timers);
     }
 
     self.storage.store();
   }
 
   pub fn get_crop_descriptions(&self) -> Option<BTreeSet<String>> {
-    self.storage.get_as(DESCRIPTIONS_KEY)
+    self.storage.get_as(CROP_DESCRIPTIONS_KEY)
   }
 
   pub fn set_crop_descriptions(&mut self, descriptions: &BTreeSet<String>) {
     // Remove the entry if descriptions is empty.
     if descriptions.is_empty() {
-      self.storage.remove(DESCRIPTIONS_KEY);
+      self.storage.remove(CROP_DESCRIPTIONS_KEY);
     } else {
-      self.storage.set_as(DESCRIPTIONS_KEY, descriptions);
+      self.storage.set_as(CROP_DESCRIPTIONS_KEY, descriptions);
     }
 
     self.storage.store();
