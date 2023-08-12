@@ -65,34 +65,34 @@ impl Config {
   }
 
   pub fn get_log_path(&self) -> Option<PathBuf> {
-    if let Some(folder) = self.get(LOG_PATH_KEY) {
-      return Some(PathBuf::from(folder));
+    if let Some(path) = self.get(LOG_PATH_KEY) {
+      return Some(PathBuf::from(path));
     }
 
     Self::get_default_log_path()
   }
 
-  pub fn set_log_path(&mut self, folder: &Path) {
-    if let Some(folder) = folder.to_str() {
-      self.set(LOG_PATH_KEY, folder.to_owned());
+  pub fn set_log_path(&mut self, path: &Path) {
+    if let Some(path) = path.to_str() {
+      self.set(LOG_PATH_KEY, path.to_owned());
     } else {
-      println!("Unable to convert path to string: {folder:?}");
+      println!("Unable to convert path to string: {path:?}");
     }
   }
 
   pub fn get_save_path(&self) -> Option<PathBuf> {
-    if let Some(folder) = self.get(SAVE_PATH_KEY) {
-      return Some(PathBuf::from(folder));
+    if let Some(path) = self.get(SAVE_PATH_KEY) {
+      return Some(PathBuf::from(path));
     }
 
     Self::get_default_save_path()
   }
 
-  pub fn set_save_path(&mut self, folder: &Path) {
-    if let Some(folder) = folder.to_str() {
-      self.set(SAVE_PATH_KEY, folder.to_owned());
+  pub fn set_save_path(&mut self, path: &Path) {
+    if let Some(path) = path.to_str() {
+      self.set(SAVE_PATH_KEY, path.to_owned());
     } else {
-      println!("Unable to convert path to string: {folder:?}");
+      println!("Unable to convert path to string: {path:?}");
     }
   }
 
