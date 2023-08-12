@@ -104,24 +104,26 @@ impl CropTimer {
     Event::None
   }
 
-  /// Get the next event and it's date/time.
-  pub fn next_event(&self) -> (Event, NaiveDateTime) {
+  /// Get information about the remaining events.
+  pub fn remaining_events(&self) -> Vec<(Event, NaiveDateTime)> {
     let elapsed = (Local::now().naive_local() - self.date_time).num_seconds();
     let interval = self.seed_type as i64 * self.environment as i64;
+    let mut events = Vec::with_capacity(self.events.len());
 
     for count in 1..=self.events.len() {
       let timeout = interval * count as i64;
       if elapsed < timeout {
         let date_time = self.date_time + Duration::seconds(timeout);
         if count < 3 {
-          return (Event::Water, date_time);
+          events.push((Event::Water, date_time));
         } else {
-          return (Event::Harvest, date_time);
+          events.push((Event::Harvest, date_time));
         }
       }
     }
 
-    (Event::None, Default::default())
+    events.reverse();
+    events
   }
 
   /// Check and update events.
