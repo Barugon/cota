@@ -59,7 +59,7 @@ impl Storage {
     self.items.write().unwrap().remove(key);
   }
 
-  /// Persist changes.
+  /// Persist changes to file system.
   pub fn persist(&self) {
     self.thread.persist();
   }
