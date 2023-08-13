@@ -32,13 +32,7 @@ impl Storage {
   pub fn get_as<T: serde::de::DeserializeOwned>(&self, key: &str) -> Option<T> {
     let lock = self.items.read().unwrap();
     let text = lock.get(key)?;
-    match ron::from_str(text) {
-      Ok(ok) => Some(ok),
-      Err(err) => {
-        println!("{err}");
-        None
-      }
-    }
+    ron::from_str(text).map_err(|e| println!("{e}")).ok()
   }
 
   // Set an item.
