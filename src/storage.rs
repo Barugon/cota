@@ -25,7 +25,7 @@ impl Storage {
 
   /// Get an item.
   pub fn get(&self, key: &str) -> Option<String> {
-    Some(self.items.read().unwrap().get(key)?.to_owned())
+    self.items.read().unwrap().get(key).map(|s| s.to_owned())
   }
 
   /// Get an item as a specific type.
