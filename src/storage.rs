@@ -13,13 +13,13 @@ use std::{
 #[derive(Clone)]
 pub struct Storage {
   items: Arc<RwLock<Items>>,
-  thread: Arc<ItemsThread>,
+  thread: Arc<PersistThread>,
 }
 
 impl Storage {
   pub fn new(path: PathBuf) -> Option<Self> {
     let items = Arc::new(RwLock::new(Items::load(path)));
-    let thread = Arc::new(ItemsThread::new(items.clone()));
+    let thread = Arc::new(PersistThread::new(items.clone()));
     Some(Self { items, thread })
   }
 
@@ -59,9 +59,9 @@ impl Storage {
     self.items.write().unwrap().remove(key);
   }
 
-  /// Store changes.
-  pub fn store(&self) {
-    self.thread.store();
+  /// Persist changes.
+  pub fn persist(&self) {
+    self.thread.persist();
   }
 }
 
@@ -89,7 +89,7 @@ impl Items {
     }
   }
 
-  fn store(&self) {
+  fn persist(&self) {
     if self.changed.swap(false, Ordering::Relaxed) {
       let file = ok!(File::create(&self.path));
       ron::ser::to_writer_pretty(file, &self.items, Default::default()).unwrap();
@@ -117,16 +117,16 @@ impl Items {
 
 impl Drop for Items {
   fn drop(&mut self) {
-    self.store();
+    self.persist();
   }
 }
 
-struct ItemsThread {
+struct PersistThread {
   thread: Option<JoinHandle<()>>,
   tx: Option<mpsc::Sender<()>>,
 }
 
-impl ItemsThread {
+impl PersistThread {
   fn new(items: Arc<RwLock<Items>>) -> Self {
     let (tx, rx) = mpsc::channel();
     Self {
@@ -134,8 +134,8 @@ impl ItemsThread {
         move || {
           // Wait for a message. Exit when the connection is closed.
           while rx.recv().is_ok() {
-            // Store the items map.
-            items.read().unwrap().store();
+            // Persist the items.
+            items.read().unwrap().persist();
           }
         }
       })),
@@ -143,14 +143,14 @@ impl ItemsThread {
     }
   }
 
-  fn store(&self) {
+  fn persist(&self) {
     if let Some(tx) = &self.tx {
       tx.send(()).unwrap();
     }
   }
 }
 
-impl Drop for ItemsThread {
+impl Drop for PersistThread {
   fn drop(&mut self) {
     // Close the connection by dropping the sender.
     drop(self.tx.take().unwrap());

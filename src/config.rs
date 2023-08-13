@@ -82,7 +82,7 @@ impl Config {
 
   pub fn set_page(&mut self, page: Page) {
     self.storage.set_as(PAGE_KEY, &page);
-    self.storage.store();
+    self.storage.persist();
   }
 
   pub fn get_log_path(&self) -> Option<PathBuf> {
@@ -96,7 +96,7 @@ impl Config {
   pub fn set_log_path(&mut self, path: &Path) {
     if let Some(path) = path.to_str() {
       self.storage.set(LOG_PATH_KEY, path.to_owned());
-      self.storage.store();
+      self.storage.persist();
     } else {
       println!("Unable to convert path to string: {path:?}");
     }
@@ -113,7 +113,7 @@ impl Config {
   pub fn set_save_path(&mut self, path: &Path) {
     if let Some(path) = path.to_str() {
       self.storage.set(SAVE_PATH_KEY, path.to_owned());
-      self.storage.store();
+      self.storage.persist();
     } else {
       println!("Unable to convert path to string: {path:?}");
     }
@@ -129,7 +129,7 @@ impl Config {
     }
 
     self.storage.set(STATS_AVATAR_KEY, avatar);
-    self.storage.store();
+    self.storage.persist();
   }
 
   pub fn get_exp_avatar(&self) -> Option<String> {
@@ -142,7 +142,7 @@ impl Config {
     }
 
     self.storage.set(EXP_AVATAR_KEY, avatar);
-    self.storage.store();
+    self.storage.persist();
   }
 
   pub fn get_notes(&self, avatar: &str) -> Option<String> {
@@ -167,7 +167,7 @@ impl Config {
       self.storage.set(&key, notes);
     }
 
-    self.storage.store();
+    self.storage.persist();
   }
 
   pub fn get_crop_timers(&self) -> Option<Vec<CropTimer>> {
@@ -182,7 +182,7 @@ impl Config {
       self.storage.set_as(CROP_TIMERS_KEY, timers);
     }
 
-    self.storage.store();
+    self.storage.persist();
   }
 
   pub fn get_crop_descriptions(&self) -> Option<BTreeSet<String>> {
@@ -197,7 +197,7 @@ impl Config {
       self.storage.set_as(CROP_DESCRIPTIONS_KEY, descriptions);
     }
 
-    self.storage.store();
+    self.storage.persist();
   }
 
   pub fn get_avatar_skills(&self, avatar: &str) -> Option<HashMap<u32, (i32, i32)>> {
@@ -229,6 +229,6 @@ impl Config {
       self.storage.set_as(&key, &skills);
     }
 
-    self.storage.store();
+    self.storage.persist();
   }
 }
