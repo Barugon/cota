@@ -96,8 +96,8 @@ impl Items {
     }
   }
 
-  fn get(&self, key: &str) -> Option<&str> {
-    self.items.get(key).map(|s| s.as_str())
+  fn get(&self, key: &str) -> Option<&String> {
+    self.items.get(key)
   }
 
   fn set(&mut self, key: &str, item: String) {
