@@ -98,7 +98,7 @@ impl Config {
       self.storage.set(LOG_PATH_KEY, path.to_owned());
       self.storage.persist();
     } else {
-      println!("Unable to convert path to string: {path:?}");
+      println!("Invalid unicode in path: {path:?}");
     }
   }
 
@@ -115,7 +115,7 @@ impl Config {
       self.storage.set(SAVE_PATH_KEY, path.to_owned());
       self.storage.persist();
     } else {
-      println!("Unable to convert path to string: {path:?}");
+      println!("Invalid unicode in path: {path:?}");
     }
   }
 
