@@ -1,4 +1,4 @@
-use self::game_info::GameInfo;
+use self::inner::GameInfo;
 use crate::{
   game_data::GameData,
   items_dlg::ItemsDlg,
@@ -234,7 +234,7 @@ fn image_button(image: &RetainedImage, ui: &mut Ui) -> Response {
 
 const MAX_GOLD: i32 = i32::MAX / 2;
 
-mod game_info {
+mod inner {
   use crate::{
     game_data::{GameData, Item, SkillLvl, SkillLvlGroup},
     skill_info::SkillCategory,
@@ -245,8 +245,8 @@ mod game_info {
       scroll_area::ScrollBarVisibility, CollapsingHeader, DragValue, Layout, RichText, ScrollArea,
       Ui,
     },
-    emath::{Align, Vec2},
-    epaint::Color32,
+    emath::Align,
+    epaint::{Color32, Vec2},
   };
   use egui_extras::{Column, TableBuilder};
   use std::{

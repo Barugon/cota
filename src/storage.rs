@@ -1,12 +1,7 @@
+use self::inner::{Items, PersistThread};
 use std::{
-  collections::HashMap,
-  fs::{self, File},
   path::PathBuf,
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    mpsc, Arc, RwLock,
-  },
-  thread::{self, JoinHandle},
+  sync::{Arc, RwLock},
 };
 
 /// Key/value persisted string storage.
@@ -59,97 +54,119 @@ impl Storage {
   }
 }
 
-struct Items {
-  path: PathBuf,
-  items: HashMap<String, String>,
-  changed: AtomicBool,
-}
+mod inner {
+  use std::{
+    collections::HashMap,
+    fs::{self, File},
+    path::{Path, PathBuf},
+    sync::{
+      atomic::{AtomicBool, Ordering},
+      mpsc::{self, Sender},
+      Arc, RwLock,
+    },
+    thread::{self, JoinHandle},
+  };
 
-impl Items {
-  fn load(path: PathBuf) -> Self {
-    let changed = AtomicBool::new(false);
-    let mut items = HashMap::new();
-    if let Ok(bytes) = fs::read(&path) {
-      match ron::de::from_bytes(&bytes) {
-        Ok(ok) => items = ok,
-        Err(err) => println!("{err}"),
+  pub struct Items {
+    path: PathBuf,
+    items: HashMap<String, String>,
+    changed: AtomicBool,
+  }
+
+  impl Items {
+    pub fn load(path: PathBuf) -> Self {
+      let items = Self::load_items(&path);
+      let changed = AtomicBool::new(false);
+
+      Self {
+        path,
+        items,
+        changed,
       }
     }
 
-    Self {
-      path,
-      items,
-      changed,
+    fn load_items(path: &Path) -> HashMap<String, String> {
+      match fs::read(path) {
+        Ok(data) => match ron::de::from_bytes(&data) {
+          Ok(items) => return items,
+          Err(err) => println!("{err}"),
+        },
+        Err(err) => println!("{err}"),
+      }
+
+      HashMap::new()
     }
-  }
 
-  fn persist(&self) {
-    if self.changed.swap(false, Ordering::Relaxed) {
-      let file = ok!(File::create(&self.path));
-      ron::ser::to_writer_pretty(file, &self.items, Default::default()).unwrap();
+    fn persist(&self) {
+      if self.changed.swap(false, Ordering::Relaxed) {
+        match File::create(&self.path) {
+          Ok(file) => ron::ser::to_writer_pretty(file, &self.items, Default::default()).unwrap(),
+          Err(err) => println!("{err}"),
+        }
+      }
     }
-  }
 
-  fn get(&self, key: &str) -> Option<&String> {
-    self.items.get(key)
-  }
+    pub fn get(&self, key: &str) -> Option<&String> {
+      self.items.get(key)
+    }
 
-  fn set(&mut self, key: &str, item: String) {
-    if let Some(prev) = self.items.insert(key.to_owned(), item) {
-      if self.items.get(key).unwrap() != &prev {
+    pub fn set(&mut self, key: &str, item: String) {
+      if let Some(prev) = self.items.insert(key.to_owned(), item) {
+        if self.items.get(key).unwrap() != &prev {
+          self.changed.store(true, Ordering::Relaxed);
+        }
+      }
+    }
+
+    pub fn remove(&mut self, key: &str) {
+      if self.items.remove(key).is_some() {
         self.changed.store(true, Ordering::Relaxed);
       }
     }
   }
 
-  fn remove(&mut self, key: &str) {
-    if self.items.remove(key).is_some() {
-      self.changed.store(true, Ordering::Relaxed);
+  impl Drop for Items {
+    fn drop(&mut self) {
+      self.persist();
     }
   }
-}
 
-impl Drop for Items {
-  fn drop(&mut self) {
-    self.persist();
+  pub struct PersistThread {
+    thread: Option<JoinHandle<()>>,
+    tx: Option<Sender<()>>,
   }
-}
 
-struct PersistThread {
-  thread: Option<JoinHandle<()>>,
-  tx: Option<mpsc::Sender<()>>,
-}
-
-impl PersistThread {
-  fn new(items: Arc<RwLock<Items>>) -> Self {
-    let (tx, rx) = mpsc::channel();
-    Self {
-      thread: Some(thread::spawn({
-        move || {
-          // Wait for a message. Exit when the connection is closed.
-          while rx.recv().is_ok() {
-            // Persist the items.
-            items.read().unwrap().persist();
+  impl PersistThread {
+    pub fn new(items: Arc<RwLock<Items>>) -> Self {
+      let (tx, rx) = mpsc::channel();
+      Self {
+        thread: Some(thread::spawn({
+          move || {
+            // Wait for a message. Exit when the connection is closed.
+            while rx.recv().is_ok() {
+              // Persist the items.
+              items.read().unwrap().persist();
+            }
           }
-        }
-      })),
-      tx: Some(tx),
+        })),
+        tx: Some(tx),
+      }
+    }
+
+    pub fn persist(&self) {
+      if let Some(tx) = &self.tx {
+        tx.send(()).unwrap();
+      }
     }
   }
 
-  fn persist(&self) {
-    if let Some(tx) = &self.tx {
-      tx.send(()).unwrap();
+  impl Drop for PersistThread {
+    fn drop(&mut self) {
+      // Close the connection by dropping the sender.
+      drop(self.tx.take().unwrap());
+
+      // Wait for the thread to exit.
+      self.thread.take().unwrap().join().unwrap();
     }
-  }
-}
-
-impl Drop for PersistThread {
-  fn drop(&mut self) {
-    // Close the connection by dropping the sender.
-    drop(self.tx.take().unwrap());
-
-    // Wait for the thread to exit.
-    self.thread.take().unwrap().join().unwrap();
   }
 }
