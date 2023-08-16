@@ -5,7 +5,7 @@ use crate::{
 };
 use eframe::epaint::Pos2;
 use std::{
-  collections::{BTreeSet, HashMap},
+  collections::{BTreeMap, BTreeSet, HashMap},
   path::{Path, PathBuf},
 };
 
@@ -214,8 +214,8 @@ impl Config {
       return;
     }
 
-    // Filter out empties.
-    let skills: HashMap<u32, (i32, i32)> = skills
+    // Filter out empties. Use BTreeMap so that the entries are sorted.
+    let skills: BTreeMap<u32, (i32, i32)> = skills
       .iter()
       .filter(|(_, levels)| levels.0 > 0 || levels.1 > 0)
       .map(|(id, levels)| (*id, *levels))
