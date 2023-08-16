@@ -192,6 +192,7 @@ impl Experience {
       SkillCategory::Producer => ("producer_skills", &self.producer_skills),
     };
 
+    let mut save = false;
     ui.vertical(|ui| {
       ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
         ScrollArea::vertical()
@@ -245,13 +246,19 @@ impl Experience {
                             let range = 0..=200;
                             let value = &mut level.0;
                             let widget = DragValue::new(value).clamp_range(range);
-                            ui.add(widget);
+                            let response = ui.add(widget);
+                            if response.drag_released() || response.lost_focus() {
+                              save = true;
+                            }
                           });
                           row.col(|ui| {
                             let range = 0..=200;
                             let value = &mut level.1;
                             let widget = DragValue::new(value).clamp_range(range);
-                            ui.add(widget);
+                            let response = ui.add(widget);
+                            if response.drag_released() || response.lost_focus() {
+                              save = true;
+                            }
                           });
                           row.col(|ui| {
                             ui.label(format!("{}x", skill.mul));
@@ -295,6 +302,10 @@ impl Experience {
           });
       });
     });
+
+    if save {
+      self.save();
+    }
   }
 
   pub fn save(&mut self) {
@@ -424,13 +435,13 @@ struct AdvInfo {
   exp: i64,
 }
 
-pub struct LevelInfo {
-  pub adv_exp: i64,
-  pub skill_lvls: HashMap<u32, (i32, i32)>,
+struct LevelInfo {
+  adv_exp: i64,
+  skill_lvls: HashMap<u32, (i32, i32)>,
 }
 
 impl LevelInfo {
-  pub fn new() -> Self {
+  fn new() -> Self {
     LevelInfo {
       adv_exp: 0,
       skill_lvls: HashMap::new(),
