@@ -52,7 +52,7 @@ impl Config {
     dirs::home_dir()
   }
 
-  fn get_default_save_path() -> Option<PathBuf> {
+  fn get_default_save_game_path() -> Option<PathBuf> {
     if let Some(path) = Self::get_sota_config_path() {
       let path = path.join("SavedGames");
       if path.is_dir() {
@@ -102,15 +102,15 @@ impl Config {
     }
   }
 
-  pub fn get_save_path(&self) -> Option<PathBuf> {
+  pub fn get_save_game_path(&self) -> Option<PathBuf> {
     if let Some(path) = self.storage.get(SAVE_PATH_KEY) {
       return Some(PathBuf::from(path));
     }
 
-    Self::get_default_save_path()
+    Self::get_default_save_game_path()
   }
 
-  pub fn set_save_path(&mut self, path: &Path) {
+  pub fn set_save_game_path(&mut self, path: &Path) {
     if let Some(path) = path.to_str() {
       self.storage.set(SAVE_PATH_KEY, path.to_owned());
       self.storage.persist();
