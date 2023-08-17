@@ -134,7 +134,7 @@ impl Experience {
       ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
         // Adventurer level.
         let (button_text, exp) = if let Some(adv_info) = self.get_adv_info() {
-          (format!("Adv Lvl {}", adv_info.lvl), Some(adv_info.exp))
+          (format!("Adv Lvl {}", adv_info.lvl), adv_info.exp)
         } else {
           (String::from("Adv Lvl ?"), None)
         };
@@ -419,10 +419,10 @@ impl Experience {
       if lvl < 200 {
         return Some(AdvInfo {
           lvl,
-          exp: LEVEL_EXP[lvl as usize] - exp,
+          exp: Some(LEVEL_EXP[lvl as usize] - exp),
         });
       } else {
-        return Some(AdvInfo { lvl, exp: 0 });
+        return Some(AdvInfo { lvl, exp: None });
       }
     }
 
@@ -432,7 +432,7 @@ impl Experience {
 
 struct AdvInfo {
   lvl: i32,
-  exp: i64,
+  exp: Option<i64>,
 }
 
 struct LevelInfo {
