@@ -224,7 +224,7 @@ impl App {
       }
     }
 
-    let Some(path) = self.config.get_save_path() else { return; };
+    let Some(path) = self.config.get_save_game_path() else { return; };
     let filter = Box::new(|path: &Path| -> bool {
       return path.extension() == Some(OsStr::new("sota"));
     });
@@ -399,7 +399,7 @@ impl eframe::App for App {
               egui_file::DialogType::OpenFile => {
                 let folder = path.with_file_name(String::default());
                 if self.offline.load(path.to_owned()) {
-                  self.config.set_save_path(&folder);
+                  self.config.set_save_game_path(&folder);
                 }
               }
               egui_file::DialogType::SaveFile => self.offline.store_as(path.to_owned()),
