@@ -266,14 +266,8 @@ impl App {
 
 impl eframe::App for App {
   fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
-    let info = frame.info();
-    if info.window_info.position.is_some()
-      && info.window_info.position != Some(Pos2::default())
-      && info.window_info.position != self.win_pos
-    {
-      self.win_pos = info.window_info.position;
-      self.config.set_window_pos(self.win_pos);
-    }
+    // Remember the window position.
+    self.win_pos = frame.info_ref().window_info.position;
 
     // Process load request from the offline page.
     if self.offline.load_request() {
@@ -510,6 +504,7 @@ impl eframe::App for App {
   }
 
   fn on_exit(&mut self, _: Option<&glow::Context>) {
+    self.config.set_window_pos(self.win_pos);
     self.chronometer.on_exit();
     self.experience.on_exit();
     self.farming.on_exit();
