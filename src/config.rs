@@ -74,6 +74,8 @@ impl Config {
     } else {
       self.storage.remove(WINDOW_POS_KEY);
     }
+
+    self.storage.persist();
   }
 
   pub fn get_page(&self) -> Option<Page> {
