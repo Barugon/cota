@@ -13,7 +13,7 @@ clipboard = "0.5"
 dirs = "5.0"
 eframe = {git = "https://github.com/Barugon/egui.git", branch = "combined_changes"}
 egui_extras = {git = "https://github.com/Barugon/egui.git", branch = "combined_changes", features = ["image", "datepicker"]}
-egui_file = {git = "https://github.com/Barugon/egui_file.git", branch = "custom_egui"}
+egui_file = {git = "https://github.com/Barugon/egui_file.git", branch = "combined_changes"}
 futures = {version = "0.3", features = ["thread-pool"]}
 image = {version = "0.24", features = ["png"]}
 notify-rust = "4.8"
