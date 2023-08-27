@@ -9,17 +9,6 @@ use std::{
   path::{Path, PathBuf},
 };
 
-static WINDOW_POS_KEY: &str = "window_pos";
-static LOG_PATH_KEY: &str = "log_path";
-static SAVE_PATH_KEY: &str = "save_path";
-static STATS_AVATAR_KEY: &str = "stats_avatar";
-static EXP_AVATAR_KEY: &str = "experience_avatar";
-static AVATAR_SKILLS: &str = "skills";
-static CROP_TIMERS_KEY: &str = "plants";
-static CROP_DESCRIPTIONS_KEY: &str = "crop_descriptions";
-static NOTES_KEY: &str = "notes";
-static PAGE_KEY: &str = "page";
-
 /// Companion of the Avatar configuration storage.
 #[derive(Clone)]
 pub struct Config {
@@ -63,32 +52,32 @@ impl Config {
   }
 
   pub fn get_window_pos(&self) -> Option<Pos2> {
-    let pos: (f32, f32) = self.storage.get_as(WINDOW_POS_KEY)?;
+    let pos: (f32, f32) = self.storage.get_as(Config::WINDOW_POS_KEY)?;
     Some(pos.into())
   }
 
   pub fn set_window_pos(&mut self, pos: Option<Pos2>) {
     if let Some(pos) = pos {
       let pos: (f32, f32) = pos.into();
-      self.storage.set_as(WINDOW_POS_KEY, &pos);
+      self.storage.set_as(Config::WINDOW_POS_KEY, &pos);
     } else {
-      self.storage.remove(WINDOW_POS_KEY);
+      self.storage.remove(Config::WINDOW_POS_KEY);
     }
 
     self.storage.persist();
   }
 
   pub fn get_page(&self) -> Option<Page> {
-    self.storage.get_as(PAGE_KEY)
+    self.storage.get_as(Config::PAGE_KEY)
   }
 
   pub fn set_page(&mut self, page: Page) {
-    self.storage.set_as(PAGE_KEY, &page);
+    self.storage.set_as(Config::PAGE_KEY, &page);
     self.storage.persist();
   }
 
   pub fn get_log_path(&self) -> Option<PathBuf> {
-    if let Some(path) = self.storage.get(LOG_PATH_KEY) {
+    if let Some(path) = self.storage.get(Config::LOG_PATH_KEY) {
       return Some(PathBuf::from(path));
     }
 
@@ -97,7 +86,7 @@ impl Config {
 
   pub fn set_log_path(&mut self, path: &Path) {
     if let Some(path) = path.to_str() {
-      self.storage.set(LOG_PATH_KEY, path.to_owned());
+      self.storage.set(Config::LOG_PATH_KEY, path.to_owned());
       self.storage.persist();
     } else {
       println!("Invalid unicode in path: {path:?}");
@@ -105,7 +94,7 @@ impl Config {
   }
 
   pub fn get_save_game_path(&self) -> Option<PathBuf> {
-    if let Some(path) = self.storage.get(SAVE_PATH_KEY) {
+    if let Some(path) = self.storage.get(Config::SAVE_PATH_KEY) {
       return Some(PathBuf::from(path));
     }
 
@@ -114,7 +103,7 @@ impl Config {
 
   pub fn set_save_game_path(&mut self, path: &Path) {
     if let Some(path) = path.to_str() {
-      self.storage.set(SAVE_PATH_KEY, path.to_owned());
+      self.storage.set(Config::SAVE_PATH_KEY, path.to_owned());
       self.storage.persist();
     } else {
       println!("Invalid unicode in path: {path:?}");
@@ -122,7 +111,7 @@ impl Config {
   }
 
   pub fn get_stats_avatar(&self) -> Option<String> {
-    self.storage.get(STATS_AVATAR_KEY)
+    self.storage.get(Config::STATS_AVATAR_KEY)
   }
 
   pub fn set_stats_avatar(&mut self, avatar: String) {
@@ -130,12 +119,12 @@ impl Config {
       return;
     }
 
-    self.storage.set(STATS_AVATAR_KEY, avatar);
+    self.storage.set(Config::STATS_AVATAR_KEY, avatar);
     self.storage.persist();
   }
 
   pub fn get_exp_avatar(&self) -> Option<String> {
-    self.storage.get(EXP_AVATAR_KEY)
+    self.storage.get(Config::EXP_AVATAR_KEY)
   }
 
   pub fn set_exp_avatar(&mut self, avatar: String) {
@@ -143,7 +132,7 @@ impl Config {
       return;
     }
 
-    self.storage.set(EXP_AVATAR_KEY, avatar);
+    self.storage.set(Config::EXP_AVATAR_KEY, avatar);
     self.storage.persist();
   }
 
@@ -152,7 +141,7 @@ impl Config {
       return None;
     }
 
-    let key = format!("{avatar} {NOTES_KEY}");
+    let key = format!("{avatar} {}", Config::NOTES_KEY);
     self.storage.get(&key)
   }
 
@@ -162,7 +151,7 @@ impl Config {
     }
 
     // Remove the entry if notes is empty.
-    let key = format!("{avatar} {NOTES_KEY}");
+    let key = format!("{avatar} {}", Config::NOTES_KEY);
     if notes.is_empty() {
       self.storage.remove(&key);
     } else {
@@ -173,30 +162,32 @@ impl Config {
   }
 
   pub fn get_crop_timers(&self) -> Option<Vec<CropTimer>> {
-    self.storage.get_as(CROP_TIMERS_KEY)
+    self.storage.get_as(Config::CROP_TIMERS_KEY)
   }
 
   pub fn set_crop_timers(&mut self, timers: &Vec<CropTimer>) {
     // Remove the entry if timers is empty.
     if timers.is_empty() {
-      self.storage.remove(CROP_TIMERS_KEY);
+      self.storage.remove(Config::CROP_TIMERS_KEY);
     } else {
-      self.storage.set_as(CROP_TIMERS_KEY, timers);
+      self.storage.set_as(Config::CROP_TIMERS_KEY, timers);
     }
 
     self.storage.persist();
   }
 
   pub fn get_crop_descriptions(&self) -> Option<BTreeSet<String>> {
-    self.storage.get_as(CROP_DESCRIPTIONS_KEY)
+    self.storage.get_as(Config::CROP_DESCRIPTIONS_KEY)
   }
 
   pub fn set_crop_descriptions(&mut self, descriptions: &BTreeSet<String>) {
     // Remove the entry if descriptions is empty.
     if descriptions.is_empty() {
-      self.storage.remove(CROP_DESCRIPTIONS_KEY);
+      self.storage.remove(Config::CROP_DESCRIPTIONS_KEY);
     } else {
-      self.storage.set_as(CROP_DESCRIPTIONS_KEY, descriptions);
+      self
+        .storage
+        .set_as(Config::CROP_DESCRIPTIONS_KEY, descriptions);
     }
 
     self.storage.persist();
@@ -207,7 +198,7 @@ impl Config {
       return None;
     }
 
-    let key = format!("{avatar} {AVATAR_SKILLS}");
+    let key = format!("{avatar} {}", Config::AVATAR_SKILLS);
     self.storage.get_as(&key)
   }
 
@@ -224,7 +215,7 @@ impl Config {
       .collect();
 
     // Remove the entry if skills is empty.
-    let key = format!("{avatar} {AVATAR_SKILLS}");
+    let key = format!("{avatar} {}", Config::AVATAR_SKILLS);
     if skills.is_empty() {
       self.storage.remove(&key);
     } else {
@@ -233,4 +224,15 @@ impl Config {
 
     self.storage.persist();
   }
+
+  const WINDOW_POS_KEY: &str = "window_pos";
+  const LOG_PATH_KEY: &str = "log_path";
+  const SAVE_PATH_KEY: &str = "save_path";
+  const STATS_AVATAR_KEY: &str = "stats_avatar";
+  const EXP_AVATAR_KEY: &str = "experience_avatar";
+  const AVATAR_SKILLS: &str = "skills";
+  const CROP_TIMERS_KEY: &str = "plants";
+  const CROP_DESCRIPTIONS_KEY: &str = "crop_descriptions";
+  const NOTES_KEY: &str = "notes";
+  const PAGE_KEY: &str = "page";
 }

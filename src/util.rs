@@ -12,11 +12,11 @@ use std::{
   },
 };
 
-pub static APP_ICON: &[u8] = include_bytes!("../res/icon.png");
-pub static APP_NAME: &str = env!("CARGO_PKG_NAME");
-pub static APP_TITLE: &str = env!("CARGO_PKG_DESCRIPTION");
-pub static APP_AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
-pub static APP_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const APP_ICON: &[u8] = include_bytes!("../res/icon.png");
+pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
+pub const APP_TITLE: &str = env!("CARGO_PKG_DESCRIPTION");
+pub const APP_AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
+pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub static LEVEL_EXP: [i64; 200] = include!("../res/level_exp_values");
 pub static SKILL_EXP: [i64; 200] = include!("../res/skill_exp_values");
@@ -213,7 +213,9 @@ fn find_ignore_case(text: &str, find: &str) -> Option<Range<usize>> {
 
   loop {
     // If we made it to the end of find_iter then it's a match.
-    let Some(find_ch) = find_iter.next() else { return Some(start..end) };
+    let Some(find_ch) = find_iter.next() else {
+      return Some(start..end);
+    };
 
     // Exit if we arrive at the end of text_iter.
     let (next, upper_ch) = text_iter.next()?;
@@ -313,7 +315,9 @@ pub fn remove_separators(text: &str) -> String {
 /// Convert a timestamp into a date & time string.
 pub fn timestamp_to_string(ts: Option<i64>) -> String {
   let Some(ts) = ts else { return String::new() };
-  let Some(dt) = NaiveDateTime::from_timestamp_opt(ts, 0) else { return String::new() };
+  let Some(dt) = NaiveDateTime::from_timestamp_opt(ts, 0) else {
+    return String::new();
+  };
   dt.format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
