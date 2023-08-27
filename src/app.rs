@@ -224,7 +224,10 @@ impl App {
       }
     }
 
-    let Some(path) = self.config.get_save_game_path() else { return; };
+    let Some(path) = self.config.get_save_game_path() else {
+      return;
+    };
+
     let filter = Box::new(|path: &Path| -> bool {
       return path.extension() == Some(OsStr::new("sota"));
     });
@@ -244,7 +247,10 @@ impl App {
   }
 
   fn choose_store_path(&mut self, ctx: &Context) {
-    let Some(path) = self.offline.file_path() else { return; };
+    let Some(path) = self.offline.file_path() else {
+      return;
+    };
+
     let filter = Box::new(|path: &Path| -> bool {
       return path.extension() == Some(OsStr::new("sota"));
     });
