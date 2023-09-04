@@ -273,7 +273,7 @@ impl App {
 impl eframe::App for App {
   fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
     // Remember the window position.
-    self.win_pos = frame.info_ref().window_info.position;
+    self.win_pos = frame.info().window_info.position;
 
     // Process load request from the offline page.
     if self.offline.load_request() {
