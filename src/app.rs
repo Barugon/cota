@@ -196,8 +196,9 @@ impl App {
 
   fn choose_folder_path(&mut self, ctx: &Context) {
     let path = Some(self.stats.log_path().into());
-    let filter = Box::new(|path: &Path| -> bool {
-      return path.extension() == Some(OsStr::new("txt"));
+    let ext = Some(OsStr::new("txt"));
+    let filter = Box::new(move |path: &Path| -> bool {
+      return path.extension() == ext;
     });
 
     let available = ctx.available_rect().size();
