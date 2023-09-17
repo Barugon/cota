@@ -16,6 +16,10 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 > **Note**: **Mac** - I no longer provide a Mac build due to Apple's licensing. However, building should be pretty easy — install [rust](https://www.rust-lang.org/tools/install), clone this repository and then build it using `cargo build --release`. You will probably also need to install Apple's [Xcode](https://developer.apple.com/download/all/?q=xcode).
 
+## Building
+
+In order to build CotA, you will need to install [Rust](https://www.rust-lang.org/). Once that's done, download the source, change directory to where the source resides on your system and enter `cargo build --release`. The executable will be in the `target/release` sub-folder.
+
 ## Features
 
 ### Portal and Cabalist chronometer
