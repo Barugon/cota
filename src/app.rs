@@ -61,6 +61,8 @@ impl App {
   }
 
   pub fn new(cc: &eframe::CreationContext<'_>, config: Config) -> Self {
+    egui_extras::install_image_loaders(&cc.egui_ctx);
+
     cc.egui_ctx.set_visuals(Visuals::dark());
     let mut style = (*cc.egui_ctx.style()).clone();
 

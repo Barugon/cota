@@ -4,18 +4,12 @@ use crate::{
   items_dlg::ItemsDlg,
   util::{AppState, LVL_RANGE},
 };
-use eframe::{
-  egui::{Button, DragValue, ImageButton, Response, RichText, Ui, WidgetText},
-  emath,
-  epaint::Color32,
-};
-use egui_extras::RetainedImage;
+use eframe::{egui, epaint::Color32};
+use egui::{Button, DragValue, RichText, Ui, WidgetText};
 use std::{borrow::Cow, path::PathBuf};
 
 pub struct Offline {
   items_dlg: ItemsDlg,
-  load_image: RetainedImage,
-  store_image: RetainedImage,
   game: Option<GameInfo>,
   error: Option<Cow<'static, str>>,
   changed: bool,
@@ -24,11 +18,6 @@ pub struct Offline {
 
 impl Offline {
   pub fn new(state: AppState) -> Self {
-    const LOAD_ICON: &[u8] = include_bytes!("../res/load.png");
-    const STORE_ICON: &[u8] = include_bytes!("../res/store.png");
-
-    let load_image = RetainedImage::from_image_bytes("load_image", LOAD_ICON).unwrap();
-    let store_image = RetainedImage::from_image_bytes("store_image", STORE_ICON).unwrap();
     let game = None;
     let error = None;
     let changed = false;
@@ -36,8 +25,6 @@ impl Offline {
 
     Offline {
       items_dlg: ItemsDlg::new(state),
-      load_image,
-      store_image,
       game,
       error,
       changed,
@@ -54,17 +41,16 @@ impl Offline {
 
     // Tool bar.
     ui.horizontal(|ui| {
-      if image_button(&self.load_image, ui)
-        .on_hover_text("Load Save-game")
-        .clicked()
-      {
+      let image = egui::include_image!("../res/load.png");
+      let response = ui.add_sized([23.0, 22.0], Button::image(image));
+      if response.on_hover_text("Load Save-game").clicked() {
         self.load_request = true;
       }
+
       ui.add_enabled_ui(self.changed(), |ui| {
-        if image_button(&self.store_image, ui)
-          .on_hover_text("Store Save-game")
-          .clicked()
-        {
+        let image = egui::include_image!("../res/store.png");
+        let response = ui.add_sized([23.0, 22.0], Button::image(image));
+        if response.on_hover_text("Store Save-game").clicked() {
           self.store();
         }
       });
@@ -224,12 +210,6 @@ impl Offline {
   pub fn on_close_event(&mut self) {
     self.items_dlg.close();
   }
-}
-
-fn image_button(image: &RetainedImage, ui: &mut Ui) -> Response {
-  let texture_id = image.texture_id(ui.ctx());
-  let image_size = emath::vec2(image.size()[0] as f32, image.size()[1] as f32);
-  ui.add(ImageButton::new(texture_id, image_size))
 }
 
 const MAX_GOLD: i32 = i32::MAX / 2;
