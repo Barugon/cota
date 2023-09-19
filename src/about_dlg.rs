@@ -89,7 +89,7 @@ impl AboutDlg {
       let pixels = pixels.as_flat_samples();
       let image = ColorImage::from_rgba_unmultiplied(size, pixels.as_slice());
       let size = Vec2::new(size[0] as f32, size[1] as f32);
-      let texture = ui.ctx().load_texture(&logo_id, image, Default::default());
+      let texture = ui.ctx().load_texture(logo_id, image, Default::default());
       self.logo = Some((size, texture));
     }
 
