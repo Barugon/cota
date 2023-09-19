@@ -2,13 +2,15 @@ use self::inner::GameInfo;
 use crate::{
   game_data::GameData,
   items_dlg::ItemsDlg,
-  util::{AppState, LVL_RANGE},
+  util::{AppState, Picture, APP_NAME, LVL_RANGE},
 };
 use eframe::{egui, epaint::Color32};
 use egui::{Button, DragValue, RichText, Ui, WidgetText};
 use std::{borrow::Cow, path::PathBuf};
 
 pub struct Offline {
+  load_icon: Picture,
+  store_icon: Picture,
   items_dlg: ItemsDlg,
   game: Option<GameInfo>,
   error: Option<Cow<'static, str>>,
@@ -18,12 +20,22 @@ pub struct Offline {
 
 impl Offline {
   pub fn new(state: AppState) -> Self {
+    let load_icon = Picture::new(
+      format!("{APP_NAME}_load_icon"),
+      include_bytes!("../res/load.png"),
+    );
+    let store_icon = Picture::new(
+      format!("{APP_NAME}_store_icon"),
+      include_bytes!("../res/store.png"),
+    );
     let game = None;
     let error = None;
     let changed = false;
     let load_request = false;
 
     Offline {
+      load_icon,
+      store_icon,
       items_dlg: ItemsDlg::new(state),
       game,
       error,
@@ -41,15 +53,13 @@ impl Offline {
 
     // Tool bar.
     ui.horizontal(|ui| {
-      let image = egui::include_image!("../res/load.png");
-      let response = ui.add_sized([23.0, 22.0], Button::image(image));
+      let response = ui.add_sized([23.0, 22.0], Button::image(self.load_icon.image(ui.ctx())));
       if response.on_hover_text("Load Save-game").clicked() {
         self.load_request = true;
       }
 
       ui.add_enabled_ui(self.changed(), |ui| {
-        let image = egui::include_image!("../res/store.png");
-        let response = ui.add_sized([23.0, 22.0], Button::image(image));
+        let response = ui.add_sized([23.0, 22.0], Button::image(self.store_icon.image(ui.ctx())));
         if response.on_hover_text("Store Save-game").clicked() {
           self.store();
         }

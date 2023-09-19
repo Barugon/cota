@@ -1,13 +1,9 @@
-use crate::util::{AppState, APP_AUTHORS, APP_ICON, APP_NAME, APP_TITLE, APP_VERSION};
-use eframe::{
-  egui,
-  emath::Align2,
-  epaint::{Color32, ColorImage, TextureHandle, Vec2},
-};
-use egui::{Context, Key, RichText, Ui, Window};
+use crate::util::{AppState, Picture, APP_AUTHORS, APP_ICON, APP_NAME, APP_TITLE, APP_VERSION};
+use eframe::{egui, emath::Align2, epaint::Color32};
+use egui::{Context, Key, RichText, Window};
 
 pub struct AboutDlg {
-  logo: Option<(Vec2, TextureHandle)>,
+  logo: Picture,
   state: AppState,
   visible: bool,
 }
@@ -15,7 +11,7 @@ pub struct AboutDlg {
 impl AboutDlg {
   pub fn new(state: AppState) -> Self {
     Self {
-      logo: None,
+      logo: Picture::new(format!("{APP_NAME}_logo"), APP_ICON),
       state,
       visible: false,
     }
@@ -38,7 +34,7 @@ impl AboutDlg {
         .show(ctx, |ui| {
           ui.add_space(8.0);
           ui.vertical_centered(|ui| {
-            self.draw_logo(ui);
+            ui.image((self.logo.texture_id(ctx), self.logo.size() * 0.5));
             ui.add_space(4.0);
             ui.label(RichText::new(APP_TITLE).heading().color(Color32::GOLD));
             ui.label(format!("Version {APP_VERSION}"));
@@ -78,22 +74,5 @@ impl AboutDlg {
     if ctx.input(|state| state.key_pressed(Key::Escape)) {
       self.close();
     }
-  }
-
-  fn draw_logo(&mut self, ui: &mut Ui) {
-    if self.logo.is_none() {
-      let logo_id = format!("{APP_NAME}_logo");
-      let image = image::load_from_memory(APP_ICON).unwrap();
-      let size = [image.width() as _, image.height() as _];
-      let pixels = image.to_rgba8();
-      let pixels = pixels.as_flat_samples();
-      let image = ColorImage::from_rgba_unmultiplied(size, pixels.as_slice());
-      let size = Vec2::new(size[0] as f32, size[1] as f32);
-      let texture = ui.ctx().load_texture(logo_id, image, Default::default());
-      self.logo = Some((size, texture));
-    }
-
-    let (size, texture) = self.logo.as_ref().unwrap();
-    ui.image((texture.id(), *size * 0.5));
   }
 }

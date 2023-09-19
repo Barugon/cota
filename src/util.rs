@@ -1,10 +1,15 @@
 use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use clipboard::{ClipboardContext, ClipboardProvider};
-use eframe::egui::{TextStyle, Ui};
+use eframe::{
+  egui::{Context, Image, TextStyle, Ui},
+  epaint::{ColorImage, TextureHandle, TextureId, Vec2},
+};
 use num_format::Locale;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::{
+  cell::RefCell,
+  mem,
   ops::{Range, RangeInclusive},
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -81,6 +86,47 @@ macro_rules! f64_to_string {
       .trim_end_matches('.')
       .replacen('.', $locale.decimal(), 1)
   };
+}
+
+pub struct Picture {
+  name: String,
+  size: Vec2,
+  rgba: RefCell<ColorImage>,
+  texture: RefCell<Option<TextureHandle>>,
+}
+
+impl Picture {
+  pub fn new(name: String, data: &[u8]) -> Self {
+    let image = image::load_from_memory(data).unwrap();
+    let size = [image.width() as _, image.height() as _];
+    let pixels = image.to_rgba8();
+    let pixels = pixels.as_flat_samples();
+    let rgba = ColorImage::from_rgba_unmultiplied(size, pixels.as_slice());
+    let size = Vec2::new(size[0] as f32, size[1] as f32);
+    Self {
+      name,
+      size,
+      rgba: RefCell::new(rgba),
+      texture: RefCell::new(None),
+    }
+  }
+
+  pub fn size(&self) -> Vec2 {
+    self.size
+  }
+
+  pub fn texture_id(&self, ctx: &Context) -> TextureId {
+    let mut texture = self.texture.borrow_mut();
+    if texture.is_none() {
+      let rgba = mem::take(&mut *self.rgba.borrow_mut());
+      *texture = Some(ctx.load_texture(&self.name, rgba, Default::default()));
+    }
+    texture.as_ref().unwrap().id()
+  }
+
+  pub fn image(&self, ctx: &Context) -> Image {
+    Image::new((self.texture_id(ctx), self.size))
+  }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
