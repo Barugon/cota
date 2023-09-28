@@ -3,7 +3,7 @@ use crate::{
   storage::Storage,
   util::{Page, APP_NAME},
 };
-use eframe::epaint::Pos2;
+// use eframe::epaint::Pos2;
 use std::{
   collections::{BTreeMap, BTreeSet, HashMap},
   path::{Path, PathBuf},
@@ -49,20 +49,6 @@ impl Config {
       }
     }
     dirs::home_dir()
-  }
-
-  pub fn get_window_pos(&self) -> Option<Pos2> {
-    let pos: (f32, f32) = self.storage.get_as(Config::WINDOW_POS_KEY)?;
-    Some(pos.into())
-  }
-
-  pub fn set_window_pos(&mut self, pos: Option<Pos2>) {
-    if let Some(pos) = pos {
-      let pos: (f32, f32) = pos.into();
-      self.storage.set_as(Config::WINDOW_POS_KEY, &pos);
-    } else {
-      self.storage.remove(Config::WINDOW_POS_KEY);
-    }
   }
 
   pub fn get_page(&self) -> Option<Page> {
@@ -223,7 +209,6 @@ impl Config {
     self.storage.persist();
   }
 
-  const WINDOW_POS_KEY: &str = "window_pos";
   const LOG_PATH_KEY: &str = "log_path";
   const SAVE_PATH_KEY: &str = "save_path";
   const STATS_AVATAR_KEY: &str = "stats_avatar";

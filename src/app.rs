@@ -15,7 +15,7 @@ use eframe::{
     TopBottomPanel, Ui, Visuals,
   },
   emath::Align2,
-  epaint::{self, Color32, Pos2, Vec2},
+  epaint::{self, Color32, Vec2},
   glow,
 };
 use futures::executor::ThreadPoolBuilder;
@@ -38,7 +38,6 @@ macro_rules! cmd {
 pub struct App {
   // State.
   config: Config,
-  win_pos: Option<Pos2>,
   state: AppState,
   page: Page,
 
@@ -81,7 +80,6 @@ impl App {
     let threads = ThreadPoolBuilder::new().pool_size(count).create().unwrap();
 
     // State.
-    let win_pos = cc.integration_info.window_info.position;
     let locale = util::get_locale();
     let state = AppState::default();
     let page = config.get_page().unwrap_or(Page::Chronometer);
@@ -110,7 +108,6 @@ impl App {
 
     App {
       config,
-      win_pos,
       state,
       page,
       chronometer,
@@ -275,9 +272,6 @@ impl App {
 
 impl eframe::App for App {
   fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
-    // Remember the window position.
-    self.win_pos = frame.info().window_info.position;
-
     // Process load request from the offline page.
     if self.offline.load_request() {
       self.choose_load_path(ctx);
@@ -513,7 +507,6 @@ impl eframe::App for App {
   }
 
   fn on_exit(&mut self, _: Option<&glow::Context>) {
-    self.config.set_window_pos(self.win_pos);
     self.chronometer.on_exit();
     self.experience.on_exit();
     self.farming.on_exit();
