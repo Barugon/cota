@@ -37,7 +37,6 @@ fn main() {
   let icon = image::load_from_memory(APP_ICON).unwrap();
   let options = eframe::NativeOptions {
     resizable: false,
-    initial_window_pos: config.get_window_pos(),
     initial_window_size: Some(App::inner_window_size()),
     max_window_size: Some(App::inner_window_size()),
     min_window_size: Some(App::inner_window_size()),
