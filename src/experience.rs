@@ -372,10 +372,7 @@ impl Experience {
     self.config.set_exp_avatar(avatar.clone());
 
     // Get the values for the new avatar.
-    let skills = self
-      .config
-      .get_avatar_skills(&avatar)
-      .unwrap_or(HashMap::new());
+    let skills = self.config.get_avatar_skills(&avatar).unwrap_or_default();
 
     self.level_info.skill_lvls = skills;
     self.level_info.adv_exp = 0;
