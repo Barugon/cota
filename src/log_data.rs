@@ -1,4 +1,4 @@
-use crate::util::{self, Cancel, Search};
+use crate::util;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{channel::mpsc, executor::ThreadPool, future, StreamExt};
 use regex::Regex;
@@ -8,6 +8,7 @@ use std::{
   path::{Path, PathBuf},
   str::SplitWhitespace,
 };
+use util::{Cancel, Search};
 
 /// Get the date portion of a log entry.
 pub fn get_log_date(line: &str) -> Option<&str> {
@@ -136,7 +137,9 @@ pub async fn get_stats_timestamps(
       let path = log_path.join(filename.as_str());
       let cancel = cancel.clone();
       futures.push(async move {
-        let Some(date) = get_log_file_date(&path) else { return Vec::new() };
+        let Some(date) = get_log_file_date(&path) else {
+          return Vec::new();
+        };
         let text = ok!(fs::read_to_string(&path), Vec::new());
         let mut timestamps = Vec::new();
 
@@ -417,7 +420,9 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
     if let Ok(text) = fs::read_to_string(path) {
       // Search for attack lines.
       for line in text.lines() {
-        let Some(ts) = get_log_timestamp(line, file_date) else { continue };
+        let Some(ts) = get_log_timestamp(line, file_date) else {
+          continue;
+        };
         if !range.contains(&ts) {
           continue;
         }
@@ -540,7 +545,9 @@ fn log_date_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
 
 /// Convert a timestamp into a log filename date string.
 fn timestamp_to_file_date(ts: i64) -> String {
-  let Some(dt) = NaiveDateTime::from_timestamp_opt(ts, 0) else { return String::default() };
+  let Some(dt) = NaiveDateTime::from_timestamp_opt(ts, 0) else {
+    return String::default();
+  };
   dt.format("%Y-%m-%d").to_string()
 }
 

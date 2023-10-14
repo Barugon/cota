@@ -1,7 +1,4 @@
-use crate::{
-  log_data,
-  util::{self, AppState, Cancel, Search},
-};
+use crate::{log_data, util};
 use eframe::{
   egui::{
     scroll_area::ScrollBarVisibility, Context, Key, RichText, ScrollArea, TextEdit, TextFormat, Ui,
@@ -13,6 +10,7 @@ use eframe::{
     Color32, FontFamily, FontId,
   },
 };
+use util::{AppState, Cancel, Search};
 
 pub struct LogDlg {
   title: String,

@@ -1,9 +1,4 @@
-use crate::{
-  config::Config,
-  log_data,
-  skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup},
-  util::{self, AppState, Cancel, LEVEL_EXP, SKILL_EXP},
-};
+use crate::{config::Config, log_data, skill_info, util};
 use eframe::{
   egui::{
     scroll_area::ScrollBarVisibility, ComboBox, Context, DragValue, Label, Layout, RichText,
@@ -15,7 +10,9 @@ use eframe::{
 use egui_extras::{Column, TableBuilder};
 use futures::{channel::mpsc, executor::ThreadPool};
 use num_format::{Locale, ToFormattedString};
+use skill_info::{SkillCategory, SkillInfo, SkillInfoGroup};
 use std::{collections::HashMap, mem, path::PathBuf};
+use util::{AppState, Cancel, LEVEL_EXP, SKILL_EXP};
 
 pub struct Experience {
   config: Config,

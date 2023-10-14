@@ -1,7 +1,7 @@
 use crate::{
   ethos::{Siege, Virtue, CABALISTS, PLANETARY_ORBITS, TOWNS, VIRTUES},
   towns_dlg::TownsDlg,
-  util::{self, AppState, Cancel, FORTNIGHT_SECS, HOUR_SECS},
+  util,
 };
 use chrono::{DateTime, TimeZone, Utc};
 use eframe::{
@@ -11,6 +11,7 @@ use eframe::{
 };
 use futures::executor::ThreadPool;
 use std::time::Duration;
+use util::{AppState, Cancel, FORTNIGHT_SECS, HOUR_SECS};
 
 pub struct Chronometer {
   towns_dlg: TownsDlg,

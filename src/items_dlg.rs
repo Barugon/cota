@@ -1,13 +1,11 @@
-use crate::{
-  game_data::Item,
-  util::{self, AppState},
-};
+use crate::{game_data::Item, util};
 use eframe::{
   egui::{Context, DragValue, Key, Layout, RichText, Window},
   emath::{Align, Align2},
   epaint::Color32,
 };
 use egui_extras::{Column, TableBuilder};
+use util::AppState;
 
 pub struct ItemsDlg {
   state: AppState,

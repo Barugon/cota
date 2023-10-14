@@ -9,10 +9,8 @@ use eframe::{
   epaint::Color32,
 };
 use egui_extras::DatePickerButton;
-use futures::{
-  channel::mpsc::{self, UnboundedReceiver, UnboundedSender},
-  executor::ThreadPool,
-};
+use futures::{channel::mpsc, executor::ThreadPool};
+use mpsc::{UnboundedReceiver, UnboundedSender};
 use num_format::Locale;
 use std::path::{Path, PathBuf};
 

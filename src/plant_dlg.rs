@@ -1,10 +1,4 @@
-use std::{collections::BTreeSet, mem};
-
-use crate::{
-  config::Config,
-  plant_info::{self, CropTimer, Environment, Seed},
-  util::AppState,
-};
+use crate::{config::Config, plant_info, util::AppState};
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
 use eframe::{
   egui::{ComboBox, Context, DragValue, Key, RichText, ScrollArea, TextEdit, Window},
@@ -12,6 +6,8 @@ use eframe::{
   epaint::Color32,
 };
 use egui_extras::DatePickerButton;
+use plant_info::{CropTimer, Environment, Seed};
+use std::{collections::BTreeSet, mem};
 
 // #[derive(Default)]
 pub struct PlantDlg {
@@ -224,7 +220,9 @@ impl PlantDlg {
   fn accept(&mut self) {
     if self.visible {
       let Some(index) = self.seed_index else { return };
-      let Some(environment) = self.environment else { return };
+      let Some(environment) = self.environment else {
+        return;
+      };
       let time = NaiveTime::from_hms_opt(self.hour, self.min, 0).unwrap();
       self.descriptions.insert(self.description.clone());
       self.result = Some(CropTimer::new(
