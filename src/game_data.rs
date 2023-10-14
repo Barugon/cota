@@ -129,7 +129,7 @@ impl GameData {
   pub fn get_adv_lvl(&self) -> i32 {
     let ae = self.character.get(AE).unwrap();
     let exp = ae.to_i64().unwrap();
-    util::floor_search(exp, &LEVEL_EXP).unwrap() as i32 + 1
+    util::floor_search(exp, LEVEL_EXP).unwrap() as i32 + 1
   }
 
   pub fn set_adv_lvl(&mut self, lvl: i32) {
@@ -140,7 +140,7 @@ impl GameData {
   pub fn get_prd_lvl(&self) -> i32 {
     let pe = self.character.get(PE).unwrap();
     let exp = pe.to_i64().unwrap();
-    util::floor_search(exp, &LEVEL_EXP).unwrap() as i32 + 1
+    util::floor_search(exp, LEVEL_EXP).unwrap() as i32 + 1
   }
 
   pub fn set_prd_lvl(&mut self, lvl: i32) {
@@ -374,7 +374,7 @@ impl Item {
 fn get_skill_lvl(sk2: &Value, info: &SkillInfo) -> Option<i32> {
   let exp = sk2.get(format!("{}", info.id))?.get(X)?;
   let exp = (exp.to_i64()? as f64 / info.mul) as i64;
-  Some(util::floor_search(exp, &SKILL_EXP)? as i32 + 1)
+  Some(util::floor_search(exp, SKILL_EXP)? as i32 + 1)
 }
 
 fn set_skill_lvl(sk2: &mut Value, date: &Value, skill: &SkillLvl) {
