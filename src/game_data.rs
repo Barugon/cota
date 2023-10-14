@@ -1,9 +1,8 @@
-use crate::{
-  skill_info::{self, SkillCategory, SkillInfo, SkillInfoGroup},
-  util::{self, LEVEL_EXP, LVL_RANGE, SKILL_EXP},
-};
+use crate::{skill_info, util};
 use serde_json::Value;
+use skill_info::{SkillCategory, SkillInfo, SkillInfoGroup};
 use std::{borrow::Cow, fs::File, io::Write, ops::Range, path::PathBuf, sync::RwLock};
+use util::{LEVEL_EXP, LVL_RANGE, SKILL_EXP};
 
 // NOTE: UserKnowledge contains virtue.
 

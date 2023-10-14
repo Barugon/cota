@@ -1,6 +1,6 @@
 use crate::{
   ethos::{Siege, Virtue, CABALISTS, TOWNS, VIRTUES},
-  util::{self, AppState},
+  util,
 };
 use eframe::{
   egui::{Context, Grid, Key, Layout, RichText, WidgetText, Window},
@@ -8,6 +8,7 @@ use eframe::{
   epaint::Color32,
 };
 use std::mem;
+use util::AppState;
 
 pub struct TownsDlg {
   state: AppState,

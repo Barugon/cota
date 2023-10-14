@@ -3,7 +3,6 @@ use crate::{
   storage::Storage,
   util::{Page, APP_NAME},
 };
-// use eframe::epaint::Pos2;
 use std::{
   collections::{BTreeMap, BTreeSet, HashMap},
   path::{Path, PathBuf},
