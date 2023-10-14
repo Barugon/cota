@@ -8,7 +8,7 @@ name = "cota"
 version = "5.6.3"
 
 [dependencies]
-chrono = {version = "0.4", features = ["serde"]}
+chrono = {version = ">=0.4.20", features = ["serde"]}
 clipboard = "0.5"
 dirs = "5.0"
 eframe = "0.23"
