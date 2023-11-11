@@ -12,7 +12,7 @@ chrono = {version = "0.4", features = ["serde"]}
 clipboard = "0.5"
 dirs = "5.0"
 eframe = "0.23"
-egui_extras = {version = "0.23", features = ["image", "datepicker"]}
+egui_extras = {version = "0.23", features = ["datepicker", "image"]}
 egui_file = "0.11"
 futures = {version = "0.3", features = ["thread-pool"]}
 image = {version = "0.24", features = ["png"]}
