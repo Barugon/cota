@@ -208,13 +208,13 @@ impl Config {
     self.storage.persist();
   }
 
-  const LOG_PATH_KEY: &str = "log_path";
-  const SAVE_PATH_KEY: &str = "save_path";
-  const STATS_AVATAR_KEY: &str = "stats_avatar";
-  const EXP_AVATAR_KEY: &str = "experience_avatar";
-  const AVATAR_SKILLS: &str = "skills";
-  const CROP_TIMERS_KEY: &str = "plants";
-  const CROP_DESCRIPTIONS_KEY: &str = "crop_descriptions";
-  const NOTES_KEY: &str = "notes";
-  const PAGE_KEY: &str = "page";
+  const LOG_PATH_KEY: &'static str = "log_path";
+  const SAVE_PATH_KEY: &'static str = "save_path";
+  const STATS_AVATAR_KEY: &'static str = "stats_avatar";
+  const EXP_AVATAR_KEY: &'static str = "experience_avatar";
+  const AVATAR_SKILLS: &'static str = "skills";
+  const CROP_TIMERS_KEY: &'static str = "plants";
+  const CROP_DESCRIPTIONS_KEY: &'static str = "crop_descriptions";
+  const NOTES_KEY: &'static str = "notes";
+  const PAGE_KEY: &'static str = "page";
 }
