@@ -30,6 +30,3 @@ embed-resource = "2.4"
 
 [profile.release]
 strip = "symbols"
-
-[profile.dev.package."*"]
-opt-level = 3
