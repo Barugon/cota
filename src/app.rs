@@ -99,8 +99,10 @@ impl App {
     let offline = Offline::new(state.clone());
     let stats = Stats::new(log_path, threads, config.clone(), state.clone(), locale);
 
-    // Start the chronometer timer.
-    chronometer.start_timer(cc.egui_ctx.clone());
+    if page == Page::Chronometer {
+      // Start the chronometer timer.
+      chronometer.start_timer(cc.egui_ctx.clone());
+    }
 
     // Dialog windows.
     let about_dlg = AboutDlg::new(state.clone());
