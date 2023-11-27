@@ -370,7 +370,7 @@ pub fn timestamp_to_string(ts: Option<i64>) -> String {
 /// Get the size (thickness) of a scrollbar.
 pub fn scroll_bar_size(ui: &Ui) -> f32 {
   let spacing = ui.spacing();
-  spacing.scroll_bar_inner_margin + spacing.scroll_bar_width + spacing.scroll_bar_outer_margin
+  spacing.scroll.bar_inner_margin + spacing.scroll.bar_width + spacing.scroll.bar_outer_margin
 }
 
 /// Get the size (height) of a button.
