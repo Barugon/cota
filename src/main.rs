@@ -29,22 +29,29 @@ mod towns_dlg;
 
 use app::App;
 use config::Config;
-use eframe::AppCreator;
+use eframe::{
+  egui::{IconData, ViewportBuilder},
+  AppCreator,
+};
 use util::{APP_ICON, APP_TITLE};
 
 fn main() {
   let config = Config::new().unwrap();
   let icon = image::load_from_memory(APP_ICON).unwrap();
+  let icon = IconData {
+    width: icon.width(),
+    height: icon.height(),
+    rgba: icon.into_rgba8().into_raw(),
+  };
+  let viewport = ViewportBuilder::default()
+    .with_resizable(false)
+    .with_inner_size(App::inner_window_size())
+    .with_max_inner_size(App::inner_window_size())
+    .with_min_inner_size(App::inner_window_size())
+    .with_icon(icon);
+
   let options = eframe::NativeOptions {
-    resizable: false,
-    initial_window_size: Some(App::inner_window_size()),
-    max_window_size: Some(App::inner_window_size()),
-    min_window_size: Some(App::inner_window_size()),
-    icon_data: Some(eframe::IconData {
-      width: icon.width(),
-      height: icon.height(),
-      rgba: icon.into_rgba8().into_raw(),
-    }),
+    viewport,
     ..Default::default()
   };
 

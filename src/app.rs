@@ -12,7 +12,7 @@ use crate::{
 use eframe::{
   egui::{
     menu, style::Margin, Button, CentralPanel, Context, CursorIcon, Event, Frame, Key,
-    TopBottomPanel, Ui, Visuals,
+    TopBottomPanel, Ui, ViewportCommand, Visuals,
   },
   emath::Align2,
   epaint, glow,
@@ -124,9 +124,22 @@ impl App {
     }
   }
 
-  fn handle_hotkeys(&mut self, ctx: &Context, frame: &mut eframe::Frame) -> bool {
+  fn handle_input(&mut self, ctx: &Context) -> bool {
+    let mut close_status = CloseStatus::None;
     let mut handled = false;
     ctx.input(|state| {
+      if state.viewport().close_requested() {
+        if self.offline.changed() {
+          self.offline.on_close_event();
+          if !self.confirm_dlg.visible() {
+            let file_name = self.offline.file_name().unwrap();
+            self.confirm_dlg.open(file_name, Hence::Exit);
+          }
+          close_status = CloseStatus::CancelClose;
+        }
+        return;
+      }
+
       for event in &state.events {
         if let Event::Key {
           key,
@@ -166,7 +179,7 @@ impl App {
                 handled = true;
               }
               Key::Q if modifiers.command_only() => {
-                frame.close();
+                close_status = CloseStatus::Close;
                 handled = true;
               }
               Key::R
@@ -192,6 +205,12 @@ impl App {
         }
       }
     });
+
+    match close_status {
+      CloseStatus::None => (),
+      CloseStatus::Close => ctx.send_viewport_cmd(ViewportCommand::Close),
+      CloseStatus::CancelClose => ctx.send_viewport_cmd(ViewportCommand::CancelClose),
+    }
 
     handled
   }
@@ -274,7 +293,7 @@ impl App {
 }
 
 impl eframe::App for App {
-  fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
+  fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
     // Process load request from the offline page.
     if self.offline.load_request() {
       self.choose_load_path(ctx);
@@ -286,7 +305,7 @@ impl eframe::App for App {
     }
 
     // We want to close any open menu whenever a hotkey is processed.
-    let close_menu = self.handle_hotkeys(ctx, frame);
+    let close_menu = self.handle_input(ctx);
 
     // Top panel for the menu bar.
     let enabled = !self.state.is_disabled();
@@ -347,7 +366,7 @@ impl eframe::App for App {
             ui.separator();
 
             if menu_item(ui, close_menu, "Quit", Some(cmd!("Q"))) {
-              frame.close();
+              ctx.send_viewport_cmd(ViewportCommand::Close);
             }
           });
 
@@ -419,7 +438,7 @@ impl eframe::App for App {
       }
       match self.confirm_dlg.take_hence() {
         Some(Hence::Load) => self.choose_load_path(ctx),
-        Some(Hence::Exit) => frame.close(),
+        Some(Hence::Exit) => ctx.send_viewport_cmd(ViewportCommand::Close),
         None => (),
       }
     }
@@ -494,27 +513,18 @@ impl eframe::App for App {
     });
   }
 
-  fn on_close_event(&mut self) -> bool {
-    if !self.offline.changed() {
-      return true;
-    }
-
-    self.offline.on_close_event();
-    if !self.confirm_dlg.visible() {
-      if let Some(file_name) = self.offline.file_name() {
-        self.confirm_dlg.open(file_name, Hence::Exit);
-      }
-    }
-
-    false
-  }
-
   fn on_exit(&mut self, _: Option<&glow::Context>) {
     self.chronometer.on_exit();
     self.experience.on_exit();
     self.farming.on_exit();
     self.stats.on_exit();
   }
+}
+
+enum CloseStatus {
+  None,
+  Close,
+  CancelClose,
 }
 
 fn top_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
