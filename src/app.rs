@@ -220,10 +220,12 @@ impl App {
     let filter = Box::new({
       let ext = Some(OsStr::new("txt"));
       move |path: &Path| -> bool {
-        let Some(stem) = path.file_stem().and_then(|s| s.to_str()) else {
+        const PREFIX: &[u8] = "SotAChatLog_".as_bytes();
+        let Some(name) = path.file_name() else {
           return false;
         };
-        return stem.starts_with("SotAChatLog_") && path.extension() == ext;
+        let name = name.as_encoded_bytes();
+        return name.starts_with(PREFIX) && path.extension() == ext;
       }
     });
 
