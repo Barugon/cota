@@ -359,11 +359,22 @@ pub struct Span {
   pub end: NaiveDateTime,
 }
 
-#[derive(Default)]
 pub struct DPSTally {
+  pub span: Span,
   pub avatar: u64,
   pub pet: u64,
   pub secs: u64,
+}
+
+impl DPSTally {
+  fn new(span: Span) -> Self {
+    Self {
+      span,
+      avatar: 0,
+      pet: 0,
+      secs: 0,
+    }
+  }
 }
 
 pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Cancel) -> DPSTally {
@@ -385,7 +396,7 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
     filenames
   };
 
-  let mut dps_tally = DPSTally::default();
+  let mut dps_tally = DPSTally::new(span.clone());
   if cancel.is_canceled() {
     return dps_tally;
   }
@@ -411,7 +422,7 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
 
   for filename in filenames {
     if cancel.is_canceled() {
-      return DPSTally::default();
+      return DPSTally::new(span.clone());
     }
 
     // Read the log file.
@@ -423,6 +434,7 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
         let Some(ts) = get_log_timestamp(line, file_date) else {
           continue;
         };
+
         if !range.contains(&ts) {
           continue;
         }
@@ -455,7 +467,15 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
   }
 
   if let Some(start_ts) = dmg_start_ts {
+    if let Some(begin) = NaiveDateTime::from_timestamp_opt(start_ts, 0) {
+      // Update the begin data/time.
+      dps_tally.span.begin = begin;
+    }
     if let Some(end_ts) = dmg_end_ts {
+      if let Some(end) = NaiveDateTime::from_timestamp_opt(end_ts, 0) {
+        // Update the end data/time.
+        dps_tally.span.end = end;
+      }
       dps_tally.secs = 0.max(end_ts - start_ts) as u64;
     }
   }
