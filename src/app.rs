@@ -217,20 +217,14 @@ impl App {
 
   fn choose_folder_path(&mut self, ctx: &Context) {
     let path = Some(self.stats.log_path().into());
-    let filter = Box::new(move |path: &Path| -> bool {
-      let Some(stem) = path.file_stem() else {
-        return false;
-      };
-      let Some(stem) = stem.to_str() else {
-        return false;
-      };
-      let Some(ext) = path.extension() else {
-        return false;
-      };
-      let Some(ext) = ext.to_str() else {
-        return false;
-      };
-      return stem.starts_with("SotAChatLog_") && ext == "txt";
+    let filter = Box::new({
+      let ext = Some(OsStr::new("txt"));
+      move |path: &Path| -> bool {
+        let Some(stem) = path.file_stem().and_then(|s| s.to_str()) else {
+          return false;
+        };
+        return stem.starts_with("SotAChatLog_") && path.extension() == ext;
+      }
     });
 
     let available = ctx.available_rect().size();
