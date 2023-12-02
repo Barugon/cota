@@ -59,12 +59,15 @@ impl DPSDlg {
       self.log_path = path_buf.to_owned();
       self.avatar = avatar.to_owned();
       self.state.set_disabled(true);
+      self.tally = None;
       self.visible = true;
     }
   }
 
   pub fn show(&mut self, ctx: &Context) {
     while let Ok(Some(tally)) = self.channel.rx.try_next() {
+      // Update the date/time span and store the tally.
+      self.span = tally.span.clone();
       self.tally = Some(tally);
       self.state.set_busy(false);
     }
@@ -197,12 +200,11 @@ impl DPSDlg {
   fn close(&mut self) {
     if self.visible {
       if let Some(mut cancel) = self.channel.cancel.take() {
-        // Cancel the search if it's still outstanding.
+        // Cancel the tally request if it's still outstanding.
         cancel.cancel();
       }
 
       self.state.set_disabled(false);
-      self.tally = None;
       self.visible = false;
     }
   }
