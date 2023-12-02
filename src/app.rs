@@ -217,9 +217,20 @@ impl App {
 
   fn choose_folder_path(&mut self, ctx: &Context) {
     let path = Some(self.stats.log_path().into());
-    let ext = Some(OsStr::new("txt"));
     let filter = Box::new(move |path: &Path| -> bool {
-      return path.extension() == ext;
+      let Some(stem) = path.file_stem() else {
+        return false;
+      };
+      let Some(stem) = stem.to_str() else {
+        return false;
+      };
+      let Some(ext) = path.extension() else {
+        return false;
+      };
+      let Some(ext) = ext.to_str() else {
+        return false;
+      };
+      return stem.starts_with("SotAChatLog_") && ext == "txt";
     });
 
     let available = ctx.available_rect().size();
@@ -227,7 +238,7 @@ impl App {
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
       .default_size([available.x, available.y * 0.5])
-      .filter(filter)
+      .show_files_filter(filter)
       .show_new_folder(false)
       .show_rename(false)
       .resizable(false);
@@ -259,7 +270,7 @@ impl App {
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
       .default_size([available.x, available.y * 0.5])
-      .filter(filter)
+      .show_files_filter(filter)
       .show_new_folder(false)
       .resizable(false);
     file_dlg.open();
@@ -282,7 +293,7 @@ impl App {
       .anchor(Align2::CENTER_TOP, [0.0, 0.0])
       .current_pos([0.0, 24.0])
       .default_size([available.x, available.y * 0.5])
-      .filter(filter)
+      .show_files_filter(filter)
       .show_new_folder(false)
       .resizable(false);
     file_dlg.open();

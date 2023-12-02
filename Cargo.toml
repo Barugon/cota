@@ -13,7 +13,7 @@ clipboard = "0.5"
 dirs = "5.0"
 eframe = "0.24"
 egui_extras = {version = "0.24", features = ["datepicker", "image"]}
-egui_file = "0.12"
+egui_file = "0.13"
 futures = {version = "0.3", features = ["thread-pool"]}
 image = {version = "0.24", features = ["png"]}
 notify-rust = "4.8"
