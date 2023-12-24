@@ -111,10 +111,9 @@ mod inner {
     }
 
     pub fn set(&mut self, key: &str, item: String) {
-      if let Some(prev) = self.items.insert(key.to_owned(), item) {
-        if self.items.get(key).unwrap() != &prev {
-          self.changed.store(true, Ordering::Relaxed);
-        }
+      let prev = self.items.insert(key.to_owned(), item);
+      if self.items.get(key) != prev.as_ref() {
+        self.changed.store(true, Ordering::Relaxed);
       }
     }
 
