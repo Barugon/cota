@@ -143,6 +143,7 @@ impl App {
       for event in &state.events {
         if let Event::Key {
           key,
+          physical_key: _,
           pressed,
           repeat,
           modifiers,
