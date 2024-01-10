@@ -220,13 +220,13 @@ impl App {
     let path = Some(self.stats.log_path().into());
     let filter = Box::new({
       let ext = Some(OsStr::new("txt"));
-      move |path: &Path| -> bool {
+      move |path: &Path| {
         const PREFIX: &[u8] = "SotAChatLog_".as_bytes();
         let Some(name) = path.file_name() else {
           return false;
         };
         let name = name.as_encoded_bytes();
-        return name.starts_with(PREFIX) && path.extension() == ext;
+        name.starts_with(PREFIX) && path.extension() == ext
       }
     });
 
@@ -258,8 +258,9 @@ impl App {
       return;
     };
 
-    let filter = Box::new(|path: &Path| -> bool {
-      return path.extension() == Some(OsStr::new("sota"));
+    let filter = Box::new({
+      let ext = Some(OsStr::new("sota"));
+      move |path: &Path| path.extension() == ext
     });
 
     let available = ctx.available_rect().size();
@@ -281,8 +282,9 @@ impl App {
       return;
     };
 
-    let filter = Box::new(|path: &Path| -> bool {
-      return path.extension() == Some(OsStr::new("sota"));
+    let filter = Box::new({
+      let ext = Some(OsStr::new("sota"));
+      move |path: &Path| path.extension() == ext
     });
 
     let available = ctx.available_rect().size();
