@@ -1,7 +1,7 @@
 use crate::util::AppState;
 use eframe::{
   egui::{
-    scroll_area::ScrollBarVisibility, text::CCursor, text_edit::CCursorRange, Context, Key,
+    scroll_area::ScrollBarVisibility, text::CCursor, text_selection::CCursorRange, Context, Key,
     RichText, ScrollArea, TextEdit, Window,
   },
   emath::Align2,
@@ -62,8 +62,9 @@ impl NotesDlg {
 
               // Set the cursor pos to the beginning.
               if let Some(mut state) = TextEdit::load_state(ctx, response.id) {
-                let ccursor = CCursor::new(0);
-                state.set_ccursor_range(Some(CCursorRange::one(ccursor)));
+                state
+                  .cursor
+                  .set_char_range(Some(CCursorRange::one(CCursor::new(0))));
                 state.store(ctx, response.id);
               }
 

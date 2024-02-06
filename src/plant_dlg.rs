@@ -171,16 +171,15 @@ impl PlantDlg {
                   let mut remove = None;
                   for text in &self.descriptions.list {
                     let response = col[0].selectable_label(false, text);
-                    if response
-                      .context_menu(|ui| {
-                        if ui.button("Remove").clicked() {
-                          remove = Some(text.to_owned());
-                          ui.close_menu();
-                        }
-                      })
-                      .clicked()
-                    {
-                      self.description = text.to_owned();
+                    if let Some(inner) = response.context_menu(|ui| {
+                      if ui.button("Remove").clicked() {
+                        remove = Some(text.to_owned());
+                        ui.close_menu();
+                      }
+                    }) {
+                      if inner.response.clicked() {
+                        self.description = text.to_owned();
+                      }
                     }
                   }
 
