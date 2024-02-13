@@ -26,8 +26,8 @@ pub fn parse_seeds() -> Vec<(&'static str, Seed)> {
   let mut result = Vec::new();
   for line in SEEDS.lines() {
     let mut iter = line.split(',');
-    let Some(seed_name) = iter.next() else { break };
-    let Some(seed_type) = iter.next() else { break };
+    let seed_name = iter.next().unwrap();
+    let seed_type = iter.next().unwrap();
     result.push((seed_name, Seed::new(seed_type)));
   }
   result
