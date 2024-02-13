@@ -10,12 +10,12 @@ pub enum Seed {
 }
 
 impl Seed {
-  fn new(text: &str) -> Option<Self> {
+  fn new(text: &str) -> Self {
     match text {
-      "1" => Some(Seed::Low),
-      "2" => Some(Seed::Med),
-      "3" => Some(Seed::High),
-      _ => None,
+      "1" => Seed::Low,
+      "2" => Seed::Med,
+      "3" => Seed::High,
+      _ => unreachable!(),
     }
   }
 }
@@ -28,7 +28,7 @@ pub fn parse_seeds() -> Vec<(&'static str, Seed)> {
     let mut iter = line.split(',');
     let Some(seed_name) = iter.next() else { break };
     let Some(seed_type) = iter.next() else { break };
-    result.push((seed_name, Seed::new(seed_type).unwrap()));
+    result.push((seed_name, Seed::new(seed_type)));
   }
   result
 }
