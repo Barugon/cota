@@ -1,5 +1,5 @@
 use crate::util;
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{channel::mpsc, executor::ThreadPool, future, StreamExt};
 use regex::Regex;
 use std::{
@@ -408,8 +408,8 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
   let pet_search = ok!(Regex::new(&pet_search), dps_tally);
 
   // Range for checking log entry date/time.
-  let begin_ts = span.begin.timestamp();
-  let end_ts = span.end.timestamp();
+  let begin_ts = span.begin.and_utc().timestamp();
+  let end_ts = span.end.and_utc().timestamp();
   let range = if end_ts >= begin_ts {
     begin_ts..=end_ts
   } else {
@@ -467,14 +467,14 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
   }
 
   if let Some(start_ts) = dmg_start_ts {
-    if let Some(begin) = NaiveDateTime::from_timestamp_opt(start_ts, 0) {
+    if let Some(begin) = DateTime::from_timestamp(start_ts, 0) {
       // Update the begin data/time.
-      dps_tally.span.begin = begin;
+      dps_tally.span.begin = begin.naive_utc();
     }
     if let Some(end_ts) = dmg_end_ts {
-      if let Some(end) = NaiveDateTime::from_timestamp_opt(end_ts, 0) {
+      if let Some(end) = DateTime::from_timestamp(end_ts, 0) {
         // Update the end data/time.
-        dps_tally.span.end = end;
+        dps_tally.span.end = end.naive_utc();
       }
       dps_tally.secs = 0.max(end_ts - start_ts) as u64;
     }
@@ -560,12 +560,16 @@ fn log_date_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
   let minute = iter.next()?.parse().ok()?;
   let second = iter.next()?.parse().ok()?;
 
-  Some(NaiveDateTime::new(date, NaiveTime::from_hms_opt(hour, minute, second)?).timestamp())
+  Some(
+    NaiveDateTime::new(date, NaiveTime::from_hms_opt(hour, minute, second)?)
+      .and_utc()
+      .timestamp(),
+  )
 }
 
 /// Convert a timestamp into a log filename date string.
 fn timestamp_to_file_date(ts: i64) -> String {
-  let Some(dt) = NaiveDateTime::from_timestamp_opt(ts, 0) else {
+  let Some(dt) = DateTime::from_timestamp(ts, 0) else {
     return String::default();
   };
   dt.format("%Y-%m-%d").to_string()

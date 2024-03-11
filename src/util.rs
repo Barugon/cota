@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use clipboard::{ClipboardContext, ClipboardProvider};
 use eframe::{
   egui::{Context, Image, TextStyle, Ui},
@@ -361,7 +361,7 @@ pub fn remove_separators(text: &str) -> String {
 /// Convert a timestamp into a date & time string.
 pub fn timestamp_to_string(ts: Option<i64>) -> String {
   let Some(ts) = ts else { return String::new() };
-  let Some(dt) = NaiveDateTime::from_timestamp_opt(ts, 0) else {
+  let Some(dt) = DateTime::from_timestamp(ts, 0) else {
     return String::new();
   };
   dt.format("%Y-%m-%d %H:%M:%S").to_string()
