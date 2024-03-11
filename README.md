@@ -4,10 +4,6 @@ CotA, a companion application for [Shroud of the Avatar](https://www.shroudofthe
 
 **Click [here](https://github.com/Barugon/cota/releases) for binaries**
 
-> **Note**: **Linux** - If you're using Wayland and you find the app's title bar disagreeable then set this environment variable before running: `WINIT_UNIX_BACKEND=x11`
-
-<!-- intentional spacing -->
-
 > **Note**: **Windows** - You might need to right click cota.exe (once unzipped), select `Properties` and then check `Unblock`.
 
 <!-- intentional spacing -->
