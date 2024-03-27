@@ -11,8 +11,8 @@ use crate::{
 };
 use eframe::{
   egui::{
-    menu, style::Margin, Button, CentralPanel, Context, CursorIcon, Event, Frame, Key,
-    TopBottomPanel, Ui, ViewportCommand, Visuals,
+    menu, Button, CentralPanel, Context, CursorIcon, Event, Frame, Key, Margin, TopBottomPanel, Ui,
+    ViewportCommand, Visuals,
   },
   emath::Align2,
   epaint, glow,

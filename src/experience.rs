@@ -244,7 +244,7 @@ impl Experience {
                             let value = &mut level.0;
                             let widget = DragValue::new(value).clamp_range(range);
                             let response = ui.add(widget);
-                            if response.drag_released() || response.lost_focus() {
+                            if response.drag_stopped() || response.lost_focus() {
                               save = true;
                             }
                           });
@@ -253,7 +253,7 @@ impl Experience {
                             let value = &mut level.1;
                             let widget = DragValue::new(value).clamp_range(range);
                             let response = ui.add(widget);
-                            if response.drag_released() || response.lost_focus() {
+                            if response.drag_stopped() || response.lost_focus() {
                               save = true;
                             }
                           });
