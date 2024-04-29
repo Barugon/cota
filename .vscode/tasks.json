@@ -44,6 +44,15 @@
       ],
       "group": "test",
       "label": "rust: cargo test"
+    },
+    {
+      "type": "cargo",
+      "command": "update",
+      "problemMatcher": [
+        "$rustc"
+      ],
+      "group": "build",
+      "label": "rust: cargo update"
     }
   ]
 }
