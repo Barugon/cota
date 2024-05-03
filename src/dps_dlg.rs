@@ -55,9 +55,9 @@ impl DPSDlg {
 
   pub fn open(&mut self, avatar: &str, path_buf: &Path) {
     if !avatar.is_empty() && !self.visible {
+      path_buf.clone_into(&mut self.log_path);
+      avatar.clone_into(&mut self.avatar);
       self.title = format!("⚔  Tally DPS ({avatar})");
-      self.log_path = path_buf.to_owned();
-      self.avatar = avatar.to_owned();
       self.state.set_disabled(true);
       self.tally = None;
       self.visible = true;

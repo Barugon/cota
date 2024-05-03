@@ -178,7 +178,7 @@ impl PlantDlg {
                       }
                     }) {
                       if inner.response.clicked() {
-                        self.description = text.to_owned();
+                        text.clone_into(&mut self.description);
                       }
                     }
                   }
