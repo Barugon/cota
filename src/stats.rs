@@ -184,7 +184,7 @@ impl Stats {
             // If the avatar wasn't set then use the first avatar.
             if self.avatar.is_empty() {
               self.config.set_stats_avatar(first.clone());
-              first.clone_into(&mut self.avatar);
+              self.avatar.clone_from(first);
             }
           }
 
@@ -222,8 +222,8 @@ impl Stats {
                 .clicked()
                 && self.avatar != *avatar
               {
-                avatar.clone_into(&mut self.avatar);
                 self.config.set_stats_avatar(avatar.clone());
+                self.avatar.clone_from(avatar);
                 avatar_changed = true;
               }
             }

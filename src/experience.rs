@@ -93,7 +93,7 @@ impl Experience {
           if avatar.is_empty() {
             // Get the first avatar.
             if let Some(first) = self.avatars.first() {
-              first.clone_into(&mut avatar);
+              avatar.clone_from(first);
             }
           }
 

@@ -361,13 +361,13 @@ impl Item {
   }
 
   pub fn accept(&mut self) {
-    self.dur.clone_into(&mut self.dur_cmp);
     self.cnt_cmp = self.cnt;
+    self.dur_cmp.clone_from(&self.dur);
   }
 
   pub fn discard(&mut self) {
-    self.dur_cmp.clone_into(&mut self.dur);
     self.cnt = self.cnt_cmp;
+    self.dur.clone_from(&self.dur_cmp);
   }
 }
 
