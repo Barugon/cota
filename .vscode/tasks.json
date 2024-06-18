@@ -51,7 +51,6 @@
       "problemMatcher": [
         "$rustc"
       ],
-      "group": "build",
       "label": "rust: cargo update"
     }
   ]
