@@ -83,7 +83,7 @@ impl Offline {
         ui.label(RichText::from("Adv Lvl").color(LABEL_COLOR));
         if let Some(game) = &mut self.game {
           let mut level = game.adv_level();
-          let widget = DragValue::new(&mut level).clamp_range(LVL_RANGE);
+          let widget = DragValue::new(&mut level).range(LVL_RANGE);
           if ui.add(widget).changed() {
             game.set_adv_level(level);
             self.changed = game.changed();
@@ -97,7 +97,7 @@ impl Offline {
         ui.label(RichText::from("Prd Lvl").color(LABEL_COLOR));
         if let Some(game) = &mut self.game {
           let mut level = game.prd_level();
-          let widget = DragValue::new(&mut level).clamp_range(LVL_RANGE);
+          let widget = DragValue::new(&mut level).range(LVL_RANGE);
           if ui.add(widget).changed() {
             game.set_prd_level(level);
             self.changed = game.changed();
@@ -113,7 +113,7 @@ impl Offline {
           let mut gold = game.gold();
           let speed = (gold as f64 / 100.0).max(1.0);
           let range = 0..=MAX_GOLD;
-          let widget = DragValue::new(&mut gold).speed(speed).clamp_range(range);
+          let widget = DragValue::new(&mut gold).speed(speed).range(range);
           if ui.add(widget).changed() {
             game.set_gold(gold);
             self.changed = game.changed();
@@ -439,7 +439,7 @@ mod inner {
                               ui.label(RichText::from(skill.info.name).color(color));
                             });
                             row.col(|ui| {
-                              let widget = DragValue::new(&mut skill.level).clamp_range(0..=200);
+                              let widget = DragValue::new(&mut skill.level).range(0..=200);
                               if ui.add(widget).changed() {
                                 changed = Some(skill.info.id);
                               }

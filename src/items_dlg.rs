@@ -72,7 +72,7 @@ impl ItemsDlg {
                         let count = item.count_mut();
                         let speed = (*count as f64 / 100.0).max(1.0);
                         let range = 1..=i16::MAX;
-                        let widget = DragValue::new(count).speed(speed).clamp_range(range);
+                        let widget = DragValue::new(count).speed(speed).range(range);
                         if ui.add(widget).changed() {
                           modified = true;
                         }
@@ -80,7 +80,10 @@ impl ItemsDlg {
                     });
                     row.col(|ui| {
                       if let Some(dur) = item.durability_mut() {
-                        ui.set_enabled(dur.minor != dur.major);
+                        if dur.minor == dur.major {
+                          ui.disable();
+                        }
+
                         if ui.button("Repair").clicked() {
                           // The actual maximum durability is unknown here, so just set the durability to a high
                           // value, it will be adjusted in-game to the actual maximum when the item takes damage.

@@ -5,7 +5,7 @@ use crate::{
   util::{AppState, Cancel},
 };
 use eframe::{
-  egui::{Context, Label, ScrollArea, Ui, WidgetText},
+  egui::{Context, Label, ScrollArea, TextWrapMode, Ui, WidgetText},
   epaint::Color32,
 };
 use notify_rust::Notification;
@@ -192,7 +192,7 @@ impl Farming {
                 }
               }
 
-              let widget = Label::new(plant.description()).wrap(true);
+              let widget = Label::new(plant.description()).wrap_mode(TextWrapMode::Extend);
               ui.spacing_mut().item_spacing.x = item_spacing.x;
               ui.add(widget);
             });

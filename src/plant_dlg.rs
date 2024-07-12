@@ -138,7 +138,7 @@ impl PlantDlg {
             ui.spacing_mut().interact_size.x = 23.0;
             let widget = DragValue::new(&mut self.hour)
               .custom_formatter(|val, _| format!("{val:02}"))
-              .clamp_range(0..=23)
+              .range(0..=23)
               .speed(0.125);
             ui.spacing_mut().item_spacing.x = 1.0;
             ui.add(widget);
@@ -147,7 +147,7 @@ impl PlantDlg {
             // Minute.
             let widget = DragValue::new(&mut self.min)
               .custom_formatter(|val, _| format!("{val:02}"))
-              .clamp_range(0..=59)
+              .range(0..=59)
               .speed(0.125);
             ui.spacing_mut().item_spacing.x = item_spacing.x;
             ui.add(widget);

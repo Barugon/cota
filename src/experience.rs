@@ -2,7 +2,7 @@ use crate::{config::Config, log_data, skill_info, util};
 use eframe::{
   egui::{
     scroll_area::ScrollBarVisibility, ComboBox, Context, DragValue, Label, Layout, RichText,
-    ScrollArea, Sense, Ui, Widget,
+    ScrollArea, Sense, TextWrapMode, Ui, Widget,
   },
   emath::{Align, Vec2},
   epaint::Color32,
@@ -236,13 +236,13 @@ impl Experience {
                           row.col(|ui| {
                             let text = RichText::from(skill.name);
                             let text = text.color(Color32::from_rgb(102, 154, 180));
-                            let widget = Label::new(text).wrap(false);
+                            let widget = Label::new(text).wrap_mode(TextWrapMode::Extend);
                             ui.add(widget);
                           });
                           row.col(|ui| {
                             let range = 0..=200;
                             let value = &mut level.0;
-                            let widget = DragValue::new(value).clamp_range(range);
+                            let widget = DragValue::new(value).range(range);
                             let response = ui.add(widget);
                             if response.drag_stopped() || response.lost_focus() {
                               save = true;
@@ -251,7 +251,7 @@ impl Experience {
                           row.col(|ui| {
                             let range = 0..=200;
                             let value = &mut level.1;
-                            let widget = DragValue::new(value).clamp_range(range);
+                            let widget = DragValue::new(value).range(range);
                             let response = ui.add(widget);
                             if response.drag_stopped() || response.lost_focus() {
                               save = true;

@@ -11,8 +11,8 @@ use crate::{
 };
 use eframe::{
   egui::{
-    menu, Button, CentralPanel, Context, CursorIcon, Event, Frame, Key, Margin, TopBottomPanel, Ui,
-    ViewportCommand, Visuals,
+    menu, Button, CentralPanel, Context, CursorIcon, Event, Frame, Key, Margin, TextWrapMode,
+    TopBottomPanel, Ui, ViewportCommand, Visuals,
   },
   emath::Align2,
   epaint, glow,
@@ -320,7 +320,9 @@ impl eframe::App for App {
     // Top panel for the menu bar.
     let enabled = !self.state.is_disabled();
     top_panel(ctx, |ui| {
-      ui.set_enabled(enabled);
+      if !enabled {
+        ui.disable();
+      }
       ui.horizontal_centered(|ui| {
         menu::bar(ui, |ui| {
           ui.menu_button("File", |ui| {
@@ -459,15 +461,21 @@ impl eframe::App for App {
     // the central panel so that we know how much space is left.
     match self.page {
       Page::Chronometer => bottom_panel(Page::Chronometer, ctx, |ui| {
-        ui.set_enabled(enabled);
+        if !enabled {
+          ui.disable();
+        }
         self.chronometer.show_status(ui);
       }),
       Page::Offline => bottom_panel(Page::Offline, ctx, |ui| {
-        ui.set_enabled(enabled);
+        if !enabled {
+          ui.disable();
+        }
         self.offline.show_status(ui);
       }),
       Page::Stats => bottom_panel(Page::Stats, ctx, |ui| {
-        ui.set_enabled(enabled);
+        if !enabled {
+          ui.disable();
+        }
         self.stats.show_status(ui);
       }),
       _ => (),
@@ -475,7 +483,9 @@ impl eframe::App for App {
 
     // Central panel for the tab pages.
     central_panel(ctx, |ui| {
-      ui.set_enabled(enabled);
+      if !enabled {
+        ui.disable();
+      }
 
       // Tab control.
       ui.horizontal(|ui| {
@@ -581,9 +591,11 @@ fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> 
 
 fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool {
   let widget = if let Some(hotkey) = hotkey {
-    Button::new(text).wrap(false).shortcut_text(hotkey)
+    Button::new(text)
+      .wrap_mode(TextWrapMode::Extend)
+      .shortcut_text(hotkey)
   } else {
-    Button::new(text).wrap(false)
+    Button::new(text).wrap_mode(TextWrapMode::Extend)
   };
 
   let response = ui.add(widget);

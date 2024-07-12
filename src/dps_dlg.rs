@@ -235,7 +235,7 @@ fn show_date_time(ui: &mut Ui, date_time: &NaiveDateTime, id: &str) -> Option<Na
   let mut hour = date_time.hour();
   let widget = DragValue::new(&mut hour)
     .custom_formatter(|val, _| format!("{val:02}"))
-    .clamp_range(0..=23)
+    .range(0..=23)
     .speed(0.125);
   ui.spacing_mut().item_spacing.x = 1.0;
   ui.spacing_mut().interact_size.x = 23.0;
@@ -248,7 +248,7 @@ fn show_date_time(ui: &mut Ui, date_time: &NaiveDateTime, id: &str) -> Option<Na
   let mut min = date_time.minute();
   let widget = DragValue::new(&mut min)
     .custom_formatter(|val, _| format!("{val:02}"))
-    .clamp_range(0..=59)
+    .range(0..=59)
     .speed(0.125);
   if ui.add(widget).changed() {
     result = Some(date_time.with_minute(min).unwrap());
@@ -259,7 +259,7 @@ fn show_date_time(ui: &mut Ui, date_time: &NaiveDateTime, id: &str) -> Option<Na
   let mut sec = date_time.second();
   let widget = DragValue::new(&mut sec)
     .custom_formatter(|val, _| format!("{val:02}"))
-    .clamp_range(0..=59)
+    .range(0..=59)
     .speed(0.125);
   ui.spacing_mut().item_spacing.x = x_spacing;
   if ui.add(widget).changed() {

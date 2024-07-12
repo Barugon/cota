@@ -55,6 +55,6 @@ fn main() {
     ..Default::default()
   };
 
-  let creator: AppCreator = Box::new(move |cc| Box::new(App::new(cc, config)));
+  let creator: AppCreator = Box::new(move |cc| Ok(Box::new(App::new(cc, config))));
   eframe::run_native(APP_TITLE, options, creator).unwrap();
 }
