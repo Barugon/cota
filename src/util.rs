@@ -38,8 +38,8 @@ macro_rules! debugln {
   ($($arg:tt)*) => (#[cfg(debug_assertions)] println!($($arg)*));
 }
 
-#[macro_export]
 /// Return from function (and print error) if `Result` is not `Ok`.
+#[macro_export]
 macro_rules! ok {
   ($res:expr) => {
     match $res {
@@ -61,8 +61,8 @@ macro_rules! ok {
   };
 }
 
-#[macro_export]
 /// Print if `Err`.
+#[macro_export]
 macro_rules! err {
   ($res:expr) => {
     if let Err(err) = $res {
@@ -71,8 +71,8 @@ macro_rules! err {
   };
 }
 
-#[macro_export]
 /// Nicely format a f64 for display.
+#[macro_export]
 macro_rules! f64_to_string {
   ($value:expr, 2, $locale:expr) => {
     format!("{:.2}", $value)
@@ -282,11 +282,8 @@ fn find_ignore_case(text: &str, find: &str) -> Option<Range<usize>> {
 #[derive(Clone)]
 pub enum Search {
   /// Search for the specified string.
-  String {
-    find: String,
-    ignore_case: bool,
-  },
-  // Use regular expression for pattern matching.
+  String { find: String, ignore_case: bool },
+  /// Use regular expression for pattern matching.
   Regex(Regex),
 }
 
