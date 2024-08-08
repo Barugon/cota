@@ -23,8 +23,8 @@ pub const APP_TITLE: &str = env!("CARGO_PKG_DESCRIPTION");
 pub const APP_AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-pub const LEVEL_EXP: &[i64] = include!("../res/level_exp_values");
-pub const SKILL_EXP: &[i64] = include!("../res/skill_exp_values");
+pub const LEVEL_EXP: &[i64] = include!("../res/level_exp_values.rs");
+pub const SKILL_EXP: &[i64] = include!("../res/skill_exp_values.rs");
 pub const LVL_RANGE: RangeInclusive<i32> = 1..=200;
 
 /// Number of seconds in an hour (one in-game day).
