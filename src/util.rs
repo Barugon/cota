@@ -283,6 +283,7 @@ fn find_ignore_case(text: &str, find: &str) -> Option<Range<usize>> {
 pub enum Search {
   /// Search for the specified string.
   String { find: String, ignore_case: bool },
+
   /// Use regular expression for pattern matching.
   Regex(Regex),
 }
