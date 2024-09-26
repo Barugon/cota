@@ -489,11 +489,7 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> 
   let entries = ok!(log_path.read_dir(), filenames);
 
   // The name text is either a specific avatar or, if not specified, a regex wildcard.
-  let name = if let Some(avatar) = avatar {
-    avatar
-  } else {
-    ".+"
-  };
+  let name = avatar.unwrap_or(".+");
 
   // The date text is either a specific date or, if not specified, regex to match the date.
   let date = if let Some(ts) = ts {
