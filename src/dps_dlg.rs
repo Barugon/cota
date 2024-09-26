@@ -224,7 +224,7 @@ fn show_date_time(ui: &mut Ui, date_time: &NaiveDateTime, id: &str) -> Option<Na
   // Date.
   let mut date = date_time.date();
   let widget = DatePickerButton::new(&mut date)
-    .id_source(id)
+    .id_salt(id)
     .show_icon(false);
   ui.spacing_mut().item_spacing.x *= 0.5;
   if ui.add(widget).changed() {

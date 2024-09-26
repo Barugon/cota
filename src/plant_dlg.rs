@@ -86,7 +86,7 @@ impl PlantDlg {
               Default::default()
             };
             ui.spacing_mut().item_spacing.x = item_spacing.x;
-            ComboBox::from_id_source("seed_combo")
+            ComboBox::from_id_salt("seed_combo")
               .selected_text(text)
               .width(157.0)
               .show_ui(ui, |ui| {
@@ -108,7 +108,7 @@ impl PlantDlg {
               Default::default()
             };
             ui.spacing_mut().item_spacing.x = item_spacing.x;
-            ComboBox::from_id_source("environment_combo")
+            ComboBox::from_id_salt("environment_combo")
               .selected_text(text)
               .show_ui(ui, |ui| {
                 let selected = self.environment == Some(Environment::Greenhouse);
@@ -129,7 +129,7 @@ impl PlantDlg {
 
             // Date.
             let widget = DatePickerButton::new(&mut self.date)
-              .id_source("plant_date_picker")
+              .id_salt("plant_date_picker")
               .show_icon(false);
             ui.spacing_mut().item_spacing.x = item_spacing.x * 0.5;
             ui.add(widget);

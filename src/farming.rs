@@ -115,7 +115,7 @@ impl Farming {
 
     // Timer list.
     ScrollArea::vertical()
-      .id_source("farming_scroll_area")
+      .id_salt("farming_scroll_area")
       .show(ui, |ui| {
         let mut lock = self.timers.lock().unwrap();
         let mut index = 0;

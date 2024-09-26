@@ -112,7 +112,7 @@ impl Experience {
       ui.add_enabled_ui(!self.avatars.is_empty(), |ui| {
         // Avatar combo-box.
         let mut avatar_changed = None;
-        ComboBox::from_id_source("exp_avatar_combo")
+        ComboBox::from_id_salt("exp_avatar_combo")
           .selected_text(&self.avatar)
           .width(234.0)
           .show_ui(ui, |ui| {
@@ -193,7 +193,7 @@ impl Experience {
     ui.vertical(|ui| {
       ui.add_enabled_ui(!self.avatar.is_empty(), |ui| {
         ScrollArea::vertical()
-          .id_source(scroll_id)
+          .id_salt(scroll_id)
           .scroll_bar_visibility(ScrollBarVisibility::AlwaysVisible)
           .show(ui, |ui| {
             for skill_group in groups {

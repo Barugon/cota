@@ -394,14 +394,14 @@ mod inner {
       let mut changed = None;
       ui.vertical(|ui| {
         ScrollArea::vertical()
-          .id_source(scroll_id)
+          .id_salt(scroll_id)
           .scroll_bar_visibility(ScrollBarVisibility::AlwaysVisible)
           .show(ui, |ui| {
             for skill_group in groups {
               // Use a single column in order to force the scroll area to fill the entire available width.
               ui.columns(1, |col| {
                 CollapsingHeader::new(skill_group.name)
-                  .id_source(format!("{}_offline", skill_group.name.to_lowercase()))
+                  .id_salt(format!("{}_offline", skill_group.name.to_lowercase()))
                   .show(&mut col[0], |ui| {
                     let spacing = ui.spacing().item_spacing;
                     let row_size = util::button_size(ui) + spacing[1] * 2.0;

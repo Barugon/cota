@@ -212,7 +212,7 @@ impl Stats {
       // Avatar combo-box.
       ui.add_enabled_ui(!self.avatars.is_empty(), |ui| {
         let mut avatar_changed = false;
-        ComboBox::from_id_source("avatar_combo")
+        ComboBox::from_id_salt("avatar_combo")
           .selected_text(&self.avatar)
           .width(250.0)
           .show_ui(ui, |ui| {
@@ -236,7 +236,7 @@ impl Stats {
       // Date combo-box.
       ui.add_enabled_ui(!self.dates.is_empty(), |ui| {
         let mut date_changed = false;
-        ComboBox::from_id_source("date_combo")
+        ComboBox::from_id_salt("date_combo")
           .selected_text(util::timestamp_to_string(self.date))
           .show_ui(ui, |ui| {
             // This is here to keep the date text from wrapping when the scroll bar is visible.
