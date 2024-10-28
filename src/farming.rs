@@ -58,7 +58,13 @@ impl Farming {
               } else {
                 format!("{name} | {env:?} | {desc}")
               };
-              err!(Notification::new().summary(summary).body(&body).show());
+              match Notification::new().summary(summary).body(&body).show() {
+                Ok(_handle) => {
+                  #[cfg(target_os = "linux")]
+                  _handle.on_close(|_| {});
+                }
+                Err(err) => println!("{err:?}"),
+              }
             }
 
             // Flag that the timers need to be persisted.
