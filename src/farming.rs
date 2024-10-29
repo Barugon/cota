@@ -8,6 +8,7 @@ use eframe::{
   egui::{Context, Label, ScrollArea, TextWrapMode, Ui, WidgetText},
   epaint::Color32,
 };
+use futures::executor::ThreadPoolBuilder;
 use notify_rust::Notification;
 use std::{
   sync::{
@@ -36,6 +37,9 @@ impl Farming {
     let persist = Arc::new(AtomicBool::new(false));
     let cancel = Cancel::default();
     let thread = Some(thread::spawn({
+      #[cfg(target_os = "linux")]
+      let notify_threads = ThreadPoolBuilder::new().pool_size(4).create().unwrap();
+
       let timers = timers.clone();
       let persist = persist.clone();
       let cancel = cancel.clone();
@@ -58,13 +62,17 @@ impl Farming {
               } else {
                 format!("{name} | {env:?} | {desc}")
               };
-              match Notification::new().summary(summary).body(&body).show() {
-                Ok(_handle) => {
-                  #[cfg(target_os = "linux")]
-                  _handle.on_close(|_| {});
+
+              #[cfg(target_os = "linux")]
+              notify_threads.spawn_ok(async move {
+                match Notification::new().summary(summary).body(&body).show() {
+                  Ok(handle) => handle.on_close(|| {}),
+                  Err(err) => println!("{err:?}"),
                 }
-                Err(err) => println!("{err:?}"),
-              }
+              });
+
+              #[cfg(not(target_os = "linux"))]
+              ok!(Notification::new().summary(summary).body(&body).show());
             }
 
             // Flag that the timers need to be persisted.
