@@ -64,7 +64,10 @@ impl Farming {
 
               #[cfg(target_os = "linux")]
               match Notification::new().summary(summary).body(&body).show() {
-                Ok(handle) => _notification = Some(handle),
+                Ok(handle) => {
+                  // Discarding the handle closes the notification on Wayland, so keep it around until the next notification.
+                  _notification = Some(handle);
+                }
                 Err(err) => println!("{err:?}"),
               };
 
