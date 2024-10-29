@@ -1,7 +1,9 @@
 use crate::{config::Config, plant_info, util::AppState};
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
 use eframe::{
-  egui::{ComboBox, Context, DragValue, Key, RichText, ScrollArea, TextEdit, Window},
+  egui::{
+    ComboBox, Context, DragValue, Key, PointerButton, RichText, ScrollArea, TextEdit, Window,
+  },
   emath::Align2,
   epaint::Color32,
 };
@@ -50,6 +52,7 @@ impl PlantDlg {
     if !self.visible {
       let now = Local::now();
       self.date = now.date_naive();
+      self.description = String::new();
       self.hour = now.hour();
       self.min = now.minute();
       self.result = None;
@@ -171,15 +174,15 @@ impl PlantDlg {
                   let mut remove = None;
                   for text in &self.descriptions.list {
                     let response = col[0].selectable_label(false, text);
-                    if let Some(inner) = response.context_menu(|ui| {
+                    response.context_menu(|ui| {
                       if ui.button("Remove").clicked() {
                         remove = Some(text.to_owned());
                         ui.close_menu();
                       }
-                    }) {
-                      if inner.response.clicked() {
-                        text.clone_into(&mut self.description);
-                      }
+                    });
+
+                    if response.clicked_by(PointerButton::Primary) {
+                      text.clone_into(&mut self.description);
                     }
                   }
 
