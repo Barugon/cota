@@ -33,7 +33,7 @@ use eframe::{
   egui::{IconData, ViewportBuilder},
   AppCreator,
 };
-use util::{APP_ICON, APP_TITLE};
+use util::{APP_ICON, APP_NAME, APP_TITLE};
 
 fn main() {
   let config = Config::new().unwrap();
@@ -45,9 +45,11 @@ fn main() {
   };
   let viewport = ViewportBuilder::default()
     .with_resizable(false)
+    .with_maximize_button(false)
     .with_inner_size(App::inner_window_size())
     .with_max_inner_size(App::inner_window_size())
     .with_min_inner_size(App::inner_window_size())
+    .with_title(APP_TITLE)
     .with_icon(icon);
 
   let options = eframe::NativeOptions {
@@ -56,5 +58,5 @@ fn main() {
   };
 
   let creator: AppCreator = Box::new(move |cc| Ok(Box::new(App::new(cc, config))));
-  eframe::run_native(APP_TITLE, options, creator).unwrap();
+  eframe::run_native(APP_NAME, options, creator).unwrap();
 }
