@@ -74,7 +74,7 @@ impl App {
       id.size *= 1.1;
     }
 
-    cc.egui_ctx.set_style(style);
+    cc.egui_ctx.all_styles_mut(|s| *s = style.clone());
 
     // Threading.
     let count = std::cmp::max(2, num_cpus::get());
