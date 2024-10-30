@@ -36,9 +36,7 @@ impl Farming {
     let persist = Arc::new(AtomicBool::new(false));
     let cancel = Cancel::default();
     let thread = Some(thread::spawn({
-      #[cfg(target_os = "linux")]
       let mut _notification = None;
-
       let timers = timers.clone();
       let persist = persist.clone();
       let cancel = cancel.clone();
@@ -62,7 +60,6 @@ impl Farming {
                 format!("{name} | {env:?} | {desc}")
               };
 
-              #[cfg(target_os = "linux")]
               match Notification::new().summary(summary).body(&body).show() {
                 Ok(handle) => {
                   // Discarding the handle closes the notification on Wayland, so keep it around until the next notification.
@@ -70,9 +67,6 @@ impl Farming {
                 }
                 Err(err) => println!("{err:?}"),
               };
-
-              #[cfg(not(target_os = "linux"))]
-              ok!(Notification::new().summary(summary).body(&body).show());
             }
 
             // Flag that the timers need to be persisted.
