@@ -31,13 +31,11 @@
     {
       "type": "cargo",
       "command": "run",
-      "args": [
-        "--release"
-      ],
+      "args": [],
       "problemMatcher": [
         "$rustc"
       ],
-      "label": "rust: cargo run (release)"
+      "label": "rust: cargo run"
     },
     {
       "type": "cargo",
