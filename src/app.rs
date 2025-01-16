@@ -11,8 +11,8 @@ use crate::{
 };
 use eframe::{
   egui::{
-    menu, Button, CentralPanel, Context, CursorIcon, Event, Frame, Key, Margin, TextWrapMode,
-    TopBottomPanel, Ui, ViewportCommand, Visuals,
+    menu, Button, CentralPanel, Context, CursorIcon, Event, Frame, Key, Margin, TextWrapMode, TopBottomPanel, Ui,
+    ViewportCommand, Visuals,
   },
   emath::Align2,
   epaint, glow,
@@ -88,13 +88,7 @@ impl App {
     // Tab pages.
     let log_path = config.get_log_path().unwrap_or_default();
     let mut chronometer = Chronometer::new(threads.clone(), state.clone());
-    let experience = Experience::new(
-      log_path.clone(),
-      threads.clone(),
-      config.clone(),
-      state.clone(),
-      locale,
-    );
+    let experience = Experience::new(log_path.clone(), threads.clone(), config.clone(), state.clone(), locale);
     let farming = Farming::new(cc.egui_ctx.clone(), config.clone(), state.clone());
     let offline = Offline::new(state.clone());
     let stats = Stats::new(log_path, threads, config.clone(), state.clone(), locale);
@@ -155,27 +149,15 @@ impl App {
                 self.stats.set_filter(StatsFilter::None);
                 handled = true;
               }
-              Key::D
-                if modifiers.command_only()
-                  && self.page == Page::Stats
-                  && !self.stats.avatar().is_empty() =>
-              {
+              Key::D if modifiers.command_only() && self.page == Page::Stats && !self.stats.avatar().is_empty() => {
                 self.stats.show_dps_dlg();
                 handled = true;
               }
-              Key::F
-                if modifiers.command_only()
-                  && self.page == Page::Stats
-                  && !self.stats.stats().is_empty() =>
-              {
+              Key::F if modifiers.command_only() && self.page == Page::Stats && !self.stats.stats().is_empty() => {
                 self.stats.show_filter_dlg();
                 handled = true;
               }
-              Key::L
-                if modifiers.command_only()
-                  && self.page == Page::Stats
-                  && !self.stats.avatar().is_empty() =>
-              {
+              Key::L if modifiers.command_only() && self.page == Page::Stats && !self.stats.avatar().is_empty() => {
                 self.stats.show_search_dlg();
                 handled = true;
               }
@@ -581,19 +563,13 @@ fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> 
   };
 
   TopBottomPanel::bottom(id)
-    .frame(
-      Frame::none()
-        .inner_margin(margin)
-        .fill(Color32::from_gray(40)),
-    )
+    .frame(Frame::none().inner_margin(margin).fill(Color32::from_gray(40)))
     .show(ctx, contents);
 }
 
 fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool {
   let widget = if let Some(hotkey) = hotkey {
-    Button::new(text)
-      .wrap_mode(TextWrapMode::Extend)
-      .shortcut_text(hotkey)
+    Button::new(text).wrap_mode(TextWrapMode::Extend).shortcut_text(hotkey)
   } else {
     Button::new(text).wrap_mode(TextWrapMode::Extend)
   };

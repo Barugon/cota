@@ -1,9 +1,7 @@
 use crate::{config::Config, plant_info, util::AppState};
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
 use eframe::{
-  egui::{
-    ComboBox, Context, DragValue, Key, PointerButton, RichText, ScrollArea, TextEdit, Window,
-  },
+  egui::{ComboBox, Context, DragValue, Key, PointerButton, RichText, ScrollArea, TextEdit, Window},
   emath::Align2,
   epaint::Color32,
 };

@@ -165,11 +165,7 @@ impl Chronometer {
               2 => Color32::from_rgb(208, 96, 32),
               _ => Color32::from_rgb(224, 48, 48),
             };
-            (
-              Color32::from_rgb(240, 140, 178),
-              town_color,
-              Color32::from_gray(204),
-            )
+            (Color32::from_rgb(240, 140, 178), town_color, Color32::from_gray(204))
           } else {
             (
               Color32::from_rgb(144, 84, 107),
@@ -185,15 +181,13 @@ impl Chronometer {
           // Town (virtue).
           ui.centered_and_justified(|ui| {
             let text = format!("{} ({:?})", TOWNS[siege.virtue() as usize], siege.virtue());
-            ui.label(RichText::from(text).color(town_color))
-              .on_hover_text(&next);
+            ui.label(RichText::from(text).color(town_color)).on_hover_text(&next);
           });
 
           // Remaining time.
           ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             let text = util::get_countdown_text(Default::default(), siege.remain_secs());
-            ui.label(RichText::from(text).color(remain_color))
-              .on_hover_text(next);
+            ui.label(RichText::from(text).color(remain_color)).on_hover_text(next);
           });
           ui.end_row();
         }

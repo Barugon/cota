@@ -20,14 +20,8 @@ pub struct Offline {
 
 impl Offline {
   pub fn new(state: AppState) -> Self {
-    let load_icon = Picture::new(
-      format!("{APP_NAME}_load_icon"),
-      include_bytes!("../res/load.png"),
-    );
-    let store_icon = Picture::new(
-      format!("{APP_NAME}_store_icon"),
-      include_bytes!("../res/store.png"),
-    );
+    let load_icon = Picture::new(format!("{APP_NAME}_load_icon"), include_bytes!("../res/load.png"));
+    let store_icon = Picture::new(format!("{APP_NAME}_store_icon"), include_bytes!("../res/store.png"));
     let game = None;
     let error = None;
     let changed = false;
@@ -143,12 +137,7 @@ impl Offline {
       } else if let Some(game) = self.game.as_ref() {
         let file_name = game.get_file_name();
         let changed = if self.changed() { "*" } else { "" };
-        ui.label(format!(
-          "Editing {} - {}{}",
-          game.avatar_name(),
-          changed,
-          file_name
-        ));
+        ui.label(format!("Editing {} - {}{}", game.avatar_name(), changed, file_name));
       }
     });
   }
@@ -231,10 +220,7 @@ mod inner {
     util,
   };
   use eframe::{
-    egui::{
-      scroll_area::ScrollBarVisibility, CollapsingHeader, DragValue, Layout, RichText, ScrollArea,
-      Ui,
-    },
+    egui::{scroll_area::ScrollBarVisibility, CollapsingHeader, DragValue, Layout, RichText, ScrollArea, Ui},
     emath::Align,
     epaint::{Color32, Vec2},
   };
@@ -297,12 +283,7 @@ mod inner {
         }
       }
 
-      Self {
-        adv,
-        prd,
-        map,
-        tree,
-      }
+      Self { adv, prd, map, tree }
     }
 
     fn get(&self, id: u32) -> Option<&SkillLvl> {

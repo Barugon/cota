@@ -1,6 +1,5 @@
 use crate::{
-  config::Config, dps_dlg::DPSDlg, log_data, log_dlg::LogDlg, notes_dlg::NotesDlg,
-  search_dlg::SearchDlg, util,
+  config::Config, dps_dlg::DPSDlg, log_data, log_dlg::LogDlg, notes_dlg::NotesDlg, search_dlg::SearchDlg, util,
 };
 use eframe::{
   egui::{ComboBox, Context, Layout, RichText, Ui},
@@ -55,13 +54,7 @@ pub struct Stats {
 }
 
 impl Stats {
-  pub fn new(
-    log_path: PathBuf,
-    threads: ThreadPool,
-    config: Config,
-    state: AppState,
-    locale: Locale,
-  ) -> Self {
+  pub fn new(log_path: PathBuf, threads: ThreadPool, config: Config, state: AppState, locale: Locale) -> Self {
     let resist_stats = HashMap::from([
       ("AirAttunement", (Resist::Air, 0.5)),
       ("AirResistance", (Resist::Air, 1.0)),
@@ -217,11 +210,7 @@ impl Stats {
           .width(250.0)
           .show_ui(ui, |ui| {
             for avatar in &self.avatars {
-              if ui
-                .selectable_label(self.avatar == *avatar, avatar)
-                .clicked()
-                && self.avatar != *avatar
-              {
+              if ui.selectable_label(self.avatar == *avatar, avatar).clicked() && self.avatar != *avatar {
                 self.config.set_stats_avatar(avatar.clone());
                 self.avatar.clone_from(avatar);
                 avatar_changed = true;

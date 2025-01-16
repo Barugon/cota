@@ -49,6 +49,9 @@
     "westend",
     "winit"
   ],
+  "editor.rulers": [
+    120
+  ],
   "editor.tabSize": 2,
   "rainbow_csv.enable_auto_csv_lint": false,
   "rust-analyzer.showUnlinkedFileNotification": false,

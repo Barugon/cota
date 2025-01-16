@@ -168,9 +168,7 @@ impl Config {
     if descriptions.is_empty() {
       self.storage.remove(Config::CROP_DESCRIPTIONS_KEY);
     } else {
-      self
-        .storage
-        .set_as(Config::CROP_DESCRIPTIONS_KEY, descriptions);
+      self.storage.set_as(Config::CROP_DESCRIPTIONS_KEY, descriptions);
     }
 
     self.storage.persist();

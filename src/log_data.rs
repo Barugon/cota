@@ -261,12 +261,7 @@ pub async fn get_adv_exp(log_path: PathBuf, avatar: String, cancel: Cancel) -> O
 }
 
 /// Find log entries matching the provided search term.
-pub async fn find_log_entries(
-  log_path: PathBuf,
-  avatar: String,
-  search: Search,
-  cancel: Cancel,
-) -> String {
+pub async fn find_log_entries(log_path: PathBuf, avatar: String, search: Search, cancel: Cancel) -> String {
   // Work on files from newest to oldest.
   let filenames = {
     let mut filenames = get_log_filenames(&log_path, Some(&avatar), None);
@@ -498,10 +493,7 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> 
     String::from(r"\d{4}-\d{2}-\d{2}")
   };
 
-  let regex = ok!(
-    Regex::new(&format!("^{FILENAME_START}_{name}_{date}.txt$")),
-    filenames
-  );
+  let regex = ok!(Regex::new(&format!("^{FILENAME_START}_{name}_{date}.txt$")), filenames);
 
   for entry in entries.flatten() {
     if let Ok(filename) = entry.file_name().into_string() {

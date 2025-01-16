@@ -1,8 +1,8 @@
 use crate::{config::Config, log_data, skill_info, util};
 use eframe::{
   egui::{
-    scroll_area::ScrollBarVisibility, ComboBox, Context, DragValue, Label, Layout, RichText,
-    ScrollArea, Sense, TextWrapMode, Ui, Widget,
+    scroll_area::ScrollBarVisibility, ComboBox, Context, DragValue, Label, Layout, RichText, ScrollArea, Sense,
+    TextWrapMode, Ui, Widget,
   },
   emath::{Align, Vec2},
   epaint::Color32,
@@ -31,13 +31,7 @@ pub struct Experience {
 }
 
 impl Experience {
-  pub fn new(
-    log_path: PathBuf,
-    threads: ThreadPool,
-    config: Config,
-    state: AppState,
-    locale: Locale,
-  ) -> Self {
+  pub fn new(log_path: PathBuf, threads: ThreadPool, config: Config, state: AppState, locale: Locale) -> Self {
     let (tx, rx) = mpsc::unbounded();
     let channel = Channel {
       tx,
@@ -316,10 +310,7 @@ impl Experience {
     self.save();
 
     // Cancel all async operations on exit.
-    let cancelers = [
-      self.channel.cancel_avatars.take(),
-      self.channel.cancel_adv_exp.take(),
-    ];
+    let cancelers = [self.channel.cancel_avatars.take(), self.channel.cancel_adv_exp.take()];
 
     for mut cancel in cancelers.into_iter().flatten() {
       cancel.cancel();

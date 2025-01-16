@@ -17,10 +17,7 @@ pub struct TownsDlg {
 
 impl TownsDlg {
   pub fn new(state: AppState) -> Self {
-    Self {
-      state,
-      visible: false,
-    }
+    Self { state, visible: false }
   }
 
   pub fn open(&mut self) {

@@ -69,12 +69,7 @@ pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
       let reqs = tmp_reqs.clone();
       tmp_reqs.clear();
 
-      skill_group.skills.push(SkillInfo {
-        name,
-        mul,
-        id,
-        reqs,
-      });
+      skill_group.skills.push(SkillInfo { name, mul, id, reqs });
     }
   }
 

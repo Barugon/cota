@@ -78,11 +78,7 @@ mod inner {
       let items = Self::load_items(&path);
       let changed = AtomicBool::new(false);
 
-      Self {
-        path,
-        items,
-        changed,
-      }
+      Self { path, items, changed }
     }
 
     fn load_items(path: &Path) -> HashMap<String, String> {

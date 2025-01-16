@@ -1,9 +1,6 @@
 use crate::{log_data, util};
 use eframe::{
-  egui::{
-    scroll_area::ScrollBarVisibility, Context, Key, RichText, ScrollArea, TextEdit, TextFormat, Ui,
-    Window,
-  },
+  egui::{scroll_area::ScrollBarVisibility, Context, Key, RichText, ScrollArea, TextEdit, TextFormat, Ui, Window},
   emath::Align2,
   epaint::{
     text::{LayoutJob, LayoutSection},

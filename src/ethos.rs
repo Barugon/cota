@@ -7,10 +7,7 @@ pub struct Siege {
 
 impl Siege {
   pub fn new(virtue: Virtue, remain_secs: i32) -> Self {
-    Self {
-      virtue,
-      remain_secs,
-    }
+    Self { virtue, remain_secs }
   }
 
   pub fn virtue(&self) -> Virtue {

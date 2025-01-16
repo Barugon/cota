@@ -14,10 +14,7 @@ pub struct ItemsDlg {
 
 impl ItemsDlg {
   pub fn new(state: AppState) -> Self {
-    Self {
-      state,
-      visible: false,
-    }
+    Self { state, visible: false }
   }
 
   pub fn show(&mut self, items: &mut Vec<Item>, ctx: &Context) -> bool {

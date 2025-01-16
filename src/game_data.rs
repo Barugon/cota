@@ -505,12 +505,7 @@ fn get_json(text: &str, collection: &str, id: &str) -> Result<Value, Cow<'static
   Err(Cow::from(err))
 }
 
-fn set_json(
-  text: &str,
-  collection: &str,
-  id: &str,
-  val: &Value,
-) -> Result<String, Cow<'static, str>> {
+fn set_json(text: &str, collection: &str, id: &str, val: &Value) -> Result<String, Cow<'static, str>> {
   if let Some(range) = get_json_range(text, collection, id) {
     // Convert the value to JSON text.
     let json = val.to_string();
