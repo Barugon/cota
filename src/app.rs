@@ -11,8 +11,8 @@ use crate::{
 };
 use eframe::{
   egui::{
-    menu, Button, CentralPanel, Context, CursorIcon, Event, Frame, Key, Margin, TextWrapMode, TopBottomPanel, Ui,
-    ViewportCommand, Visuals,
+    Button, CentralPanel, Context, CursorIcon, Event, Frame, Key, Margin, TextWrapMode, TopBottomPanel, Ui,
+    ViewportCommand, Visuals, containers::menu,
   },
   emath::Align2,
   epaint, glow,
@@ -306,7 +306,7 @@ impl eframe::App for App {
         ui.disable();
       }
       ui.horizontal_centered(|ui| {
-        menu::bar(ui, |ui| {
+        menu::Bar::new().ui(ui, |ui| {
           ui.menu_button("File", |ui| {
             if menu_item(ui, close_menu, "Set Log Folder...", None) {
               self.choose_folder_path(ctx);
@@ -533,8 +533,8 @@ fn top_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
   const MENU: &str = "Menu";
   TopBottomPanel::top(MENU)
     .frame(
-      Frame::none()
-        .inner_margin(Margin::symmetric(8.0, 2.0))
+      Frame::NONE
+        .inner_margin(Margin::symmetric(8, 2))
         .fill(Color32::from_gray(40)),
     )
     .show(ctx, contents);
@@ -542,28 +542,24 @@ fn top_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
 
 fn central_panel<R>(ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
   CentralPanel::default()
-    .frame(
-      Frame::none()
-        .inner_margin(Margin::same(8.0))
-        .fill(Color32::from_gray(32)),
-    )
+    .frame(Frame::NONE.inner_margin(Margin::same(8)).fill(Color32::from_gray(32)))
     .show(ctx, contents);
 }
 
 fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> R) {
   let (id, margin) = match page {
     // We need a little more vertical space for the chronometer status area so that it looks good.
-    Page::Chronometer => ("chronometer_status", Margin::symmetric(8.0, 6.0)),
+    Page::Chronometer => ("chronometer_status", Margin::symmetric(8, 6)),
     // The experience page doesn't have a status area.
     Page::Experience => unreachable!(),
     // The farming page doesn't have a status area.
     Page::Farming => unreachable!(),
-    Page::Offline => ("offline_status", Margin::symmetric(8.0, 2.0)),
-    Page::Stats => ("stats_status", Margin::symmetric(8.0, 2.0)),
+    Page::Offline => ("offline_status", Margin::symmetric(8, 2)),
+    Page::Stats => ("stats_status", Margin::symmetric(8, 2)),
   };
 
   TopBottomPanel::bottom(id)
-    .frame(Frame::none().inner_margin(margin).fill(Color32::from_gray(40)))
+    .frame(Frame::NONE.inner_margin(margin).fill(Color32::from_gray(40)))
     .show(ctx, contents);
 }
 
@@ -577,7 +573,7 @@ fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool
   let response = ui.add(widget);
   let clicked = response.clicked();
   if clicked || close {
-    ui.close_menu();
+    ui.close();
   }
 
   clicked
