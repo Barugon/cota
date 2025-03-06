@@ -12,7 +12,7 @@ use crate::{
 use eframe::{
   egui::{
     Button, CentralPanel, Context, CursorIcon, Event, Frame, Key, Margin, TextWrapMode, TopBottomPanel, Ui,
-    ViewportCommand, Visuals, containers::menu,
+    ViewportCommand, Visuals, menu,
   },
   emath::Align2,
   epaint, glow,
@@ -306,7 +306,7 @@ impl eframe::App for App {
         ui.disable();
       }
       ui.horizontal_centered(|ui| {
-        menu::Bar::new().ui(ui, |ui| {
+        menu::bar(ui, |ui| {
           ui.menu_button("File", |ui| {
             if menu_item(ui, close_menu, "Set Log Folder...", None) {
               self.choose_folder_path(ctx);
@@ -573,7 +573,7 @@ fn menu_item(ui: &mut Ui, close: bool, text: &str, hotkey: Option<&str>) -> bool
   let response = ui.add(widget);
   let clicked = response.clicked();
   if clicked || close {
-    ui.close();
+    ui.close_menu();
   }
 
   clicked

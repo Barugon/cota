@@ -175,7 +175,7 @@ impl PlantDlg {
                     response.context_menu(|ui| {
                       if ui.button("Remove").clicked() {
                         remove = Some(text.to_owned());
-                        ui.close();
+                        ui.close_menu();
                       }
                     });
 
