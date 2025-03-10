@@ -1,5 +1,5 @@
 use crate::{
-  ethos::{Siege, Virtue, CABALISTS, PLANETARY_ORBITS, TOWNS, VIRTUES},
+  ethos::{CABALISTS, PLANETARY_ORBITS, Siege, TOWNS, VIRTUES, Virtue},
   towns_dlg::TownsDlg,
   util,
 };
@@ -72,18 +72,12 @@ impl Chronometer {
           let (name, phase) = LUNAR_RIFTS[idx];
           let (rift_color, color, status) = if countdown < 0 {
             const OPEN_RIFT_COLOR: Color32 = Color32::from_rgb(154, 229, 255);
-            (
-              OPEN_RIFT_COLOR,
-              ACTIVE_PORTAL_COLOR,
-              util::get_countdown_text("Closes: ", -countdown),
-            )
+            let status = util::get_countdown_text("Closes: ", -countdown);
+            (OPEN_RIFT_COLOR, ACTIVE_PORTAL_COLOR, status)
           } else {
             const CLOSED_RIFT_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
-            (
-              CLOSED_RIFT_COLOR,
-              INACTIVE_PORTAL_COLOR,
-              util::get_countdown_text("Opens: ", countdown),
-            )
+            let status = util::get_countdown_text("Opens: ", countdown);
+            (CLOSED_RIFT_COLOR, INACTIVE_PORTAL_COLOR, status)
           };
 
           ui.label(RichText::from(name).color(rift_color));
@@ -96,6 +90,27 @@ impl Chronometer {
           ui.end_row();
         }
       });
+
+    ui.scope(|ui| {
+      ui.visuals_mut().widgets.noninteractive.bg_stroke.color = Color32::from_rgb(40, 40, 40);
+      ui.separator();
+    });
+
+    Grid::new("lunar_grid").min_col_width(width).show(ui, |ui| {
+      let lunar_pos = get_lunar_countdown(now);
+      if lunar_pos < 0 {
+        let status = util::get_countdown_text("Moonrise: ", -lunar_pos);
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+          ui.label(RichText::from(status).color(INACTIVE_PORTAL_COLOR));
+        });
+      } else {
+        let status = util::get_countdown_text("Moonset: ", lunar_pos);
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+          ui.label(RichText::from(status).color(ACTIVE_PORTAL_COLOR));
+        });
+      }
+      ui.end_row();
+    });
 
     ui.scope(|ui| {
       ui.visuals_mut().widgets.noninteractive.bg_stroke.color = Color32::from_rgb(40, 40, 40);
@@ -261,6 +276,30 @@ fn get_rift_countdowns(now: DateTime<Utc>) -> [i32; RIFT_COUNT] {
   }
 
   secs
+}
+
+/// Get the number of seconds until moonrise or moonset.
+fn get_lunar_countdown(now: DateTime<Utc>) -> i32 {
+  /// Number of seconds for one full orbit of the moon.
+  const LUNAR_SECS: i64 = HOUR_SECS * 7;
+  const LUNAR_QTR: i64 = LUNAR_SECS / 4;
+  const LUNAR_3QTR: i64 = LUNAR_QTR * 3;
+
+  // Get the number of seconds elapsed since epoch.
+  let epoch_secs = (now - util::get_epoch()).num_seconds();
+
+  // Current lunar position (zero is lunar high noon).
+  let lunar_pos = epoch_secs % LUNAR_SECS;
+
+  // Adjust so that [0, LUNAR_SECS / 2) is moon up and [-LUNAR_SECS / 2, 0) is moon down.
+  let lunar_pos = match lunar_pos {
+    0..LUNAR_QTR => LUNAR_QTR - lunar_pos,
+    LUNAR_QTR..LUNAR_3QTR => lunar_pos - LUNAR_3QTR,
+    LUNAR_3QTR..LUNAR_SECS => (LUNAR_SECS + LUNAR_QTR) - lunar_pos,
+    _ => unreachable!(),
+  };
+
+  lunar_pos as i32
 }
 
 /// Get the current Lost Vale countdown as seconds.
