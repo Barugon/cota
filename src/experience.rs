@@ -1,8 +1,8 @@
 use crate::{config::Config, log_data, skill_info, util};
 use eframe::{
   egui::{
-    scroll_area::ScrollBarVisibility, ComboBox, Context, DragValue, Label, Layout, RichText, ScrollArea, Sense,
-    TextWrapMode, Ui, Widget,
+    ComboBox, Context, DragValue, Label, Layout, RichText, ScrollArea, Sense, TextWrapMode, Ui, Widget,
+    scroll_area::ScrollBarVisibility,
   },
   emath::{Align, Vec2},
   epaint::Color32,

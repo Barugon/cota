@@ -1,6 +1,6 @@
 use crate::util;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
-use futures::{channel::mpsc, executor::ThreadPool, future, StreamExt};
+use futures::{StreamExt, channel::mpsc, executor::ThreadPool, future};
 use regex::Regex;
 use std::{
   collections::HashSet,

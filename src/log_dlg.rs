@@ -1,10 +1,10 @@
 use crate::{log_data, util};
 use eframe::{
-  egui::{scroll_area::ScrollBarVisibility, Context, Key, RichText, ScrollArea, TextEdit, TextFormat, Ui, Window},
+  egui::{Context, Key, RichText, ScrollArea, TextEdit, TextFormat, Ui, Window, scroll_area::ScrollBarVisibility},
   emath::Align2,
   epaint::{
-    text::{LayoutJob, LayoutSection},
     Color32, FontFamily, FontId,
+    text::{LayoutJob, LayoutSection},
   },
 };
 use util::{AppState, Cancel, Search};

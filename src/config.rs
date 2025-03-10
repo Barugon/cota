@@ -1,7 +1,7 @@
 use crate::{
   plant_info::CropTimer,
   storage::Storage,
-  util::{Page, APP_NAME},
+  util::{APP_NAME, Page},
 };
 use std::{
   collections::{BTreeMap, BTreeSet, HashMap},

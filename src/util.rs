@@ -12,8 +12,8 @@ use std::{
   mem,
   ops::{Range, RangeInclusive},
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
 };
 

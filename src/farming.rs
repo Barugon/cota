@@ -11,8 +11,8 @@ use eframe::{
 use notify_rust::Notification;
 use std::{
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc, Mutex,
+    atomic::{AtomicBool, Ordering},
   },
   thread,
   time::{Duration, Instant},

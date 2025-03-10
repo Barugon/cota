@@ -30,8 +30,8 @@ mod towns_dlg;
 use app::App;
 use config::Config;
 use eframe::{
-  egui::{IconData, ViewportBuilder},
   AppCreator,
+  egui::{IconData, ViewportBuilder},
 };
 use util::{APP_ICON, APP_NAME, APP_TITLE};
 
