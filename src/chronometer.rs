@@ -96,31 +96,6 @@ impl Chronometer {
       ui.separator();
     });
 
-    Grid::new("lunar_grid")
-      .min_col_width((width - spacing.x) / 2.0)
-      .show(ui, |ui| {
-        let (lunar_secs, countdown) = get_lunar_countdown(now);
-        let orbit = util::get_countdown_text("Orbit: ", lunar_secs);
-        ui.label(RichText::from(orbit).color(INACTIVE_PORTAL_COLOR));
-        if countdown < 0 {
-          let status = util::get_countdown_text("Moonrise: ", -countdown);
-          ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            ui.label(RichText::from(status).color(INACTIVE_PORTAL_COLOR));
-          });
-        } else {
-          let status = util::get_countdown_text("Moonset: ", countdown);
-          ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            ui.label(RichText::from(status).color(ACTIVE_PORTAL_COLOR));
-          });
-        }
-        ui.end_row();
-      });
-
-    ui.scope(|ui| {
-      ui.visuals_mut().widgets.noninteractive.bg_stroke.color = Color32::from_rgb(40, 40, 40);
-      ui.separator();
-    });
-
     Grid::new("lost_vale_grid")
       .min_col_width((width - spacing.x) / 2.0)
       .show(ui, |ui| {
@@ -147,6 +122,31 @@ impl Chronometer {
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
           ui.label(RichText::from(status).color(status_color));
         });
+        ui.end_row();
+      });
+
+    ui.scope(|ui| {
+      ui.visuals_mut().widgets.noninteractive.bg_stroke.color = Color32::from_rgb(40, 40, 40);
+      ui.separator();
+    });
+
+    Grid::new("lunar_grid")
+      .min_col_width((width - spacing.x) / 2.0)
+      .show(ui, |ui| {
+        let (lunar_secs, countdown) = get_lunar_countdown(now);
+        let orbit = util::get_countdown_text(Default::default(), lunar_secs);
+        ui.label(RichText::from(format!("({orbit})")).color(INACTIVE_PORTAL_COLOR));
+        if countdown < 0 {
+          let status = util::get_countdown_text("Moonrise: ", -countdown);
+          ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            ui.label(RichText::from(status).color(INACTIVE_PORTAL_COLOR));
+          });
+        } else {
+          let status = util::get_countdown_text("Moonset: ", countdown);
+          ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            ui.label(RichText::from(status).color(ACTIVE_PORTAL_COLOR));
+          });
+        }
         ui.end_row();
       });
 
