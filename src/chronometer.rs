@@ -104,18 +104,12 @@ impl Chronometer {
         let countdown = get_lost_vale_countdown(now);
         let (vale_color, status_color, status) = if countdown < 0 {
           const OPEN_VALE_COLOR: Color32 = Color32::from_rgb(187, 187, 255);
-          (
-            OPEN_VALE_COLOR,
-            ACTIVE_PORTAL_COLOR,
-            util::get_countdown_text("Closes: ", -countdown),
-          )
+          let status = util::get_countdown_text("Closes: ", -countdown);
+          (OPEN_VALE_COLOR, ACTIVE_PORTAL_COLOR, status)
         } else {
           const CLOSED_VALE_COLOR: Color32 = Color32::from_rgb(140, 140, 187);
-          (
-            CLOSED_VALE_COLOR,
-            INACTIVE_PORTAL_COLOR,
-            util::get_countdown_text("Opens: ", countdown),
-          )
+          let status = util::get_countdown_text("Opens: ", countdown);
+          (CLOSED_VALE_COLOR, INACTIVE_PORTAL_COLOR, status)
         };
 
         ui.label(RichText::from(LOST_VALE).color(vale_color));
