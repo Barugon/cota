@@ -96,21 +96,25 @@ impl Chronometer {
       ui.separator();
     });
 
-    Grid::new("lunar_grid").min_col_width(width).show(ui, |ui| {
-      let lunar_pos = get_lunar_countdown(now);
-      if lunar_pos < 0 {
-        let status = util::get_countdown_text("Moonrise: ", -lunar_pos);
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-          ui.label(RichText::from(status).color(INACTIVE_PORTAL_COLOR));
-        });
-      } else {
-        let status = util::get_countdown_text("Moonset: ", lunar_pos);
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-          ui.label(RichText::from(status).color(ACTIVE_PORTAL_COLOR));
-        });
-      }
-      ui.end_row();
-    });
+    Grid::new("lunar_grid")
+      .min_col_width((width - spacing.x) / 2.0)
+      .show(ui, |ui| {
+        let (lunar_secs, countdown) = get_lunar_countdown(now);
+        let orbit = util::get_countdown_text("Orbit: ", lunar_secs);
+        ui.label(RichText::from(orbit).color(INACTIVE_PORTAL_COLOR));
+        if countdown < 0 {
+          let status = util::get_countdown_text("Moonrise: ", -countdown);
+          ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            ui.label(RichText::from(status).color(INACTIVE_PORTAL_COLOR));
+          });
+        } else {
+          let status = util::get_countdown_text("Moonset: ", countdown);
+          ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            ui.label(RichText::from(status).color(ACTIVE_PORTAL_COLOR));
+          });
+        }
+        ui.end_row();
+      });
 
     ui.scope(|ui| {
       ui.visuals_mut().widgets.noninteractive.bg_stroke.color = Color32::from_rgb(40, 40, 40);
@@ -279,7 +283,7 @@ fn get_rift_countdowns(now: DateTime<Utc>) -> [i32; RIFT_COUNT] {
 }
 
 /// Get the number of seconds until moonrise or moonset.
-fn get_lunar_countdown(now: DateTime<Utc>) -> i32 {
+fn get_lunar_countdown(now: DateTime<Utc>) -> (i32, i32) {
   /// Number of seconds for one full orbit of the moon.
   const LUNAR_SECS: i64 = HOUR_SECS * 7;
   const LUNAR_QTR: i64 = LUNAR_SECS / 4;
@@ -289,17 +293,17 @@ fn get_lunar_countdown(now: DateTime<Utc>) -> i32 {
   let epoch_secs = (now - util::get_epoch()).num_seconds();
 
   // Current lunar position (zero is lunar high noon).
-  let lunar_pos = epoch_secs % LUNAR_SECS;
+  let lunar_secs = epoch_secs % LUNAR_SECS;
 
   // Adjust so that [0, LUNAR_SECS / 2) is moon up and [-LUNAR_SECS / 2, 0) is moon down.
-  let lunar_pos = match lunar_pos {
-    0..LUNAR_QTR => LUNAR_QTR - lunar_pos,
-    LUNAR_QTR..LUNAR_3QTR => lunar_pos - LUNAR_3QTR,
-    LUNAR_3QTR..LUNAR_SECS => (LUNAR_SECS + LUNAR_QTR) - lunar_pos,
+  let countdown = match lunar_secs {
+    0..LUNAR_QTR => LUNAR_QTR - lunar_secs,
+    LUNAR_QTR..LUNAR_3QTR => lunar_secs - LUNAR_3QTR,
+    LUNAR_3QTR..LUNAR_SECS => (LUNAR_SECS + LUNAR_QTR) - lunar_secs,
     _ => unreachable!(),
   };
 
-  lunar_pos as i32
+  (lunar_secs as i32, countdown as i32)
 }
 
 /// Get the current Lost Vale countdown as seconds.
