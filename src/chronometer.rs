@@ -124,25 +124,21 @@ impl Chronometer {
       ui.separator();
     });
 
-    Grid::new("lunar_grid")
-      .min_col_width((width - spacing.x) / 2.0)
-      .show(ui, |ui| {
-        let (lunar_secs, countdown) = get_lunar_countdown(now);
-        let orbit = util::get_countdown_text(Default::default(), lunar_secs);
-        ui.label(RichText::from(format!("({orbit})")).color(INACTIVE_PORTAL_COLOR));
-        if countdown < 0 {
-          let status = util::get_countdown_text("Moonrise: ", -countdown);
-          ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            ui.label(RichText::from(status).color(INACTIVE_PORTAL_COLOR));
-          });
-        } else {
-          let status = util::get_countdown_text("Moonset: ", countdown);
-          ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            ui.label(RichText::from(status).color(ACTIVE_PORTAL_COLOR));
-          });
-        }
-        ui.end_row();
+    Grid::new("lunar_grid").min_col_width(width).show(ui, |ui| {
+      let countdown = get_lunar_countdown(now);
+      let (status, color) = if countdown < 0 {
+        let status = util::get_countdown_text("Moonrise: ", -countdown);
+        (status, INACTIVE_PORTAL_COLOR)
+      } else {
+        let status = util::get_countdown_text("Moonset: ", countdown);
+        (status, ACTIVE_PORTAL_COLOR)
+      };
+
+      ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+        ui.label(RichText::from(status).color(color));
       });
+      ui.end_row();
+    });
 
     ui.add_space(4.0);
     ui.separator();
@@ -277,7 +273,7 @@ fn get_rift_countdowns(now: DateTime<Utc>) -> [i32; RIFT_COUNT] {
 }
 
 /// Get the number of seconds until moonrise or moonset.
-fn get_lunar_countdown(now: DateTime<Utc>) -> (i32, i32) {
+fn get_lunar_countdown(now: DateTime<Utc>) -> i32 {
   /// Number of seconds for one full orbit of the moon.
   const LUNAR_SECS: i64 = HOUR_SECS * 7;
   const LUNAR_QTR: i64 = LUNAR_SECS / 4;
@@ -297,7 +293,7 @@ fn get_lunar_countdown(now: DateTime<Utc>) -> (i32, i32) {
     _ => unreachable!(),
   };
 
-  (lunar_secs as i32, countdown as i32)
+  countdown as i32
 }
 
 /// Get the current Lost Vale countdown as seconds.
