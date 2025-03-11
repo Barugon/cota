@@ -3,7 +3,7 @@ use crate::{
   towns_dlg::TownsDlg,
   util,
 };
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{DateTime, Local, TimeDelta, TimeZone, Utc};
 use eframe::{
   egui::{Context, Grid, Layout, RichText, Ui},
   emath::Align,
@@ -35,8 +35,9 @@ impl Chronometer {
 
     let width = ui.available_width();
     let spacing = ui.spacing().item_spacing;
-    let now = Utc::now();
-    let sieges = get_sieges(now);
+    let now = Local::now();
+    let utc = now.to_utc();
+    let sieges = get_sieges(utc);
 
     self.towns_dlg.show(ui.ctx(), &sieges);
 
@@ -47,45 +48,48 @@ impl Chronometer {
         // Header.
         ui.label(RichText::from("Portal").color(HEADER_COLOR));
         ui.centered_and_justified(|ui| {
-          ui.label(RichText::from("Phase").color(HEADER_COLOR));
+          ui.label(RichText::from("Local Time").color(HEADER_COLOR));
         });
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-          ui.label(RichText::from("Status").color(HEADER_COLOR));
+          ui.label(RichText::from("Countdown").color(HEADER_COLOR));
         });
         ui.end_row();
 
-        const LUNAR_RIFTS: [(&str, &str); RIFT_COUNT] = [
-          ("Blood River", "New Moon"),
-          ("Solace Bridge", "Waxing Crescent"),
-          ("Highvale", "First Quarter"),
-          ("Brookside", "Waxing Gibbous"),
-          ("Owl's Head", "Full Moon"),
-          ("Westend", "Wanning Gibbous"),
-          ("Brittany Graveyard", "Third Quarter"),
-          ("Etceter", "Wanning Crescent"),
+        const LUNAR_RIFTS: [&str; RIFT_COUNT] = [
+          "Blood River",
+          "Solace Bridge",
+          "Highvale",
+          "Brookside",
+          "Owl's Head",
+          "Westend",
+          "Brittany Graveyard",
+          "Etceter",
         ];
 
         // Rifts.
-        let rift_countdowns = get_rift_countdowns(now);
+        let rift_countdowns = get_rift_countdowns(utc);
         for idx in 0..RIFT_COUNT {
           let countdown = rift_countdowns[idx];
-          let (name, phase) = LUNAR_RIFTS[idx];
-          let (rift_color, color, status) = if countdown < 0 {
+          let (rift_color, color, time, countdown) = if countdown < 0 {
             const OPEN_RIFT_COLOR: Color32 = Color32::from_rgb(154, 229, 255);
-            let status = util::get_countdown_text("Closes: ", -countdown);
-            (OPEN_RIFT_COLOR, ACTIVE_PORTAL_COLOR, status)
+            let time = now + TimeDelta::seconds(-countdown as i64);
+            let time = format!("Closes: {}", time.format("%H:%M:%S"));
+            let countdown = util::get_countdown_text(Default::default(), -countdown);
+            (OPEN_RIFT_COLOR, ACTIVE_PORTAL_COLOR, time, countdown)
           } else {
             const CLOSED_RIFT_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
-            let status = util::get_countdown_text("Opens: ", countdown);
-            (CLOSED_RIFT_COLOR, INACTIVE_PORTAL_COLOR, status)
+            let time = now + TimeDelta::seconds(countdown as i64);
+            let time = format!("Opens: {}", time.format("%H:%M:%S"));
+            let countdown = util::get_countdown_text(Default::default(), countdown);
+            (CLOSED_RIFT_COLOR, INACTIVE_PORTAL_COLOR, time, countdown)
           };
 
-          ui.label(RichText::from(name).color(rift_color));
+          ui.label(RichText::from(LUNAR_RIFTS[idx]).color(rift_color));
           ui.centered_and_justified(|ui| {
-            ui.label(RichText::from(phase).color(color));
+            ui.label(RichText::from(time).color(color));
           });
           ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            ui.label(RichText::from(status).color(color));
+            ui.label(RichText::from(countdown).color(color));
           });
           ui.end_row();
         }
@@ -97,24 +101,31 @@ impl Chronometer {
     });
 
     Grid::new("lost_vale_grid")
-      .min_col_width((width - spacing.x) / 2.0)
+      .min_col_width((width - spacing.x * 2.0) / 3.0)
       .show(ui, |ui| {
         const LOST_VALE: &str = "Lost Vale";
 
-        let countdown = get_lost_vale_countdown(now);
-        let (vale_color, status_color, status) = if countdown < 0 {
+        let countdown = get_lost_vale_countdown(utc);
+        let (vale_color, color, time, countdown) = if countdown < 0 {
           const OPEN_VALE_COLOR: Color32 = Color32::from_rgb(187, 187, 255);
-          let status = util::get_countdown_text("Closes: ", -countdown);
-          (OPEN_VALE_COLOR, ACTIVE_PORTAL_COLOR, status)
+          let time = now + TimeDelta::seconds(-countdown as i64);
+          let time = format!("Closes: {}", time.format("%H:%M"));
+          let countdown = util::get_countdown_text(Default::default(), -countdown);
+          (OPEN_VALE_COLOR, ACTIVE_PORTAL_COLOR, time, countdown)
         } else {
           const CLOSED_VALE_COLOR: Color32 = Color32::from_rgb(140, 140, 187);
-          let status = util::get_countdown_text("Opens: ", countdown);
-          (CLOSED_VALE_COLOR, INACTIVE_PORTAL_COLOR, status)
+          let time = now + TimeDelta::seconds(countdown as i64);
+          let time = format!("Opens: {}", time.format("%H:%M"));
+          let countdown = util::get_countdown_text(Default::default(), countdown);
+          (CLOSED_VALE_COLOR, INACTIVE_PORTAL_COLOR, time, countdown)
         };
 
         ui.label(RichText::from(LOST_VALE).color(vale_color));
+        ui.centered_and_justified(|ui| {
+          ui.label(RichText::from(time).color(color));
+        });
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-          ui.label(RichText::from(status).color(status_color));
+          ui.label(RichText::from(countdown).color(color));
         });
         ui.end_row();
       });
@@ -124,21 +135,31 @@ impl Chronometer {
       ui.separator();
     });
 
-    Grid::new("lunar_grid").min_col_width(width).show(ui, |ui| {
-      let countdown = get_lunar_countdown(now);
-      let (status, color) = if countdown < 0 {
-        let status = util::get_countdown_text("Moonrise: ", -countdown);
-        (status, INACTIVE_PORTAL_COLOR)
-      } else {
-        let status = util::get_countdown_text("Moonset: ", countdown);
-        (status, ACTIVE_PORTAL_COLOR)
-      };
+    Grid::new("lunar_grid")
+      .min_col_width((width - spacing.x * 2.0) / 3.0)
+      .show(ui, |ui| {
+        let countdown = get_lunar_countdown(utc);
+        let (time, countdown, color) = if countdown < 0 {
+          let time = now + TimeDelta::seconds(-countdown as i64);
+          let time = format!("Moonrise: {}", time.format("%H:%M"));
+          let status = util::get_countdown_text(Default::default(), -countdown);
+          (time, status, INACTIVE_PORTAL_COLOR)
+        } else {
+          let time = now + TimeDelta::seconds(countdown as i64);
+          let time = format!("Moonset: {}", time.format("%H:%M"));
+          let status = util::get_countdown_text(Default::default(), countdown);
+          (time, status, ACTIVE_PORTAL_COLOR)
+        };
 
-      ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-        ui.label(RichText::from(status).color(color));
+        ui.label("");
+        ui.centered_and_justified(|ui| {
+          ui.label(RichText::from(time).color(color));
+        });
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+          ui.label(RichText::from(countdown).color(color));
+        });
+        ui.end_row();
       });
-      ui.end_row();
-    });
 
     ui.add_space(4.0);
     ui.separator();
