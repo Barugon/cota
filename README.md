@@ -18,7 +18,7 @@ In order to build CotA, you will need to install [Rust](https://www.rust-lang.or
 
 ### Portal and Cabalist chronometer
 
-![screenshot](https://a4.pbase.com/o12/09/605909/1/166622004.wKsH8AHG.Screenshotfrom20230424213227.png)
+![screenshot](https://a4.pbase.com/o12/09/605909/1/166622004.h3PG5IhA.ScreenshotFrom20250311125529.png)
 
 ### Experience planner
 
