@@ -260,7 +260,7 @@ impl Chronometer {
 
 const RIFT_COUNT: usize = 8;
 
-// Get the number of seconds for each rift.
+// Get the countdown (as seconds) for each rift.
 fn get_rift_countdowns(now: DateTime<Utc>) -> [i64; RIFT_COUNT] {
   const PHASE_SECS: i64 = 525;
   const CYCLE_SECS: i64 = 4200;
@@ -367,6 +367,7 @@ pub fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
   })
 }
 
+/// Get the number of cabalists for each siege.
 fn count_cabalists(sieges: &[Siege; CABALISTS.len()]) -> [u32; VIRTUES.len()] {
   let mut counts: [u32; VIRTUES.len()] = Default::default();
   for siege in sieges {
