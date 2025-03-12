@@ -306,7 +306,7 @@ fn get_lunar_countdown(now: DateTime<Utc>) -> i32 {
   // Current lunar position (zero is lunar high noon).
   let lunar_secs = epoch_secs % LUNAR_SECS;
 
-  // Adjust so that [0, LUNAR_SECS / 2) is moon up and [-LUNAR_SECS / 2, 0) is moon down.
+  // Adjust so that [LUNAR_SECS / 2, 0) is moon up and [-LUNAR_SECS / 2, 0) is moon down.
   let countdown = match lunar_secs {
     0..LUNAR_QTR => LUNAR_QTR - lunar_secs,
     LUNAR_QTR..LUNAR_3QTR => lunar_secs - LUNAR_3QTR,
