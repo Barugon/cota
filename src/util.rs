@@ -163,7 +163,7 @@ pub fn get_epoch() -> DateTime<Utc> {
 }
 
 /// Get the remaining time in XXh XXm XXs format.
-pub fn get_countdown_text(sec: i32) -> String {
+pub fn get_countdown_text(sec: i64) -> String {
   if sec >= 60 {
     let min = sec / 60;
     let sec = sec % 60;

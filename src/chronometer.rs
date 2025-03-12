@@ -108,13 +108,13 @@ impl Chronometer {
         let countdown = get_lost_vale_countdown(utc);
         let (vale_color, color, time, countdown) = if countdown < 0 {
           const OPEN_VALE_COLOR: Color32 = Color32::from_rgb(187, 187, 255);
-          let time = now + TimeDelta::seconds(-countdown as i64);
+          let time = now + TimeDelta::seconds(-countdown);
           let time = format!("Closes: {}", time.format("%H:%M"));
           let countdown = util::get_countdown_text(-countdown);
           (OPEN_VALE_COLOR, ACTIVE_PORTAL_COLOR, time, countdown)
         } else {
           const CLOSED_VALE_COLOR: Color32 = Color32::from_rgb(140, 140, 187);
-          let time = now + TimeDelta::seconds(countdown as i64);
+          let time = now + TimeDelta::seconds(countdown);
           let time = format!("Opens: {}", time.format("%H:%M"));
           let countdown = util::get_countdown_text(countdown);
           (CLOSED_VALE_COLOR, INACTIVE_PORTAL_COLOR, time, countdown)
@@ -140,12 +140,12 @@ impl Chronometer {
       .show(ui, |ui| {
         let countdown = get_lunar_countdown(utc);
         let (time, countdown, color) = if countdown < 0 {
-          let time = now + TimeDelta::seconds(-countdown as i64);
+          let time = now + TimeDelta::seconds(-countdown);
           let time = format!("Moonrise: {}", time.format("%H:%M"));
           let status = util::get_countdown_text(-countdown);
           (time, status, INACTIVE_PORTAL_COLOR)
         } else {
-          let time = now + TimeDelta::seconds(countdown as i64);
+          let time = now + TimeDelta::seconds(countdown);
           let time = format!("Moonset: {}", time.format("%H:%M"));
           let status = util::get_countdown_text(countdown);
           (time, status, ACTIVE_PORTAL_COLOR)
@@ -259,8 +259,8 @@ impl Chronometer {
 const RIFT_COUNT: usize = 8;
 
 // Get the number of seconds for each rift.
-fn get_rift_countdowns(now: DateTime<Utc>) -> [i32; RIFT_COUNT] {
-  const PHASE_SECS: i32 = 525;
+fn get_rift_countdowns(now: DateTime<Utc>) -> [i64; RIFT_COUNT] {
+  const PHASE_SECS: i64 = 525;
   const CYCLE_SECS: i64 = 4200;
 
   // Get the number of seconds since epoch.
@@ -268,7 +268,7 @@ fn get_rift_countdowns(now: DateTime<Utc>) -> [i32; RIFT_COUNT] {
 
   // Calculate the lunar phase from the delta. Each phase is 525 seconds and there are 8 phases, for a total of 4200
   // seconds per lunar cycle.
-  let phase = (delta_secs % CYCLE_SECS) as i32;
+  let phase = delta_secs % CYCLE_SECS;
 
   let mut rift = (phase / PHASE_SECS) as usize;
   let mut time = PHASE_SECS - phase % PHASE_SECS;
@@ -294,7 +294,7 @@ fn get_rift_countdowns(now: DateTime<Utc>) -> [i32; RIFT_COUNT] {
 }
 
 /// Get the number of seconds until moonrise or moonset.
-fn get_lunar_countdown(now: DateTime<Utc>) -> i32 {
+fn get_lunar_countdown(now: DateTime<Utc>) -> i64 {
   /// Number of seconds for one full orbit of the moon.
   const LUNAR_SECS: i64 = HOUR_SECS * 7;
   const LUNAR_QTR: i64 = LUNAR_SECS / 4;
@@ -303,24 +303,22 @@ fn get_lunar_countdown(now: DateTime<Utc>) -> i32 {
   // Get the number of seconds elapsed since epoch.
   let epoch_secs = (now - util::get_epoch()).num_seconds();
 
-  // Current lunar position (zero is lunar high noon).
+  // Current lunar position in seconds (zero is lunar high noon).
   let lunar_secs = epoch_secs % LUNAR_SECS;
 
   // Adjust so that [LUNAR_SECS / 2, 0) is moon up and [-LUNAR_SECS / 2, 0) is moon down.
-  let countdown = match lunar_secs {
+  match lunar_secs {
     0..LUNAR_QTR => LUNAR_QTR - lunar_secs,
     LUNAR_QTR..LUNAR_3QTR => lunar_secs - LUNAR_3QTR,
     LUNAR_3QTR..LUNAR_SECS => (LUNAR_SECS + LUNAR_QTR) - lunar_secs,
     _ => unreachable!(),
-  };
-
-  countdown as i32
+  }
 }
 
 /// Get the current Lost Vale countdown as seconds.
-fn get_lost_vale_countdown(now: DateTime<Utc>) -> i32 {
+fn get_lost_vale_countdown(now: DateTime<Utc>) -> i64 {
   // Get the number of seconds since 2018/02/23 13:00:00 UTC (first sighting).
-  let delta_secs = (now - Utc.with_ymd_and_hms(2018, 2, 23, 13, 0, 0).unwrap()).num_seconds(); // LocalResult does not have expect.
+  let delta_secs = (now - Utc.with_ymd_and_hms(2018, 2, 23, 13, 0, 0).unwrap()).num_seconds();
 
   // Calculate the time window using the original 28 hour duration (one in-game month).
   let win = delta_secs % (28 * HOUR_SECS);
@@ -330,17 +328,17 @@ fn get_lost_vale_countdown(now: DateTime<Utc>) -> i32 {
 
   if seg < HOUR_SECS {
     // Lost vale is currently open.
-    (seg - HOUR_SECS) as i32
+    seg - HOUR_SECS
   } else if win < (22 * HOUR_SECS) {
     // First two 11 hour segments.
-    (11 * HOUR_SECS - seg) as i32
+    11 * HOUR_SECS - seg
   } else {
     // Last 6 hour segment.
-    (6 * HOUR_SECS - seg) as i32
+    6 * HOUR_SECS - seg
   }
 }
 
-/// Calculate the virtue/town and number of seconds remaining in a siege for each cabalist.
+/// Calculate the virtue/town and seconds remaining in a siege for each cabalist.
 pub fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
   PLANETARY_ORBITS.map(|(orbit_secs, zone_secs)| {
     // Get the number of seconds elapsed since epoch.
@@ -361,7 +359,7 @@ pub fn get_sieges(now: DateTime<Utc>) -> [Siege; CABALISTS.len()] {
     let virtue = VIRTUES[zone_phase as usize];
 
     // Fractional part is the position within the zone.
-    let remain_secs = (zone_secs - zone_phase.fract() * zone_secs).ceil() as i32;
+    let remain_secs = (zone_secs - zone_phase.fract() * zone_secs).ceil() as i64;
 
     Siege::new(virtue, remain_secs)
   })

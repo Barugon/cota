@@ -2,11 +2,11 @@ use crate::util::{FORTNIGHT_SECS, HOUR_SECS};
 
 pub struct Siege {
   virtue: Virtue,
-  remain_secs: i32,
+  remain_secs: i64,
 }
 
 impl Siege {
-  pub fn new(virtue: Virtue, remain_secs: i32) -> Self {
+  pub fn new(virtue: Virtue, remain_secs: i64) -> Self {
     Self { virtue, remain_secs }
   }
 
@@ -14,7 +14,7 @@ impl Siege {
     self.virtue
   }
 
-  pub fn remain_secs(&self) -> i32 {
+  pub fn remain_secs(&self) -> i64 {
     self.remain_secs
   }
 }
