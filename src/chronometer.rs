@@ -55,20 +55,9 @@ impl Chronometer {
         });
         ui.end_row();
 
-        const LUNAR_RIFTS: [&str; RIFT_COUNT] = [
-          "Blood River",
-          "Solace Bridge",
-          "Highvale",
-          "Brookside",
-          "Owl's Head",
-          "Westend",
-          "Brittany Graveyard",
-          "Etceter",
-        ];
-
         // Rifts.
         let rift_countdowns = get_rift_countdowns(utc);
-        for idx in 0..RIFT_COUNT {
+        for idx in 0..LUNAR_RIFTS.len() {
           let countdown = rift_countdowns[idx];
           let (rift_color, color, time, countdown) = if countdown < 0 {
             const OPEN_RIFT_COLOR: Color32 = Color32::from_rgb(154, 229, 255);
@@ -258,10 +247,19 @@ impl Chronometer {
   }
 }
 
-const RIFT_COUNT: usize = 8;
+const LUNAR_RIFTS: &[&str] = &[
+  "Blood River",
+  "Solace Bridge",
+  "Highvale",
+  "Brookside",
+  "Owl's Head",
+  "Westend",
+  "Brittany Graveyard",
+  "Etceter",
+];
 
 // Get the countdown (as seconds) for each rift.
-fn get_rift_countdowns(now: DateTime<Utc>) -> [i64; RIFT_COUNT] {
+fn get_rift_countdowns(now: DateTime<Utc>) -> [i64; LUNAR_RIFTS.len()] {
   const PHASE_SECS: i64 = 525;
   const CYCLE_SECS: i64 = 4200;
 
@@ -274,15 +272,15 @@ fn get_rift_countdowns(now: DateTime<Utc>) -> [i64; RIFT_COUNT] {
 
   let mut rift = (phase / PHASE_SECS) as usize;
   let mut time = PHASE_SECS - phase % PHASE_SECS;
-  let mut secs = [0; RIFT_COUNT];
+  let mut secs = [0; LUNAR_RIFTS.len()];
 
   // Express the remaining time for the active rift as negative.
   secs[rift] = -time;
 
-  for _ in 1..RIFT_COUNT {
+  for _ in 1..LUNAR_RIFTS.len() {
     // Next rift.
     rift += 1;
-    if rift >= RIFT_COUNT {
+    if rift >= LUNAR_RIFTS.len() {
       rift = 0;
     }
 
