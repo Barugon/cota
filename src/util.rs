@@ -163,18 +163,18 @@ pub fn get_epoch() -> DateTime<Utc> {
 }
 
 /// Get the remaining time in XXh XXm XXs format.
-pub fn get_countdown_text(prefix: &str, sec: i32) -> String {
+pub fn get_countdown_text(sec: i32) -> String {
   if sec >= 60 {
     let min = sec / 60;
     let sec = sec % 60;
     if min >= 60 {
       let hour = min / 60;
       let min = min % 60;
-      return format!("{prefix}{hour:02}h {min:02}m {sec:02}s");
+      return format!("{hour:02}h {min:02}m {sec:02}s");
     }
-    return format!("{prefix}{min:02}m {sec:02}s");
+    return format!("{min:02}m {sec:02}s");
   }
-  format!("{prefix}{sec:02}s")
+  format!("{sec:02}s")
 }
 
 #[derive(Default)]

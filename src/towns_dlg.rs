@@ -1,5 +1,5 @@
 use crate::{
-  ethos::{Siege, Virtue, CABALISTS, TOWNS, VIRTUES},
+  ethos::{CABALISTS, Siege, TOWNS, VIRTUES, Virtue},
   util,
 };
 use eframe::{
@@ -90,10 +90,7 @@ impl TownsDlg {
                       ui.label(CABALISTS[cabalist_index]);
                     });
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                      ui.label(util::get_countdown_text(
-                        Default::default(),
-                        sieges[cabalist_index].remain_secs(),
-                      ));
+                      ui.label(util::get_countdown_text(sieges[cabalist_index].remain_secs()));
                     });
                     ui.end_row();
                   }

@@ -74,13 +74,13 @@ impl Chronometer {
             const OPEN_RIFT_COLOR: Color32 = Color32::from_rgb(154, 229, 255);
             let time = now + TimeDelta::seconds(-countdown as i64);
             let time = format!("Closes: {}", time.format("%H:%M:%S"));
-            let countdown = util::get_countdown_text(Default::default(), -countdown);
+            let countdown = util::get_countdown_text(-countdown);
             (OPEN_RIFT_COLOR, ACTIVE_PORTAL_COLOR, time, countdown)
           } else {
             const CLOSED_RIFT_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
             let time = now + TimeDelta::seconds(countdown as i64);
             let time = format!("Opens: {}", time.format("%H:%M:%S"));
-            let countdown = util::get_countdown_text(Default::default(), countdown);
+            let countdown = util::get_countdown_text(countdown);
             (CLOSED_RIFT_COLOR, INACTIVE_PORTAL_COLOR, time, countdown)
           };
 
@@ -110,13 +110,13 @@ impl Chronometer {
           const OPEN_VALE_COLOR: Color32 = Color32::from_rgb(187, 187, 255);
           let time = now + TimeDelta::seconds(-countdown as i64);
           let time = format!("Closes: {}", time.format("%H:%M"));
-          let countdown = util::get_countdown_text(Default::default(), -countdown);
+          let countdown = util::get_countdown_text(-countdown);
           (OPEN_VALE_COLOR, ACTIVE_PORTAL_COLOR, time, countdown)
         } else {
           const CLOSED_VALE_COLOR: Color32 = Color32::from_rgb(140, 140, 187);
           let time = now + TimeDelta::seconds(countdown as i64);
           let time = format!("Opens: {}", time.format("%H:%M"));
-          let countdown = util::get_countdown_text(Default::default(), countdown);
+          let countdown = util::get_countdown_text(countdown);
           (CLOSED_VALE_COLOR, INACTIVE_PORTAL_COLOR, time, countdown)
         };
 
@@ -142,12 +142,12 @@ impl Chronometer {
         let (time, countdown, color) = if countdown < 0 {
           let time = now + TimeDelta::seconds(-countdown as i64);
           let time = format!("Moonrise: {}", time.format("%H:%M"));
-          let status = util::get_countdown_text(Default::default(), -countdown);
+          let status = util::get_countdown_text(-countdown);
           (time, status, INACTIVE_PORTAL_COLOR)
         } else {
           let time = now + TimeDelta::seconds(countdown as i64);
           let time = format!("Moonset: {}", time.format("%H:%M"));
-          let status = util::get_countdown_text(Default::default(), countdown);
+          let status = util::get_countdown_text(countdown);
           (time, status, ACTIVE_PORTAL_COLOR)
         };
 
@@ -216,7 +216,7 @@ impl Chronometer {
 
           // Remaining time.
           ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            let text = util::get_countdown_text(Default::default(), siege.remain_secs());
+            let text = util::get_countdown_text(siege.remain_secs());
             ui.label(RichText::from(text).color(remain_color)).on_hover_text(next);
           });
           ui.end_row();
