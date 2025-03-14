@@ -128,16 +128,16 @@ impl Chronometer {
       .min_col_width((width - spacing.x * 2.0) / 3.0)
       .show(ui, |ui| {
         let countdown = get_lunar_countdown(utc);
-        let (time, countdown, color) = if countdown < 0 {
+        let (color, time, countdown) = if countdown < 0 {
           let time = now + TimeDelta::seconds(-countdown);
           let time = format!("Moonrise: {}", time.format("%H:%M"));
           let status = util::get_countdown_text(-countdown);
-          (time, status, INACTIVE_PORTAL_COLOR)
+          (INACTIVE_PORTAL_COLOR, time, status)
         } else {
           let time = now + TimeDelta::seconds(countdown);
           let time = format!("Moonset: {}", time.format("%H:%M"));
           let status = util::get_countdown_text(countdown);
-          (time, status, ACTIVE_PORTAL_COLOR)
+          (ACTIVE_PORTAL_COLOR, time, status)
         };
 
         ui.label("");
