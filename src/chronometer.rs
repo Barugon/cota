@@ -215,7 +215,7 @@ impl Chronometer {
 
   pub fn show_status(&mut self, ui: &mut Ui) {
     ui.centered_and_justified(|ui| {
-      static MSG: &str = concat!(
+      const MSG: &str = concat!(
         "The accuracy of this chronometer depends entirely on your system clock.\n",
         "For best results, set your system clock to synchronize with Internet time."
       );
