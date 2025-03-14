@@ -50,7 +50,7 @@ pub const VIRTUES: &[Virtue] = &[
   Virtue::Spirituality,
 ];
 
-pub static TOWNS: [&str; VIRTUES.len()] = [
+pub const TOWNS: &[&str; VIRTUES.len()] = &[
   "Kiln",
   "Northwood",
   "Jaanaford",
@@ -70,7 +70,7 @@ pub const CABALISTS: &[&str] = &[
 ];
 
 /// Orbital periods and zone times.
-pub static PLANETARY_ORBITS: [(i64, f64); CABALISTS.len()] = [
+pub const PLANETARY_ORBITS: &[(i64, f64); CABALISTS.len()] = &[
   // Dolus.
   (
     DECEIT_SECS,
