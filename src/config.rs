@@ -191,7 +191,7 @@ impl Config {
     // Filter out empties. Use BTreeMap so that the entries are sorted.
     let skills: BTreeMap<u32, (i32, i32)> = skills
       .iter()
-      .filter(|(_, levels)| levels.0 > 0 || levels.1 > 0)
+      .filter(|(_, (cur, tgt))| *cur > 0 || *tgt > 0)
       .map(|(id, levels)| (*id, *levels))
       .collect();
 
