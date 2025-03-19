@@ -2,7 +2,7 @@ use self::inner::GameInfo;
 use crate::{
   game_data::GameData,
   items_dlg::ItemsDlg,
-  util::{AppState, Picture, APP_NAME, LVL_RANGE},
+  util::{APP_NAME, AppState, LVL_RANGE, Picture},
 };
 use eframe::{egui, epaint::Color32};
 use egui::{Button, DragValue, RichText, Ui, WidgetText};
@@ -137,7 +137,7 @@ impl Offline {
       } else if let Some(game) = self.game.as_ref() {
         let file_name = game.get_file_name();
         let changed = if self.changed() { "*" } else { "" };
-        ui.label(format!("Editing {} - {}{}", game.avatar_name(), changed, file_name));
+        ui.label(format!("Editing {} - {}{}", game.avatar_name(), file_name, changed));
       }
     });
   }
@@ -220,7 +220,7 @@ mod inner {
     util,
   };
   use eframe::{
-    egui::{scroll_area::ScrollBarVisibility, CollapsingHeader, DragValue, Layout, RichText, ScrollArea, Ui},
+    egui::{CollapsingHeader, DragValue, Layout, RichText, ScrollArea, Ui, scroll_area::ScrollBarVisibility},
     emath::Align,
     epaint::{Color32, Vec2},
   };
