@@ -225,7 +225,7 @@ impl Experience {
                     })
                     .body(|mut body| {
                       for skill in &skill_group.skills {
-                        let level = get_skill_lvl_mut(&mut self.level_info.skill_lvls, skill.id);
+                        let (cur, tgt) = get_skill_lvl_mut(&mut self.level_info.skill_lvls, skill.id);
                         body.row(row_size, |mut row| {
                           row.col(|ui| {
                             let text = RichText::from(skill.name);
@@ -235,8 +235,7 @@ impl Experience {
                           });
                           row.col(|ui| {
                             let range = 0..=200;
-                            let value = &mut level.0;
-                            let widget = DragValue::new(value).range(range);
+                            let widget = DragValue::new(cur).range(range);
                             let response = ui.add(widget);
                             if response.drag_stopped() || response.lost_focus() {
                               save = true;
@@ -244,8 +243,7 @@ impl Experience {
                           });
                           row.col(|ui| {
                             let range = 0..=200;
-                            let value = &mut level.1;
-                            let widget = DragValue::new(value).range(range);
+                            let widget = DragValue::new(tgt).range(range);
                             let response = ui.add(widget);
                             if response.drag_stopped() || response.lost_focus() {
                               save = true;
@@ -255,7 +253,7 @@ impl Experience {
                             ui.label(format!("{}x", skill.mul));
                           });
                           row.col(|ui| {
-                            if let Some(exp) = get_needed_exp(level, skill.mul) {
+                            if let Some(exp) = get_needed_exp(*cur, *tgt, skill.mul) {
                               let (text, exp) = if exp < 0 {
                                 // Half experience returned for un-training.
                                 let exp = exp / 2;
@@ -450,10 +448,10 @@ fn get_skill_lvl_mut(levels: &mut HashMap<u32, (i32, i32)>, id: u32) -> &mut (i3
   levels.entry(id).or_insert_with(|| (0, 0))
 }
 
-fn get_needed_exp(level: &(i32, i32), mul: f64) -> Option<i64> {
-  if level.0 > 0 || level.1 > 0 {
-    let cur_lvl = level.0.max(1);
-    let tgt_lvl = level.1.max(1);
+fn get_needed_exp(cur: i32, tgt: i32, mul: f64) -> Option<i64> {
+  if cur > 0 || tgt > 0 {
+    let cur_lvl = cur.max(1);
+    let tgt_lvl = tgt.max(1);
     let val = SKILL_EXP[tgt_lvl as usize - 1] - SKILL_EXP[cur_lvl as usize - 1];
     return Some((val as f64 * mul).ceil() as i64);
   }
