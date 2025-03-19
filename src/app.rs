@@ -556,8 +556,8 @@ fn bottom_panel<R>(page: Page, ctx: &Context, contents: impl FnOnce(&mut Ui) -> 
     Page::Experience => unreachable!(),
     // The farming page doesn't have a status area.
     Page::Farming => unreachable!(),
-    Page::Offline => ("offline_status", Margin::symmetric(8, 2)),
-    Page::Stats => ("stats_status", Margin::symmetric(8, 2)),
+    Page::Offline => ("offline_status", Margin::symmetric(8, 4)),
+    Page::Stats => ("stats_status", Margin::symmetric(8, 4)),
   };
 
   TopBottomPanel::bottom(id)
