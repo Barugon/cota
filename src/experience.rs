@@ -11,7 +11,7 @@ use egui_extras::{Column, TableBuilder};
 use futures::{channel::mpsc, executor::ThreadPool};
 use num_format::{Locale, ToFormattedString};
 use skill_info::{SkillCategory, SkillInfo, SkillInfoGroup};
-use std::{collections::HashMap, mem, path::PathBuf};
+use std::{collections::HashMap, mem, ops::RangeInclusive, path::PathBuf};
 use util::{AppState, Cancel, LEVEL_EXP, SKILL_EXP};
 
 pub struct Experience {
@@ -224,6 +224,7 @@ impl Experience {
                       });
                     })
                     .body(|mut body| {
+                      pub const SKILL_RANGE: RangeInclusive<i32> = 0..=200;
                       for skill in &skill_group.skills {
                         let (cur, tgt) = get_skill_lvl_mut(&mut self.level_info.skill_lvls, skill.id);
                         body.row(row_size, |mut row| {
@@ -234,23 +235,21 @@ impl Experience {
                             ui.add(widget);
                           });
                           row.col(|ui| {
-                            let range = 0..=200;
-                            let widget = DragValue::new(cur).range(range);
+                            let widget = DragValue::new(cur).range(SKILL_RANGE);
                             let response = ui.add(widget);
                             if response.drag_stopped() || response.lost_focus() {
                               save = true;
                             }
                           });
                           row.col(|ui| {
-                            let range = 0..=200;
-                            let widget = DragValue::new(tgt).range(range);
+                            let widget = DragValue::new(tgt).range(SKILL_RANGE);
                             let response = ui.add(widget);
                             if response.drag_stopped() || response.lost_focus() {
                               save = true;
                             }
                           });
                           row.col(|ui| {
-                            ui.label(format!("{}x", skill.mul));
+                            ui.label(format!("{}\u{D7}", skill.mul));
                           });
                           row.col(|ui| {
                             if let Some(exp) = get_needed_exp(*cur, *tgt, skill.mul) {
