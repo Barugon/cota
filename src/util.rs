@@ -348,12 +348,12 @@ pub fn get_locale() -> Locale {
 
 /// Replace a single occurrence of a comma or arabic decimal with a period.
 pub fn replace_decimal(text: &str) -> String {
-  text.replacen([',', '\u{66b}'], ".", 1)
+  text.replacen([',', '\u{66B}'], ".", 1)
 }
 
 /// Remove all digit grouping separators (comma, period, single quote and non-breaking space).
 pub fn remove_separators(text: &str) -> String {
-  text.replace([',', '.', '\'', '\u{a0}'], Default::default())
+  text.replace([',', '.', '\'', '\u{A0}'], Default::default())
 }
 
 /// Convert a timestamp into a date & time string.
@@ -391,9 +391,9 @@ mod tests {
     assert_eq!("123.4", replace_decimal("123,4"));
     assert_eq!("123.", replace_decimal("123,"));
     assert_eq!(".4", replace_decimal(",4"));
-    assert_eq!("123.4", replace_decimal("123\u{66b}4"));
-    assert_eq!("123.", replace_decimal("123\u{66b}"));
-    assert_eq!(".4", replace_decimal("\u{66b}4"));
+    assert_eq!("123.4", replace_decimal("123\u{66B}4"));
+    assert_eq!("123.", replace_decimal("123\u{66B}"));
+    assert_eq!(".4", replace_decimal("\u{66B}4"));
   }
 
   #[test]
@@ -401,7 +401,7 @@ mod tests {
     assert_eq!("123456789", remove_separators("123,456,789"));
     assert_eq!("123456789", remove_separators("123.456.789"));
     assert_eq!("123456789", remove_separators("123'456'789"));
-    assert_eq!("123456789", remove_separators("123\u{a0}456\u{a0}789"));
+    assert_eq!("123456789", remove_separators("123\u{A0}456\u{A0}789"));
   }
 
   #[test]
