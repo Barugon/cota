@@ -241,7 +241,7 @@ impl App {
     };
 
     let filter = Box::new({
-      let ext = Some(OsStr::new("sota"));
+      let ext = Some(OsStr::new(App::SOTA));
       move |path: &Path| path.extension() == ext
     });
 
@@ -265,7 +265,7 @@ impl App {
     };
 
     let filter = Box::new({
-      let ext = Some(OsStr::new("sota"));
+      let ext = Some(OsStr::new(App::SOTA));
       move |path: &Path| path.extension() == ext
     });
 
@@ -282,6 +282,8 @@ impl App {
     self.state.set_disabled(true);
     self.file_dlg = Some(file_dlg);
   }
+
+  const SOTA: &str = "sota";
 }
 
 impl eframe::App for App {
