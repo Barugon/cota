@@ -43,6 +43,7 @@ fn main() {
     height: icon.height(),
     rgba: icon.into_rgba8().into_raw(),
   };
+
   let viewport = ViewportBuilder::default()
     .with_resizable(false)
     .with_maximize_button(false)
