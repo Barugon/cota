@@ -158,7 +158,6 @@ pub fn set_clipboard_contents(text: String) {
 
 /// SotA epoch (date/time of lunar cataclysm).
 pub fn get_epoch() -> DateTime<Utc> {
-  // Note: LocalResult does not have expect.
   Utc.with_ymd_and_hms(1997, 9, 2, 0, 0, 0).unwrap()
 }
 
