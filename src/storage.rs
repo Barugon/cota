@@ -57,12 +57,12 @@ impl Storage {
 mod inner {
   use std::{
     collections::HashMap,
-    fs::{self, File},
+    fs,
     path::{Path, PathBuf},
     sync::{
+      Arc, RwLock,
       atomic::{AtomicBool, Ordering},
       mpsc::{self, Sender},
-      Arc, RwLock,
     },
     thread::{self, JoinHandle},
   };
@@ -95,8 +95,12 @@ mod inner {
 
     fn persist(&self) {
       if self.changed.swap(false, Ordering::Relaxed) {
-        match File::create(&self.path) {
-          Ok(file) => ron::ser::to_writer_pretty(file, &self.items, Default::default()).unwrap(),
+        match ron::ser::to_string_pretty(&self.items, Default::default()) {
+          Ok(text) => {
+            if let Err(err) = fs::write(&self.path, text) {
+              println!("{err}");
+            }
+          }
           Err(err) => println!("{err}"),
         }
       }
