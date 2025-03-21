@@ -310,7 +310,7 @@ impl Stats {
               }
             }
 
-            const RESIST_KEYS: [(Resist, &str); 9] = [
+            const RESIST_KEYS: &[(Resist, &str)] = &[
               (Resist::Air, "Air"),
               (Resist::Chaos, "Chaos"),
               (Resist::Death, "Death"),
@@ -322,7 +322,7 @@ impl Stats {
               (Resist::Water, "Water"),
             ];
 
-            for (key, name) in RESIST_KEYS {
+            for &(key, name) in RESIST_KEYS {
               if let Some(value) = resist_values.get(&key) {
                 let value = f64_to_string!(*value, 6, self.locale);
                 body.row(row_size, |mut row| {
