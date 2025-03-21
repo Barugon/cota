@@ -411,7 +411,12 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
     if let Ok(text) = fs::read_to_string(path) {
       // Search for attack lines.
       for line in text.lines() {
-        let Some(ts) = get_log_timestamp(line, file_date) else {
+        let (date, text) = get_log_date_text(line);
+        if date.is_empty() {
+          continue;
+        }
+
+        let Some(ts) = log_date_to_timestamp(date, file_date) else {
           continue;
         };
 
@@ -419,7 +424,6 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
           continue;
         }
 
-        let (_, text) = get_log_date_text(line);
         if let Some(found) = avatar_search.find(text) {
           // The search term ends just past the damage value.
           if let Some(digits) = text[found.range()].split_whitespace().next_back() {
@@ -504,6 +508,7 @@ fn verify_log_text(text: &str) -> bool {
 /// Convert a SotA log date & time into a timestamp. Since the dates are localized, we don't know
 /// if day or month come first, so we use the date from the filename, which is always YYYY-MM-DD.
 fn log_date_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
+  let text = text.trim_start_matches('[').trim_end_matches(']');
   let mut iter = text.split_whitespace();
   let _date = iter.next()?;
   let time = iter.next()?;
@@ -566,18 +571,10 @@ fn get_log_date(line: &str) -> Option<&str> {
   Some(&line[0..=pos])
 }
 
-/// Get the log entry date/time as a timestamp.
-fn get_log_timestamp(line: &str, file_date: NaiveDate) -> Option<i64> {
-  let date = get_log_date(line)?;
-  let date = &date[1..date.len() - 1];
-  log_date_to_timestamp(date, file_date)
-}
-
 /// Get the log entry date/time as a timestamp and the log text if it's a `/stats` entry.
 fn get_stats_ts_text(line: &str, file_date: NaiveDate) -> Option<(i64, &str)> {
   let (date, text) = get_log_date_text(line);
   if !date.is_empty() && text.starts_with(STATS_KEY) {
-    let date = &date[1..date.len() - 1];
     let ts = log_date_to_timestamp(date, file_date)?;
     return Some((ts, text));
   }
