@@ -10,30 +10,21 @@ use std::{
 };
 use util::{Cancel, Search};
 
-/// Get the date portion of a log entry.
-pub fn get_log_date(line: &str) -> Option<&str> {
-  if !line.starts_with('[') {
-    return None;
-  }
-
-  let pos = line.find(']')?;
-  Some(&line[0..=pos])
-}
-
-/// Get the text portion (sans date and time) of a log entry.
-pub fn get_log_text(line: &str) -> &str {
+/// Get separate date/time and text portions of a log entry.
+pub fn get_log_date_text(line: &str) -> (&str, &str) {
   if let Some(date) = get_log_date(line) {
     let text = &line[date.len()..];
 
     // Check if a chat timestamp was output.
-    if let Some(time) = get_log_date(text.trim_start()) {
-      let pos = util::offset(text, time).unwrap() + time.len();
-      return &text[pos..];
+    let trimmed = text.trim_start();
+    if let Some(time) = get_log_date(trimmed) {
+      return (date, &trimmed[time.len()..]);
     }
-    return text;
+
+    return (date, text);
   }
 
-  line
+  (Default::default(), line)
 }
 
 pub struct StatsIter<'a> {
@@ -295,13 +286,7 @@ pub async fn find_log_entries(log_path: PathBuf, avatar: String, search: Search,
           continue;
         }
 
-        // Filter out superfluous chat timestamp.
-        let (date, text) = if let Some(date) = get_log_date(line) {
-          (date, get_log_text(line))
-        } else {
-          (Default::default(), line)
-        };
-
+        let (date, text) = get_log_date_text(line);
         let size = date.len() + text.len();
         if size > 0 {
           // Account for a newline.
@@ -434,10 +419,10 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
           continue;
         }
 
-        let line = get_log_text(line);
-        if let Some(found) = avatar_search.find(line) {
+        let (_, text) = get_log_date_text(line);
+        if let Some(found) = avatar_search.find(text) {
           // The search term ends just past the damage value.
-          if let Some(digits) = line[found.range()].split_whitespace().next_back() {
+          if let Some(digits) = text[found.range()].split_whitespace().next_back() {
             if let Ok(value) = digits.parse::<u64>() {
               if dmg_start_ts.is_none() {
                 dmg_start_ts = Some(ts);
@@ -446,8 +431,8 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
               dps_tally.avatar += value;
             }
           }
-        } else if let Some(found) = pet_search.find(line) {
-          if let Some(digits) = line[found.range()].split_whitespace().next_back() {
+        } else if let Some(found) = pet_search.find(text) {
+          if let Some(digits) = text[found.range()].split_whitespace().next_back() {
             if let Ok(value) = digits.parse::<u64>() {
               if dmg_start_ts.is_none() {
                 dmg_start_ts = Some(ts);
@@ -571,25 +556,29 @@ fn get_log_file_date(path: &Path) -> Option<NaiveDate> {
   NaiveDate::parse_from_str(text, "%Y-%m-%d").ok()
 }
 
+/// Get the date portion of a log entry.
+fn get_log_date(line: &str) -> Option<&str> {
+  if !line.starts_with('[') {
+    return None;
+  }
+
+  let pos = line.find(']')?;
+  Some(&line[0..=pos])
+}
+
 /// Get the log entry date/time as a timestamp.
 fn get_log_timestamp(line: &str, file_date: NaiveDate) -> Option<i64> {
   let date = get_log_date(line)?;
-  log_date_to_timestamp(&date[1..date.len() - 1], file_date)
+  let date = &date[1..date.len() - 1];
+  log_date_to_timestamp(date, file_date)
 }
 
 /// Get the log entry date/time as a timestamp and the log text if it's a `/stats` entry.
 fn get_stats_ts_text(line: &str, file_date: NaiveDate) -> Option<(i64, &str)> {
-  let date = get_log_date(line)?;
-  let line = &line[date.len()..];
-  let trimmed = line.trim_start();
-  let text = if let Some(time) = get_log_date(trimmed) {
-    &trimmed[time.len()..]
-  } else {
-    line
-  };
-
-  if text.starts_with(STATS_KEY) {
-    let ts = log_date_to_timestamp(&date[1..date.len() - 1], file_date)?;
+  let (date, text) = get_log_date_text(line);
+  if !date.is_empty() && text.starts_with(STATS_KEY) {
+    let date = &date[1..date.len() - 1];
+    let ts = log_date_to_timestamp(date, file_date)?;
     return Some((ts, text));
   }
 
@@ -607,7 +596,7 @@ fn get_stats_text(line: &str, ts: i64, file_date: NaiveDate) -> Option<&str> {
 }
 
 fn get_adv_xp(line: &str) -> Option<i64> {
-  let text = get_log_text(line);
+  let (_, text) = get_log_date_text(line);
   if let Some(text) = text.strip_prefix(ADV_EXP_KEY) {
     let text = util::remove_separators(text);
     return text.parse().ok();
