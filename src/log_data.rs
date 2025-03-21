@@ -148,7 +148,7 @@ pub async fn get_stats_timestamps(
             return Vec::new();
           }
 
-          if let Some(ts) = get_stats_timestamp(line, date) {
+          if let Some((ts, _)) = get_stats_ts_text(line, date) {
             timestamps.push(ts);
           }
         }
@@ -577,11 +577,20 @@ fn get_log_timestamp(line: &str, file_date: NaiveDate) -> Option<i64> {
   log_date_to_timestamp(&date[1..date.len() - 1], file_date)
 }
 
-/// Get the log entry date/time as a timestamp if it's a `/stats` entry.
-fn get_stats_timestamp(line: &str, file_date: NaiveDate) -> Option<i64> {
+/// Get the log entry date/time as a timestamp and the log text if it's a `/stats` entry.
+fn get_stats_ts_text(line: &str, file_date: NaiveDate) -> Option<(i64, &str)> {
   let date = get_log_date(line)?;
-  if line[date.len()..].contains(STATS_KEY) {
-    return log_date_to_timestamp(&date[1..date.len() - 1], file_date);
+  let line = &line[date.len()..];
+  let trimmed = line.trim_start();
+  let text = if let Some(time) = get_log_date(trimmed) {
+    &trimmed[time.len()..]
+  } else {
+    line
+  };
+
+  if text.starts_with(STATS_KEY) {
+    let ts = log_date_to_timestamp(&date[1..date.len() - 1], file_date)?;
+    return Some((ts, text));
   }
 
   None
@@ -589,9 +598,9 @@ fn get_stats_timestamp(line: &str, file_date: NaiveDate) -> Option<i64> {
 
 /// Get the log entry text if it's `/stats` and the date/time matches.
 fn get_stats_text(line: &str, ts: i64, file_date: NaiveDate) -> Option<&str> {
-  let lts = get_stats_timestamp(line, file_date)?;
+  let (lts, text) = get_stats_ts_text(line, file_date)?;
   if lts == ts {
-    return Some(get_log_text(line));
+    return Some(text);
   }
 
   None
