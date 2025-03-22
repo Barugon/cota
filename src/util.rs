@@ -439,4 +439,10 @@ mod tests {
     let result = find_ignore_case(text, "abc");
     assert_eq!(result, Some(8..11));
   }
+
+  #[test]
+  fn test_timestamp_to_string() {
+    let text = timestamp_to_string(Some(0));
+    assert_eq!("1970-01-01 00:00:00", text);
+  }
 }
