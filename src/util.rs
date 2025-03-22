@@ -347,12 +347,12 @@ pub fn get_locale() -> Locale {
 
 /// Replace a single occurrence of a comma or arabic decimal with a period.
 pub fn replace_decimal(text: &str) -> String {
-  text.replacen([',', '\u{66B}'], ".", 1)
+  text.replacen(&[',', '\u{66B}'], ".", 1)
 }
 
 /// Remove all digit grouping separators (comma, period, single quote and non-breaking space).
 pub fn remove_separators(text: &str) -> String {
-  text.replace([',', '.', '\'', '\u{A0}'], Default::default())
+  text.replace(&[',', '.', '\'', '\u{A0}'], Default::default())
 }
 
 /// Convert a timestamp into a date & time string.
