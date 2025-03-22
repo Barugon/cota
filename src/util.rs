@@ -138,6 +138,7 @@ pub enum Page {
   Stats,
 }
 
+/// Get the index of the matching element or the one just below if an exact match is not found.
 pub fn floor_search<T: Ord>(value: T, values: &[T]) -> Option<usize> {
   match values.binary_search(&value) {
     Ok(idx) => Some(idx),
@@ -383,6 +384,16 @@ pub fn text_size(ui: &Ui) -> f32 {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn test_floor_search() {
+    let values = &[10, 20, 30, 40, 50];
+    assert_eq!(Some(3), floor_search(41, values));
+    assert_eq!(Some(1), floor_search(27, values));
+    assert_eq!(Some(0), floor_search(10, values));
+    assert_eq!(None, floor_search(9, values));
+    assert_eq!(Some(4), floor_search(180, values));
+  }
 
   #[test]
   fn test_replace_decimal() {
