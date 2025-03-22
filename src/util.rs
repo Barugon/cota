@@ -320,7 +320,11 @@ pub fn offset(text: &str, sub: &str) -> Option<usize> {
 
 /// Get the system's locale.
 pub fn get_locale() -> Locale {
-  if let Some(name) = sys_locale::get_locale() {
+  to_locale(sys_locale::get_locale().as_deref())
+}
+
+fn to_locale(name: Option<&str>) -> Locale {
+  if let Some(name) = name {
     let name = name.replace('_', "-");
     let names = Locale::available_names();
     let uname = name.to_uppercase();
@@ -393,6 +397,16 @@ mod tests {
     assert_eq!(Some(0), floor_search(10, values));
     assert_eq!(None, floor_search(9, values));
     assert_eq!(Some(4), floor_search(180, values));
+  }
+
+  #[test]
+  fn test_to_locale() {
+    assert_eq!(Locale::en, to_locale(Some("en-US")));
+    assert_eq!(Locale::en_US_POSIX, to_locale(Some("en-US-POSIX")));
+    assert_eq!(Locale::ca, to_locale(Some("ca-YT")));
+    assert_eq!(Locale::gsw_FR, to_locale(Some("gsw-FR")));
+    assert_eq!(Locale::en, to_locale(Some("nope")));
+    assert_eq!(Locale::en, to_locale(None));
   }
 
   #[test]
