@@ -196,17 +196,19 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, ts: i64, cancel: Cance
               return StatsData::default();
             }
 
-            if let Some(mut stats) = get_stats_text(line, ts, date) {
+            if let Some(stats) = get_stats_text(line, ts, date) {
               // Include subsequent lines that do not start with a square bracket.
               let pos = util::offset(&text, stats).unwrap();
               let sub = &text[pos + stats.len()..];
               for line in sub.lines() {
                 if line.starts_with('[') {
-                  break;
+                  let stats = text[pos..util::offset(&text, line).unwrap()].trim();
+                  return StatsData::new(stats.into());
                 }
-                stats = &text[pos..util::offset(&text, line).unwrap()];
               }
 
+              // EOF was reached.
+              let stats = text[pos..].trim();
               return StatsData::new(stats.into());
             }
           }
