@@ -82,8 +82,8 @@ impl ItemsDlg {
                         }
 
                         if ui.button("Repair").clicked() {
-                          // The actual maximum durability is unknown here, so just set the durability to a high
-                          // value, it will be adjusted in-game to the actual maximum when the item takes damage.
+                          // The actual maximum durability is unknown here so just set the durability to a high value;
+                          // it will be adjusted in-game to the actual maximum when the item takes damage.
                           dur.minor = 5000.0;
                           dur.major = 5000.0;
                           modified = true;
