@@ -140,7 +140,7 @@ impl Chronometer {
           (ACTIVE_PORTAL_COLOR, time, status)
         };
 
-        ui.label("");
+        ui.label(String::new());
         ui.centered_and_justified(|ui| {
           ui.label(RichText::from(time).color(color));
         });
