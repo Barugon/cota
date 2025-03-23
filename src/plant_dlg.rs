@@ -1,4 +1,8 @@
-use crate::{config::Config, plant_info, util::AppState};
+use crate::{
+  config::Config,
+  plant_info::{self, CropTimer, Environment, Seed},
+  util::AppState,
+};
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
 use eframe::{
   egui::{ComboBox, Context, DragValue, Key, PointerButton, RichText, ScrollArea, TextEdit, Window},
@@ -6,7 +10,6 @@ use eframe::{
   epaint::Color32,
 };
 use egui_extras::DatePickerButton;
-use plant_info::{CropTimer, Environment, Seed};
 use std::{collections::BTreeSet, mem};
 
 // #[derive(Default)]

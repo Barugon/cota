@@ -1,4 +1,4 @@
-use crate::util;
+use crate::util::{self, Cancel, Search};
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
 use futures::{StreamExt, channel::mpsc, executor::ThreadPool, future};
 use regex::Regex;
@@ -8,7 +8,6 @@ use std::{
   path::{Path, PathBuf},
   str::SplitWhitespace,
 };
-use util::{Cancel, Search};
 
 /// Get separate date/time and text portions of a log entry.
 pub fn get_log_date_text(line: &str) -> (&str, &str) {

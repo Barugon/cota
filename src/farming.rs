@@ -14,10 +14,9 @@ use std::{
     Arc, Mutex,
     atomic::{AtomicBool, Ordering},
   },
-  thread,
+  thread::{self, JoinHandle},
   time::{Duration, Instant},
 };
-use thread::JoinHandle;
 
 pub struct Farming {
   config: Config,

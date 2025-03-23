@@ -1,4 +1,8 @@
-use crate::{config::Config, log_data, skill_info, util};
+use crate::{
+  config::Config,
+  log_data, skill_info,
+  util::{self, AppState, Cancel, LEVEL_EXP, SKILL_EXP},
+};
 use eframe::{
   egui::{
     ComboBox, Context, DragValue, Label, Layout, RichText, ScrollArea, Sense, TextWrapMode, Ui, Widget,
@@ -12,7 +16,6 @@ use futures::{channel::mpsc, executor::ThreadPool};
 use num_format::{Locale, ToFormattedString};
 use skill_info::{SkillCategory, SkillInfo, SkillInfoGroup};
 use std::{collections::HashMap, mem, ops::RangeInclusive, path::PathBuf};
-use util::{AppState, Cancel, LEVEL_EXP, SKILL_EXP};
 
 pub struct Experience {
   config: Config,

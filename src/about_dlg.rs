@@ -1,6 +1,9 @@
 use crate::util::{APP_AUTHORS, APP_ICON, APP_NAME, APP_TITLE, APP_VERSION, AppState, Picture};
-use eframe::{egui, emath::Align2, epaint::Color32};
-use egui::{Context, Key, RichText, Window};
+use eframe::{
+  egui::{Context, Key, RichText, Window},
+  emath::Align2,
+  epaint::Color32,
+};
 
 pub struct AboutDlg {
   logo: Picture,

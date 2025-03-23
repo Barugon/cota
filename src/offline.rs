@@ -4,8 +4,10 @@ use crate::{
   items_dlg::ItemsDlg,
   util::{self, APP_NAME, AppState, LVL_RANGE, Picture},
 };
-use eframe::{egui, epaint::Color32};
-use egui::{Button, DragValue, RichText, Ui, WidgetText};
+use eframe::{
+  egui::{Button, DragValue, RichText, Ui, WidgetText},
+  epaint::Color32,
+};
 use std::path::PathBuf;
 
 pub struct Offline {

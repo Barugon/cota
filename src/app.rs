@@ -7,7 +7,7 @@ use crate::{
   farming::Farming,
   offline::Offline,
   stats::{Stats, StatsFilter},
-  util,
+  util::{self, AppState, Page},
 };
 use eframe::{
   egui::{
@@ -15,12 +15,11 @@ use eframe::{
     ViewportCommand, Visuals, menu,
   },
   emath::Align2,
-  epaint, glow,
+  epaint::{self, Color32, Vec2},
+  glow,
 };
-use epaint::{Color32, Vec2};
 use futures::executor::ThreadPoolBuilder;
 use std::{ffi::OsStr, path::Path};
-use util::{AppState, Page};
 
 #[cfg(target_os = "macos")]
 macro_rules! cmd {

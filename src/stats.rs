@@ -1,5 +1,11 @@
 use crate::{
-  config::Config, dps_dlg::DPSDlg, log_data, log_dlg::LogDlg, notes_dlg::NotesDlg, search_dlg::SearchDlg, util,
+  config::Config,
+  dps_dlg::DPSDlg,
+  log_data::{self, StatsData},
+  log_dlg::LogDlg,
+  notes_dlg::NotesDlg,
+  search_dlg::SearchDlg,
+  util::{self, AppState, Cancel, Search},
 };
 use eframe::{
   egui::{ComboBox, Context, Layout, RichText, Ui},
@@ -8,14 +14,12 @@ use eframe::{
 };
 use egui_extras::{Column, TableBuilder};
 use futures::{channel::mpsc, executor::ThreadPool};
-use log_data::StatsData;
 use num_format::Locale;
 use std::{
   collections::HashMap,
   mem,
   path::{Path, PathBuf},
 };
-use util::{AppState, Cancel, Search};
 
 pub struct Stats {
   config: Config,
