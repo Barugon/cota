@@ -562,7 +562,7 @@ fn get_log_file_date(path: &Path) -> Option<NaiveDate> {
   NaiveDate::parse_from_str(text, "%Y-%m-%d").ok()
 }
 
-/// Get the date portion of a log entry.
+/// Get the date/time portion of a log entry.
 fn get_log_date(line: &str) -> Option<&str> {
   if !line.starts_with('[') {
     return None;
