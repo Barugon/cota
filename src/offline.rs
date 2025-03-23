@@ -2,18 +2,18 @@ use self::inner::GameInfo;
 use crate::{
   game_data::GameData,
   items_dlg::ItemsDlg,
-  util::{APP_NAME, AppState, LVL_RANGE, Picture},
+  util::{self, APP_NAME, AppState, LVL_RANGE, Picture},
 };
 use eframe::{egui, epaint::Color32};
 use egui::{Button, DragValue, RichText, Ui, WidgetText};
-use std::{borrow::Cow, path::PathBuf};
+use std::path::PathBuf;
 
 pub struct Offline {
   load_icon: Picture,
   store_icon: Picture,
   items_dlg: ItemsDlg,
   game: Option<GameInfo>,
-  error: Option<Cow<'static, str>>,
+  error: Option<util::Error>,
   changed: bool,
   load_request: bool,
 }
@@ -226,7 +226,6 @@ mod inner {
   };
   use egui_extras::{Column, TableBuilder};
   use std::{
-    borrow::Cow,
     collections::{HashMap, HashSet},
     ffi::OsStr,
     path::PathBuf,
@@ -493,7 +492,7 @@ mod inner {
       self.gold = gold;
     }
 
-    pub fn store(&mut self) -> Result<(), Cow<'static, str>> {
+    pub fn store(&mut self) -> Result<(), util::Error> {
       self.update_json();
       let result = self.data.store();
       if result.is_ok() {
@@ -502,7 +501,7 @@ mod inner {
       result
     }
 
-    pub fn store_as(&mut self, path: PathBuf) -> Result<(), Cow<'static, str>> {
+    pub fn store_as(&mut self, path: PathBuf) -> Result<(), util::Error> {
       // Make sure the extension is "sota".
       let path = if path.extension() != Some(OsStr::new("sota")) {
         path.with_extension("sota")

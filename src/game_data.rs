@@ -33,7 +33,7 @@ pub struct GameData {
 }
 
 impl GameData {
-  pub fn load(path: PathBuf) -> Result<Self, Cow<'static, str>> {
+  pub fn load(path: PathBuf) -> Result<Self, util::Error> {
     match std::fs::read_to_string(&path) {
       Ok(text) => {
         // Get the avatar ID.
@@ -86,11 +86,11 @@ impl GameData {
     }
   }
 
-  pub fn store(&self) -> Result<(), Cow<'static, str>> {
+  pub fn store(&self) -> Result<(), util::Error> {
     self.store_as(self.get_file_path())
   }
 
-  pub fn store_as(&self, path: PathBuf) -> Result<(), Cow<'static, str>> {
+  pub fn store_as(&self, path: PathBuf) -> Result<(), util::Error> {
     // Set CharacterSheet.
     let text = set_json(&self.text, CHARACTER_SHEET, &self.avatar, &self.character)?;
 
@@ -424,7 +424,7 @@ impl ToI64 for Value {
   }
 }
 
-fn get_avatar_id(text: &str) -> Result<String, Cow<'static, str>> {
+fn get_avatar_id(text: &str) -> Result<String, util::Error> {
   // Get the User json.
   let json = get_json(text, "User", USER_ID)?;
 
@@ -436,7 +436,7 @@ fn get_avatar_id(text: &str) -> Result<String, Cow<'static, str>> {
   Err(Cow::from("Unable to determine the current avatar"))
 }
 
-fn get_avatar_name(text: &str, avatar: &str) -> Result<String, Cow<'static, str>> {
+fn get_avatar_name(text: &str, avatar: &str) -> Result<String, util::Error> {
   // Get the CharacterName json.
   let json = get_json(text, "CharacterName", avatar)?;
 
@@ -448,7 +448,7 @@ fn get_avatar_name(text: &str, avatar: &str) -> Result<String, Cow<'static, str>
   Err(Cow::from("Unable to get the avatar name"))
 }
 
-fn get_backpack_id(text: &str, avatar: &str) -> Result<String, Cow<'static, str>> {
+fn get_backpack_id(text: &str, avatar: &str) -> Result<String, util::Error> {
   // Get the Character json.
   let json = get_json(text, "Character", avatar)?;
 
@@ -491,7 +491,7 @@ fn get_json_range(text: &str, collection: &str, id: &str) -> Option<Range<usize>
   Some(start..end)
 }
 
-fn get_json(text: &str, collection: &str, id: &str) -> Result<Value, Cow<'static, str>> {
+fn get_json(text: &str, collection: &str, id: &str) -> Result<Value, util::Error> {
   if let Some(range) = get_json_range(text, collection, id) {
     let text = &text[range];
     match serde_json::from_str::<Value>(text) {
@@ -505,7 +505,7 @@ fn get_json(text: &str, collection: &str, id: &str) -> Result<Value, Cow<'static
   Err(Cow::from(err))
 }
 
-fn set_json(text: &str, collection: &str, id: &str, val: &Value) -> Result<String, Cow<'static, str>> {
+fn set_json(text: &str, collection: &str, id: &str, val: &Value) -> Result<String, util::Error> {
   if let Some(range) = get_json_range(text, collection, id) {
     // Convert the value to JSON text.
     let json = val.to_string();
@@ -523,7 +523,7 @@ fn set_json(text: &str, collection: &str, id: &str, val: &Value) -> Result<Strin
   Err(Cow::from(err))
 }
 
-fn find_date(val: &Value) -> Result<Value, Cow<'static, str>> {
+fn find_date(val: &Value) -> Result<Value, util::Error> {
   if let Value::Object(obj) = val {
     for (_, val) in obj {
       if let Some(val) = val.get(T) {

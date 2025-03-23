@@ -8,6 +8,7 @@ use num_format::Locale;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::{
+  borrow::Cow,
   cell::RefCell,
   mem,
   ops::{Range, RangeInclusive},
@@ -32,6 +33,8 @@ pub const HOUR_SECS: i64 = 60 * 60;
 
 /// Number of seconds in a fortnight (two weeks, one in-game year).
 pub const FORTNIGHT_SECS: i64 = HOUR_SECS * 24 * 14;
+
+pub type Error = Cow<'static, str>;
 
 #[macro_export]
 macro_rules! debugln {
