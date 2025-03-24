@@ -37,10 +37,8 @@ impl Storage {
 
   /// Set an item as a specific type.
   pub fn set_as<T: serde::Serialize>(&mut self, key: &str, item: &T) {
-    match ron::to_string(item) {
-      Ok(ok) => self.set(key, ok),
-      Err(err) => println!("{err}"),
-    }
+    let text = ok!(ron::to_string(item));
+    self.set(key, text);
   }
 
   /// Remove an item.
@@ -82,27 +80,14 @@ mod inner {
     }
 
     fn load_items(path: &Path) -> HashMap<String, String> {
-      match fs::read(path) {
-        Ok(data) => match ron::de::from_bytes(&data) {
-          Ok(items) => return items,
-          Err(err) => println!("{err}"),
-        },
-        Err(err) => println!("{err}"),
-      }
-
-      HashMap::new()
+      let data = ok!(fs::read(path), HashMap::new());
+      ok!(ron::de::from_bytes(&data), HashMap::new())
     }
 
     fn persist(&self) {
       if self.changed.swap(false, Ordering::Relaxed) {
-        match ron::ser::to_string_pretty(&self.items, Default::default()) {
-          Ok(text) => {
-            if let Err(err) = fs::write(&self.path, text) {
-              println!("{err}");
-            }
-          }
-          Err(err) => println!("{err}"),
-        }
+        let text = ok!(ron::ser::to_string_pretty(&self.items, Default::default()));
+        err!(fs::write(&self.path, text));
       }
     }
 
