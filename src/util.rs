@@ -102,7 +102,7 @@ impl Picture {
   pub fn new(name: String, data: &[u8]) -> Self {
     let image = image::load_from_memory(data).unwrap();
     let size = [image.width() as usize, image.height() as usize];
-    let pixels = image.to_rgba8();
+    let pixels = image.into_rgba8();
     let pixels = pixels.as_flat_samples();
     let rgba = ColorImage::from_rgba_unmultiplied(size, pixels.as_slice());
     let size = Vec2::new(size[0] as f32, size[1] as f32);
