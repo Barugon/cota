@@ -8,7 +8,7 @@ use std::{
   path::{Path, PathBuf},
 };
 
-/// Companion of the Avatar configuration storage.
+/// Companion of the Avatar configuration.
 #[derive(Clone)]
 pub struct Config {
   storage: Storage,
