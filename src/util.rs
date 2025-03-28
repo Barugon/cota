@@ -410,6 +410,17 @@ mod tests {
   }
 
   #[test]
+  fn test_offset() {
+    let text = "Is something sub-text?";
+    let something = "something";
+    let pos = text.find(something).unwrap();
+    let substr = &text[pos..pos + something.len()];
+    assert_eq!(something, substr);
+    assert_eq!(Some(pos), offset(text, substr));
+    assert_eq!(None, offset(text, something));
+  }
+
+  #[test]
   fn test_to_locale() {
     assert_eq!(Locale::en, to_locale(Some("en-US")));
     assert_eq!(Locale::en_US_POSIX, to_locale(Some("en-US-POSIX")));
