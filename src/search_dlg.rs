@@ -1,6 +1,11 @@
+use std::mem;
+
 use crate::util::{AppState, Search};
 use eframe::{
-  egui::{Context, Key, Layout, RichText, Window},
+  egui::{
+    Context, Key, Layout, RichText, TextEdit, Window,
+    text::{CCursor, CCursorRange},
+  },
   emath::{Align, Align2},
   epaint::Color32,
 };
@@ -48,10 +53,15 @@ impl SearchDlg {
         .default_size([available.width(), 0.0])
         .show(ctx, |ui| {
           ui.vertical_centered_justified(|ui| {
-            let response = ui.text_edit_singleline(&mut self.text);
-            if self.focus {
-              self.focus = false;
-              response.request_focus();
+            let mut output = TextEdit::singleline(&mut self.text).show(ui);
+            if mem::take(&mut self.focus) {
+              output.response.request_focus();
+              if !self.text.is_empty() {
+                // Select the text.
+                let select = CCursorRange::two(CCursor::new(0), CCursor::new(self.text.len()));
+                output.state.cursor.set_char_range(Some(select));
+                output.state.store(ui.ctx(), output.response.id);
+              }
             }
           });
           if !self.error.is_empty() {
@@ -121,15 +131,11 @@ impl SearchDlg {
       self.search = match self.search_type {
         SearchType::Default | SearchType::NoCase => {
           let ignore_case = self.search_type == SearchType::NoCase;
-          let mut find = String::new();
-          std::mem::swap(&mut find, &mut self.text);
+          let find = self.text.clone();
           Some(Search::String { find, ignore_case })
         }
         SearchType::Regex => match Regex::new(&self.text) {
-          Ok(regex) => {
-            self.text.clear();
-            Some(Search::Regex(regex))
-          }
+          Ok(regex) => Some(Search::Regex(regex)),
           Err(err) => {
             self.text = format!("{err:?}");
             return;
@@ -147,7 +153,6 @@ impl SearchDlg {
     if self.visible {
       self.state.set_disabled(false);
       self.title.clear();
-      self.text.clear();
       self.visible = false;
     }
   }
