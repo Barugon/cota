@@ -403,6 +403,13 @@ mod tests {
   }
 
   #[test]
+  fn test_get_countdown_text() {
+    assert_eq!("02h 12m 32s", get_countdown_text(HOUR_SECS * 2 + 60 * 12 + 32));
+    assert_eq!("07m 44s", get_countdown_text(60 * 7 + 44));
+    assert_eq!("05s", get_countdown_text(5));
+  }
+
+  #[test]
   fn test_to_locale() {
     assert_eq!(Locale::en, to_locale(Some("en-US")));
     assert_eq!(Locale::en_US_POSIX, to_locale(Some("en-US-POSIX")));
