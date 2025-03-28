@@ -169,10 +169,10 @@ pub fn get_epoch() -> DateTime<Utc> {
 pub fn get_countdown_text(sec: i64) -> String {
   if sec >= 60 {
     let min = sec / 60;
-    let sec = sec % 60;
+    let sec = sec - min * 60;
     if min >= 60 {
       let hour = min / 60;
-      let min = min % 60;
+      let min = min - hour * 60;
       return format!("{hour:02}h {min:02}m {sec:02}s");
     }
     return format!("{min:02}m {sec:02}s");
