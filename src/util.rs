@@ -477,7 +477,8 @@ mod tests {
 
   #[test]
   fn test_timestamp_to_string() {
-    let text = timestamp_to_string(Some(0));
-    assert_eq!("1970-01-01 00:00:00", text);
+    let epoch = get_epoch().timestamp();
+    assert_eq!("1970-01-01 00:00:00", timestamp_to_string(Some(0)));
+    assert_eq!("1997-09-02 00:00:00", timestamp_to_string(Some(epoch)));
   }
 }
