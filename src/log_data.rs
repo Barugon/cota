@@ -10,17 +10,17 @@ use std::{
 };
 
 /// Get separate date/time and text portions of a log entry.
-pub fn get_log_date_text(line: &str) -> (&str, &str) {
-  if let Some(date) = get_log_date(line) {
-    let text = &line[date.len()..];
+pub fn get_log_datetime_and_text(line: &str) -> (&str, &str) {
+  if let Some(datetime) = get_log_datetime(line) {
+    let text = &line[datetime.len()..];
 
     // Check if a chat timestamp was output.
     let trimmed = text.trim_start();
-    if let Some(time) = get_log_date(trimmed) {
-      return (date, &trimmed[time.len()..]);
+    if let Some(time) = get_log_datetime(trimmed) {
+      return (datetime, &trimmed[time.len()..]);
     }
 
-    return (date, text);
+    return (datetime, text);
   }
 
   (Default::default(), line)
@@ -138,7 +138,7 @@ pub async fn get_stats_timestamps(
             return Vec::new();
           }
 
-          if let Some((ts, _)) = get_stats_ts_text(line, date) {
+          if let Some((ts, _)) = get_stats_timestamp_and_text(line, date) {
             timestamps.push(ts);
           }
         }
@@ -180,9 +180,9 @@ pub async fn get_stats_timestamps(
 }
 
 /// Get the stats for the specified avatar and timestamp.
-pub async fn get_stats(log_path: PathBuf, avatar: String, ts: i64, cancel: Cancel) -> StatsData {
+pub async fn get_stats(log_path: PathBuf, avatar: String, timestamp: i64, cancel: Cancel) -> StatsData {
   if !avatar.is_empty() {
-    let filenames = get_log_filenames(&log_path, Some(&avatar), Some(ts));
+    let filenames = get_log_filenames(&log_path, Some(&avatar), Some(timestamp));
 
     // There will actually only be one file with the specific avatar name and date.
     for filename in filenames {
@@ -195,7 +195,7 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, ts: i64, cancel: Cance
               return StatsData::default();
             }
 
-            if let Some(stats) = get_stats_text(line, ts, date) {
+            if let Some(stats) = get_stats_text(line, timestamp, date) {
               // Include subsequent lines that do not start with a square bracket.
               let pos = util::offset(&text, stats).unwrap();
               let sub = &text[pos + stats.len()..];
@@ -254,9 +254,10 @@ pub async fn get_adv_exp(log_path: PathBuf, avatar: String, cancel: Cancel) -> O
 
 /// Find log entries matching the provided search term.
 pub async fn find_log_entries(log_path: PathBuf, avatar: String, search: Search, cancel: Cancel) -> String {
-  // Work on files from newest to oldest.
   let filenames = {
     let mut filenames = get_log_filenames(&log_path, Some(&avatar), None);
+
+    // Work on files from newest to oldest.
     filenames.sort_unstable_by(|a, b| b.cmp(a));
     filenames
   };
@@ -280,11 +281,11 @@ pub async fn find_log_entries(log_path: PathBuf, avatar: String, search: Search,
         }
 
         // Split the date and text.
-        let (date, text) = get_log_date_text(line);
+        let (datetime, text) = get_log_datetime_and_text(line);
 
         // Search the text portion.
         if search.find_in(text).is_some() {
-          result.push_str(date);
+          result.push_str(datetime);
           result.push_str(text);
           result.push('\n');
           if result.len() >= LOG_SEARCH_LIMIT {
@@ -376,12 +377,12 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
     if let Ok(text) = fs::read_to_string(path) {
       // Search for attack lines.
       for line in text.lines() {
-        let (date, text) = get_log_date_text(line);
-        if date.is_empty() {
+        let (datetime, text) = get_log_datetime_and_text(line);
+        if datetime.is_empty() {
           continue;
         }
 
-        let Some(ts) = log_date_to_timestamp(date, file_date) else {
+        let Some(ts) = log_datetime_to_timestamp(datetime, file_date) else {
           continue;
         };
 
@@ -433,7 +434,7 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
   dps_tally
 }
 
-fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> Vec<String> {
+fn get_log_filenames(log_path: &Path, avatar: Option<&str>, timestamp: Option<i64>) -> Vec<String> {
   let mut filenames = Vec::new();
   let entries = ok!(log_path.read_dir(), filenames);
 
@@ -441,8 +442,8 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> 
   let name = avatar.unwrap_or(".+");
 
   // The date text is either a specific date or, if not specified, regex to match the date.
-  let date = if let Some(ts) = ts {
-    timestamp_to_file_date(ts)
+  let date = if let Some(timestamp) = timestamp {
+    timestamp_to_file_date(timestamp)
   } else {
     String::from(r"\d{4}-\d{2}-\d{2}")
   };
@@ -450,9 +451,9 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> 
   let regex = ok!(Regex::new(&format!("^{FILENAME_START}_{name}_{date}.txt$")), filenames);
 
   for entry in entries.flatten() {
-    if let Ok(filename) = entry.file_name().into_string() {
-      if regex.is_match(&filename) {
-        filenames.push(filename);
+    if let Some(filename) = entry.file_name().to_str() {
+      if regex.is_match(filename) {
+        filenames.push(filename.to_string());
       }
     }
   }
@@ -463,7 +464,7 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, ts: Option<i64>) -> 
 /// Make sure the text contains at least one date/time.
 fn verify_log_text(text: &str) -> bool {
   for line in text.lines() {
-    if get_log_date(line).is_some() {
+    if get_log_datetime(line).is_some() {
       return true;
     }
   }
@@ -472,7 +473,7 @@ fn verify_log_text(text: &str) -> bool {
 
 /// Convert a SotA log date & time into a timestamp. Since the dates are localized, we don't know
 /// if day or month come first, so we use the date from the filename, which is always YYYY-MM-DD.
-fn log_date_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
+fn log_datetime_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
   let text = text.trim_start_matches('[').trim_end_matches(']');
   let mut iter = text.split_whitespace();
   let _date = iter.next()?;
@@ -511,11 +512,11 @@ fn log_date_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
 }
 
 /// Convert a timestamp into a log filename date string.
-fn timestamp_to_file_date(ts: i64) -> String {
-  let Some(dt) = DateTime::from_timestamp(ts, 0) else {
+fn timestamp_to_file_date(timestamp: i64) -> String {
+  let Some(datetime) = DateTime::from_timestamp(timestamp, 0) else {
     return String::default();
   };
-  dt.format("%Y-%m-%d").to_string()
+  datetime.format("%Y-%m-%d").to_string()
 }
 
 /// Get a NaiveDate from a log filename.
@@ -527,7 +528,7 @@ fn get_log_file_date(path: &Path) -> Option<NaiveDate> {
 }
 
 /// Get the date/time portion of a log entry.
-fn get_log_date(line: &str) -> Option<&str> {
+fn get_log_datetime(line: &str) -> Option<&str> {
   if !line.starts_with('[') {
     return None;
   }
@@ -537,20 +538,20 @@ fn get_log_date(line: &str) -> Option<&str> {
 }
 
 /// Get the log entry date/time as a timestamp and the log text if it's a `/stats` entry.
-fn get_stats_ts_text(line: &str, file_date: NaiveDate) -> Option<(i64, &str)> {
-  let (date, text) = get_log_date_text(line);
-  if !date.is_empty() && text.starts_with(STATS_KEY) {
-    let ts = log_date_to_timestamp(date, file_date)?;
-    return Some((ts, text));
+fn get_stats_timestamp_and_text(line: &str, file_date: NaiveDate) -> Option<(i64, &str)> {
+  let (datetime, text) = get_log_datetime_and_text(line);
+  if !datetime.is_empty() && text.starts_with(STATS_KEY) {
+    let timestamp = log_datetime_to_timestamp(datetime, file_date)?;
+    return Some((timestamp, text));
   }
 
   None
 }
 
 /// Get the log entry text if it's `/stats` and the date/time matches.
-fn get_stats_text(line: &str, ts: i64, file_date: NaiveDate) -> Option<&str> {
-  let (lts, text) = get_stats_ts_text(line, file_date)?;
-  if lts == ts {
+fn get_stats_text(line: &str, timestamp: i64, file_date: NaiveDate) -> Option<&str> {
+  let (line_timestamp, text) = get_stats_timestamp_and_text(line, file_date)?;
+  if line_timestamp == timestamp {
     return Some(text);
   }
 
@@ -558,11 +559,7 @@ fn get_stats_text(line: &str, ts: i64, file_date: NaiveDate) -> Option<&str> {
 }
 
 fn get_adv_xp(line: &str) -> Option<i64> {
-  let (_, text) = get_log_date_text(line);
-  if let Some(text) = text.strip_prefix(ADV_EXP_KEY) {
-    let text = util::remove_separators(text);
-    return text.parse().ok();
-  }
-
-  None
+  let (_, text) = get_log_datetime_and_text(line);
+  let text = text.strip_prefix(ADV_EXP_KEY)?;
+  util::remove_separators(text).parse().ok()
 }

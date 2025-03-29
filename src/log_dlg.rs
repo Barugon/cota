@@ -142,15 +142,15 @@ impl LogDlg {
 fn layout_text(text: String, search: Search, font: FontId, color: Color32) -> LayoutJob {
   let mut sections = Vec::new();
   for line in text.lines() {
-    let (date, mut line) = log_data::get_log_date_text(line);
+    let (datetime, mut line) = log_data::get_log_datetime_and_text(line);
 
     // Highlight the date/time.
-    if !date.is_empty() {
+    if !datetime.is_empty() {
       const DATE_COLOR: Color32 = Color32::from_rgb(180, 154, 102);
-      let pos = util::offset(&text, date).unwrap();
+      let pos = util::offset(&text, datetime).unwrap();
       sections.push(LayoutSection {
         leading_space: 0.0,
-        byte_range: pos..pos + date.len(),
+        byte_range: pos..pos + datetime.len(),
         format: TextFormat::simple(font.clone(), DATE_COLOR),
       });
     }
