@@ -261,8 +261,7 @@ pub async fn find_log_entries(log_path: PathBuf, avatar: String, search: Search,
     filenames
   };
 
-  let mut results = Vec::new();
-  let mut total_size: usize = 0;
+  let mut result = String::new();
   for filename in filenames {
     if cancel.is_canceled() {
       return String::new();
@@ -274,64 +273,29 @@ pub async fn find_log_entries(log_path: PathBuf, avatar: String, search: Search,
         continue;
       }
 
-      let mut lines = Vec::new();
-      let mut alloc_size: usize = 0;
-
       // Iterate through the lines in reverse order (newest to oldest).
       for line in text.lines().rev() {
         if cancel.is_canceled() {
           return String::new();
         }
 
-        if search.find_in(line).is_none() {
-          continue;
-        }
-
+        // Split the date and text.
         let (date, text) = get_log_date_text(line);
-        let size = date.len() + text.len();
-        if size > 0 {
-          // Account for a newline.
-          let size = size + 1;
-          alloc_size += size;
-          total_size += size;
-          lines.push((date, text));
-        }
 
-        if total_size >= LOG_SEARCH_LIMIT {
-          break;
+        // Search the text portion.
+        if search.find_in(text).is_some() {
+          result.push_str(date);
+          result.push_str(text);
+          result.push('\n');
+          if result.len() >= LOG_SEARCH_LIMIT {
+            return result;
+          }
         }
       }
-
-      // Push all the matching lines to a new string.
-      let mut concatenated = String::with_capacity(alloc_size);
-      for (date, text) in lines {
-        if cancel.is_canceled() {
-          return String::new();
-        }
-
-        concatenated.push_str(date);
-        concatenated.push_str(text);
-        concatenated.push('\n');
-      }
-      results.push(concatenated);
-    }
-
-    if total_size >= LOG_SEARCH_LIMIT {
-      break;
     }
   }
 
-  // Concatenate the results.
-  let mut text = String::with_capacity(total_size);
-  for result in results {
-    if cancel.is_canceled() {
-      return String::new();
-    }
-
-    text.push_str(&result);
-  }
-
-  text
+  result
 }
 
 #[derive(Clone)]
