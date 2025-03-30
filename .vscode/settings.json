@@ -45,6 +45,7 @@
     "reqs",
     "rfind",
     "rustup",
+    "savegame",
     "serde",
     "sota",
     "temna",
@@ -56,7 +57,7 @@
     "unmultiplied",
     "vscroll",
     "westend",
-    "winit",
+    "winit"
   ],
   "editor.rulers": [
     120
