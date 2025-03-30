@@ -6,6 +6,8 @@ use serde_json::Value;
 use skill_info::{SkillCategory, SkillInfo, SkillInfoGroup};
 use std::{borrow::Cow, fs::File, io::Write, ops::Range, path::PathBuf, sync::RwLock};
 
+pub const SAVEGAME_EXT: &str = "sota";
+
 // NOTE: UserKnowledge contains virtue.
 
 /// Structure to load and modify a SotA save-game file.

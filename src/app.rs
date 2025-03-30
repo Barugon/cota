@@ -5,6 +5,7 @@ use crate::{
   confirm_dlg::{Choice, ConfirmDlg, Hence},
   experience::Experience,
   farming::Farming,
+  game_data::SAVEGAME_EXT,
   offline::Offline,
   stats::{Stats, StatsFilter},
   util::{self, AppState, Page},
@@ -240,7 +241,7 @@ impl App {
     };
 
     let filter = Box::new({
-      let ext = Some(OsStr::new(App::SOTA));
+      let ext = Some(OsStr::new(SAVEGAME_EXT));
       move |path: &Path| path.extension() == ext
     });
 
@@ -264,7 +265,7 @@ impl App {
     };
 
     let filter = Box::new({
-      let ext = Some(OsStr::new(App::SOTA));
+      let ext = Some(OsStr::new(SAVEGAME_EXT));
       move |path: &Path| path.extension() == ext
     });
 
@@ -281,8 +282,6 @@ impl App {
     self.state.set_disabled(true);
     self.file_dlg = Some(file_dlg);
   }
-
-  const SOTA: &str = "sota";
 }
 
 impl eframe::App for App {
