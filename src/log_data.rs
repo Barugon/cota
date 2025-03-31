@@ -10,7 +10,7 @@ use std::{
 };
 
 /// Get separate date/time and text portions of a log entry.
-/// > **NOTE:** the date/time text will still have the surrounding square brackets.
+/// > **NOTE:** the date/time will still have the surrounding square brackets.
 pub fn get_log_datetime_and_text(line: &str) -> (&str, &str) {
   if let Some(datetime) = get_log_datetime(line) {
     let text = &line[datetime.len()..];
