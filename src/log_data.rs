@@ -132,9 +132,7 @@ pub async fn get_stats_timestamps(
       let path = log_path.join(filename.as_str());
       let cancel = cancel.clone();
       futures.push(async move {
-        let Some(date) = get_log_file_date(&path) else {
-          return Vec::new();
-        };
+        let date = get_log_file_date(&path).unwrap();
         let text = ok!(fs::read_to_string(&path), Vec::new());
         let mut timestamps = Vec::new();
 
