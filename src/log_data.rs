@@ -281,6 +281,10 @@ pub async fn find_log_entries(
     ..Default::default()
   };
 
+  let format_normal = TextFormat::simple(font.clone(), color);
+  let format_datetime = TextFormat::simple(font.clone(), Color32::from_rgb(180, 154, 102));
+  let format_match = TextFormat::simple(font.clone(), Color32::from_rgb(102, 154, 180));
+
   for filename in filenames {
     if cancel.is_canceled() {
       return LayoutJob::default();
@@ -306,15 +310,13 @@ pub async fn find_log_entries(
         if find.is_some() {
           let mut pos = layout.text.len();
 
-          // Highlight the date/time.
           if !datetime.is_empty() {
-            const DATETIME_COLOR: Color32 = Color32::from_rgb(180, 154, 102);
-
+            // Highlight the date/time.
             layout.text.push_str(datetime);
             layout.sections.push(LayoutSection {
               leading_space: 0.0,
               byte_range: pos..pos + datetime.len(),
-              format: TextFormat::simple(font.clone(), DATETIME_COLOR),
+              format: format_datetime.clone(),
             });
             pos += datetime.len();
           }
@@ -323,8 +325,6 @@ pub async fn find_log_entries(
           layout.text.push('\n');
 
           while let Some(range) = find {
-            const MATCH_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
-
             let start = pos + range.start;
             let end = pos + range.end;
 
@@ -333,7 +333,7 @@ pub async fn find_log_entries(
               layout.sections.push(LayoutSection {
                 leading_space: 0.0,
                 byte_range: pos..start,
-                format: TextFormat::simple(font.clone(), color),
+                format: format_normal.clone(),
               });
             }
 
@@ -341,7 +341,7 @@ pub async fn find_log_entries(
             layout.sections.push(LayoutSection {
               leading_space: 0.0,
               byte_range: start..end,
-              format: TextFormat::simple(font.clone(), MATCH_COLOR),
+              format: format_match.clone(),
             });
 
             pos += range.end;
@@ -355,7 +355,7 @@ pub async fn find_log_entries(
           layout.sections.push(LayoutSection {
             leading_space: 0.0,
             byte_range: pos..pos + text.len() + 1,
-            format: TextFormat::simple(font.clone(), color),
+            format: format_normal.clone(),
           });
 
           if layout.text.len() >= LOG_SEARCH_LIMIT {
