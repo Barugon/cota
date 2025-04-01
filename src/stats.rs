@@ -8,7 +8,7 @@ use crate::{
   util::{self, AppState, Cancel, Search},
 };
 use eframe::{
-  egui::{ComboBox, Context, Layout, RichText, Ui},
+  egui::{ComboBox, Context, FontFamily, FontId, Layout, RichText, Ui, text::LayoutJob},
   emath::Align,
   epaint::Color32,
 };
@@ -197,9 +197,9 @@ impl Stats {
           self.state.set_busy(false);
           self.stats = stats;
         }
-        Message::Search(text, search) => {
+        Message::Search(layout) => {
           self.state.set_busy(false);
-          self.log_dlg.set_text(text, search, ui.ctx());
+          self.log_dlg.set_layout(layout, ui.ctx());
         }
       }
     }
@@ -562,9 +562,11 @@ impl Stats {
     let ctx = ctx.clone();
     let log_path = self.log_path.clone();
     let avatar = self.avatar.clone();
-    let future = log_data::find_log_entries(log_path, avatar, search.clone(), cancel);
+    let font = FontId::new(14.0, FontFamily::Monospace);
+    let color = ctx.style().visuals.text_color();
+    let future = log_data::find_log_entries(log_path, avatar, search, font, color, cancel);
     let future = async move {
-      let msg = Message::Search(future.await, search);
+      let msg = Message::Search(future.await);
       tx.unbounded_send(msg).unwrap();
       ctx.request_repaint();
     };
@@ -614,7 +616,7 @@ enum Message {
   Avatars(Vec<String>),
   Dates(Vec<i64>),
   Stats(StatsData),
-  Search(String, Search),
+  Search(LayoutJob),
 }
 
 struct Channel {

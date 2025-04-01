@@ -1,5 +1,9 @@
 use crate::util::{self, Cancel, Search};
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
+use eframe::egui::{
+  Color32, FontId, TextFormat,
+  text::{LayoutJob, LayoutSection},
+};
 use futures::{StreamExt, channel::mpsc, executor::ThreadPool, future};
 use regex::Regex;
 use std::{
@@ -254,7 +258,14 @@ pub async fn get_adv_exp(log_path: PathBuf, avatar: String, cancel: Cancel) -> O
 }
 
 /// Find log entries matching the provided search term.
-pub async fn find_log_entries(log_path: PathBuf, avatar: String, search: Search, cancel: Cancel) -> String {
+pub async fn find_log_entries(
+  log_path: PathBuf,
+  avatar: String,
+  search: Search,
+  font: FontId,
+  color: Color32,
+  cancel: Cancel,
+) -> LayoutJob {
   let filenames = {
     let mut filenames = get_log_filenames(&log_path, Some(&avatar), None);
 
@@ -263,10 +274,16 @@ pub async fn find_log_entries(log_path: PathBuf, avatar: String, search: Search,
     filenames
   };
 
-  let mut result = String::new();
+  let mut layout = LayoutJob {
+    text: String::new(),
+    sections: Vec::new(),
+    break_on_newline: true,
+    ..Default::default()
+  };
+
   for filename in filenames {
     if cancel.is_canceled() {
-      return String::new();
+      return LayoutJob::default();
     }
 
     let path = log_path.join(filename);
@@ -278,26 +295,78 @@ pub async fn find_log_entries(log_path: PathBuf, avatar: String, search: Search,
       // Iterate through the lines in reverse order (newest to oldest).
       for line in text.lines().rev() {
         if cancel.is_canceled() {
-          return String::new();
+          return LayoutJob::default();
         }
 
         // Split the date and text.
-        let (datetime, text) = get_log_datetime_and_text(line);
+        let (datetime, mut text) = get_log_datetime_and_text(line);
 
         // Search the text portion.
-        if search.find_in(text).is_some() {
-          result.push_str(datetime);
-          result.push_str(text);
-          result.push('\n');
-          if result.len() >= LOG_SEARCH_LIMIT {
-            return result;
+        let mut find = search.find_in(text);
+        if find.is_some() {
+          let mut pos = layout.text.len();
+
+          // Highlight the date/time.
+          if !datetime.is_empty() {
+            const DATETIME_COLOR: Color32 = Color32::from_rgb(180, 154, 102);
+
+            layout.text.push_str(datetime);
+            layout.sections.push(LayoutSection {
+              leading_space: 0.0,
+              byte_range: pos..pos + datetime.len(),
+              format: TextFormat::simple(font.clone(), DATETIME_COLOR),
+            });
+            pos += datetime.len();
+          }
+
+          layout.text.push_str(text);
+          layout.text.push('\n');
+
+          while let Some(range) = find {
+            const MATCH_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
+
+            let start = pos + range.start;
+            let end = pos + range.end;
+
+            if start > pos {
+              // Text before the match.
+              layout.sections.push(LayoutSection {
+                leading_space: 0.0,
+                byte_range: pos..start,
+                format: TextFormat::simple(font.clone(), color),
+              });
+            }
+
+            // Highlight the match
+            layout.sections.push(LayoutSection {
+              leading_space: 0.0,
+              byte_range: start..end,
+              format: TextFormat::simple(font.clone(), MATCH_COLOR),
+            });
+
+            pos += range.end;
+            text = &text[range.end..];
+
+            // Search for another match.
+            find = search.find_in(text);
+          }
+
+          // The rest.
+          layout.sections.push(LayoutSection {
+            leading_space: 0.0,
+            byte_range: pos..pos + text.len() + 1,
+            format: TextFormat::simple(font.clone(), color),
+          });
+
+          if layout.text.len() >= LOG_SEARCH_LIMIT {
+            return layout;
           }
         }
       }
     }
   }
 
-  result
+  layout
 }
 
 #[derive(Clone)]

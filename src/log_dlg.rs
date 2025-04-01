@@ -1,14 +1,8 @@
-use crate::{
-  log_data,
-  util::{self, AppState, Cancel, Search},
-};
+use crate::util::{AppState, Cancel};
 use eframe::{
-  egui::{Context, Key, RichText, ScrollArea, TextEdit, TextFormat, Ui, Window, scroll_area::ScrollBarVisibility},
+  egui::{Context, Key, RichText, ScrollArea, TextEdit, Ui, Window, scroll_area::ScrollBarVisibility},
   emath::Align2,
-  epaint::{
-    Color32, FontFamily, FontId,
-    text::{LayoutJob, LayoutSection},
-  },
+  epaint::{Color32, text::LayoutJob},
 };
 
 pub struct LogDlg {
@@ -103,15 +97,13 @@ impl LogDlg {
     }
   }
 
-  pub fn set_text(&mut self, text: String, search: Search, ctx: &Context) {
+  pub fn set_layout(&mut self, layout: LayoutJob, ctx: &Context) {
     if self.visible {
-      if text.is_empty() {
+      if layout.text.is_empty() {
         self.layout = None;
         self.status = RichText::from("Nothing Found").color(Color32::from_rgb(229, 187, 123));
       } else {
-        let font = FontId::new(14.0, FontFamily::Monospace);
-        let color = ctx.style().visuals.text_color();
-        self.layout = Some(layout_text(text, search, font, color));
+        self.layout = Some(layout);
         self.status = Default::default();
       }
       ctx.request_repaint();
@@ -136,69 +128,5 @@ impl LogDlg {
     if ctx.input(|state| state.key_pressed(Key::Escape)) {
       self.close();
     }
-  }
-}
-
-/// Construct a `LayoutJob` for highlighted results.
-fn layout_text(text: String, search: Search, font: FontId, color: Color32) -> LayoutJob {
-  let mut sections = Vec::new();
-  for line in text.lines() {
-    let (datetime, mut line) = log_data::get_log_datetime_and_text(line);
-
-    // Highlight the date/time.
-    if !datetime.is_empty() {
-      const DATE_COLOR: Color32 = Color32::from_rgb(180, 154, 102);
-      let pos = util::offset(&text, datetime).unwrap();
-      sections.push(LayoutSection {
-        leading_space: 0.0,
-        byte_range: pos..pos + datetime.len(),
-        format: TextFormat::simple(font.clone(), DATE_COLOR),
-      });
-    }
-
-    loop {
-      let pos = util::offset(&text, line).unwrap();
-      if let Some(find) = search.find_in(line) {
-        let start = pos + find.start;
-        let end = pos + find.end;
-        if start > pos {
-          // Text before the match.
-          sections.push(LayoutSection {
-            leading_space: 0.0,
-            byte_range: pos..start,
-            format: TextFormat::simple(font.clone(), color),
-          });
-        }
-
-        const MATCH_COLOR: Color32 = Color32::from_rgb(102, 154, 180);
-
-        // Highlight the match
-        sections.push(LayoutSection {
-          leading_space: 0.0,
-          byte_range: start..end,
-          format: TextFormat::simple(font.clone(), MATCH_COLOR),
-        });
-
-        // Move past the match.
-        line = &line[find.end..];
-      } else {
-        if !line.is_empty() {
-          // The rest.
-          sections.push(LayoutSection {
-            leading_space: 0.0,
-            byte_range: pos..pos + line.len() + 1,
-            format: TextFormat::simple(font.clone(), color),
-          });
-        }
-        break;
-      }
-    }
-  }
-
-  LayoutJob {
-    text,
-    sections,
-    break_on_newline: true,
-    ..Default::default()
   }
 }
