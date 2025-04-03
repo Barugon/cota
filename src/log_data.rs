@@ -13,24 +13,6 @@ use std::{
   str::SplitWhitespace,
 };
 
-/// Get separate date/time and text portions of a log entry.
-/// > **NOTE:** the date/time will still have the surrounding square brackets.
-pub fn get_log_datetime_and_text(line: &str) -> (&str, &str) {
-  if let Some(datetime) = get_log_datetime(line) {
-    let text = &line[datetime.len()..];
-
-    // Check if a chat timestamp was output.
-    let trimmed = text.trim_start();
-    if let Some(time) = get_log_datetime(trimmed) {
-      return (datetime, &trimmed[time.len()..]);
-    }
-
-    return (datetime, text);
-  }
-
-  (Default::default(), line)
-}
-
 pub struct StatsIter<'a> {
   iter: SplitWhitespace<'a>,
 }
@@ -224,13 +206,7 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, timestamp: i64, cancel
 
 /// Get the latest adventurer experience from `/xp`.
 pub async fn get_adv_exp(log_path: PathBuf, avatar: String, cancel: Cancel) -> Option<i64> {
-  // Work on files from newest to oldest.
-  let filenames = {
-    let mut filenames = get_log_filenames(&log_path, Some(&avatar), None);
-    filenames.sort_unstable_by(|a, b| b.cmp(a));
-    filenames
-  };
-
+  let filenames = get_sorted_log_filenames(&log_path, Some(&avatar));
   for filename in filenames {
     if cancel.is_canceled() {
       break;
@@ -264,13 +240,10 @@ pub async fn find_log_entries(
   color: Color32,
   cancel: Cancel,
 ) -> LayoutJob {
-  let filenames = {
-    let mut filenames = get_log_filenames(&log_path, Some(&avatar), None);
-
-    // Sort files from newest to oldest.
-    filenames.sort_unstable_by(|a, b| b.cmp(a));
-    filenames
-  };
+  let filenames = get_sorted_log_filenames(&log_path, Some(&avatar));
+  let format_normal = TextFormat::simple(font.clone(), color);
+  let format_datetime = TextFormat::simple(font.clone(), Color32::from_rgb(180, 154, 102));
+  let format_match = TextFormat::simple(font.clone(), Color32::from_rgb(102, 154, 180));
 
   let mut layout = LayoutJob {
     text: String::new(),
@@ -278,10 +251,6 @@ pub async fn find_log_entries(
     break_on_newline: true,
     ..Default::default()
   };
-
-  let format_normal = TextFormat::simple(font.clone(), color);
-  let format_datetime = TextFormat::simple(font.clone(), Color32::from_rgb(180, 154, 102));
-  let format_match = TextFormat::simple(font.clone(), Color32::from_rgb(102, 154, 180));
 
   for filename in filenames {
     if cancel.is_canceled() {
@@ -504,6 +473,32 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
 
   dps_tally.secs += 1;
   dps_tally
+}
+
+/// Get separate date/time and text portions of a log entry.
+/// > **NOTE:** the date/time will still have the surrounding square brackets.
+pub fn get_log_datetime_and_text(line: &str) -> (&str, &str) {
+  if let Some(datetime) = get_log_datetime(line) {
+    let text = &line[datetime.len()..];
+
+    // Check if a chat timestamp was output.
+    let trimmed = text.trim_start();
+    if let Some(time) = get_log_datetime(trimmed) {
+      return (datetime, &trimmed[time.len()..]);
+    }
+
+    return (datetime, text);
+  }
+
+  (Default::default(), line)
+}
+
+fn get_sorted_log_filenames(log_path: &Path, avatar: Option<&str>) -> Vec<String> {
+  let mut filenames = get_log_filenames(log_path, avatar, None);
+
+  // Sort files from newest to oldest.
+  filenames.sort_unstable_by(|a, b| b.cmp(a));
+  filenames
 }
 
 fn get_log_filenames(log_path: &Path, avatar: Option<&str>, timestamp: Option<i64>) -> Vec<String> {
