@@ -310,7 +310,6 @@ impl Durability {
   }
 }
 
-#[derive(Clone)]
 pub struct Item {
   id: String,
   name: String,

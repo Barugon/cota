@@ -271,7 +271,7 @@ mod inner {
             );
 
             // The tree is a map of skill IDs to the IDs of skills that require it.
-            for req in &skill.info.reqs {
+            for req in skill.info.reqs.iter() {
               let set = if let Some(set) = tree.get_mut(&req.id) {
                 set
               } else {
@@ -586,7 +586,7 @@ mod inner {
         for child_id in set {
           let skill = self.skills.get(*child_id).unwrap();
           if skill.level > 0 {
-            for req in &skill.info.reqs {
+            for req in skill.info.reqs.iter() {
               if req.id == id && req.lvl > min {
                 min = req.lvl;
               }
@@ -602,7 +602,7 @@ mod inner {
         return;
       }
 
-      for req in &skill.info.reqs {
+      for req in skill.info.reqs.iter() {
         let req_skill = self.skills.get_mut(req.id).unwrap();
         if req_skill.level < req.lvl {
           let enabling = req_skill.level == 0;

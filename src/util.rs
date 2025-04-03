@@ -285,7 +285,7 @@ fn find_ignore_case(text: &str, find: &str) -> Option<Range<usize>> {
 #[derive(Clone)]
 pub enum Search {
   /// Search for the specified string.
-  String { find: String, ignore_case: bool },
+  String { find: Arc<str>, ignore_case: bool },
 
   /// Use regular expression for pattern matching.
   Regex(Regex),
@@ -298,7 +298,7 @@ impl Search {
         Search::String { find, ignore_case } => {
           if *ignore_case {
             return find_ignore_case(text, find);
-          } else if let Some(pos) = text.find(find) {
+          } else if let Some(pos) = text.find(find.as_ref()) {
             return Some(pos..pos + find.len());
           }
         }

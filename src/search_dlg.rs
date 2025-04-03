@@ -131,7 +131,7 @@ impl SearchDlg {
       self.search = match self.search_type {
         SearchType::Default | SearchType::NoCase => {
           let ignore_case = self.search_type == SearchType::NoCase;
-          let find = self.text.clone();
+          let find = self.text.clone().into();
           Some(Search::String { find, ignore_case })
         }
         SearchType::Regex => match Regex::new(&self.text) {

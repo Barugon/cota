@@ -11,6 +11,7 @@ use std::{
   fs,
   path::{Path, PathBuf},
   str::SplitWhitespace,
+  sync::Arc,
 };
 
 pub struct StatsIter<'a> {
@@ -36,14 +37,14 @@ impl<'a> Iterator for StatsIter<'a> {
   }
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct StatsData {
-  text: String,
+  text: Arc<str>,
 }
 
 impl StatsData {
   fn new(text: String) -> StatsData {
-    StatsData { text }
+    StatsData { text: text.into() }
   }
 
   pub fn is_empty(&self) -> bool {

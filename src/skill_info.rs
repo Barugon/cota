@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 #[derive(Clone, Copy, Debug)]
 pub enum SkillCategory {
   Adventurer,
@@ -15,7 +17,7 @@ pub struct SkillInfo {
   pub name: &'static str,
   pub mul: f64,
   pub id: u32,
-  pub reqs: Vec<Requires>,
+  pub reqs: Arc<[Requires]>,
 }
 
 #[derive(Default)]
@@ -66,7 +68,7 @@ pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
         tmp_reqs.push(Requires { id, lvl });
       }
 
-      let reqs = tmp_reqs.clone();
+      let reqs = tmp_reqs.clone().into();
       tmp_reqs.clear();
 
       skill_group.skills.push(SkillInfo { name, mul, id, reqs });
