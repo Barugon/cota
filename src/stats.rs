@@ -492,7 +492,7 @@ impl Stats {
       let log_path = self.log_path.clone();
       let avatar = self.avatar.clone();
       let threads = self.threads.clone();
-      let future = log_data::get_stats_timestamps(log_path, avatar, cancel, Some(threads));
+      let future = log_data::get_stats_timestamps(log_path, avatar, cancel, threads);
       let tx = self.channel.tx.clone();
       let ctx = ctx.clone();
       let future = async move {

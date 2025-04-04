@@ -4,7 +4,7 @@ use eframe::egui::{
   Color32, FontId, TextFormat,
   text::{LayoutJob, LayoutSection},
 };
-use futures::{StreamExt, channel::mpsc, executor::ThreadPool, future};
+use futures::{StreamExt, channel::mpsc, executor::ThreadPool};
 use regex::Regex;
 use std::{
   collections::HashSet,
@@ -96,63 +96,49 @@ pub async fn get_avatars(log_path: PathBuf, cancel: Cancel) -> Vec<String> {
 }
 
 /// Get a vector of timestamps where `/stats` was used for the specified avatar.
-pub async fn get_stats_timestamps(
-  log_path: PathBuf,
-  avatar: String,
-  cancel: Cancel,
-  threads: Option<ThreadPool>,
-) -> Vec<i64> {
-  // Collect the futures, one for each matching log file.
-  let futures = {
-    let filenames = get_log_filenames(&log_path, Some(&avatar), None);
-    let mut futures = Vec::with_capacity(filenames.len());
+pub async fn get_stats_timestamps(log_path: PathBuf, avatar: String, cancel: Cancel, threads: ThreadPool) -> Vec<i64> {
+  let filenames = get_log_filenames(&log_path, Some(&avatar), None);
+  let (tx, rx) = mpsc::unbounded();
 
-    for filename in filenames {
-      if cancel.is_canceled() {
-        return Vec::new();
-      }
+  for filename in filenames {
+    if cancel.is_canceled() {
+      break;
+    }
 
-      let path = log_path.join(filename.as_str());
-      let cancel = cancel.clone();
-      futures.push(async move {
-        let date = get_log_file_date(&path).unwrap();
-        let text = ok!(fs::read_to_string(&path), Vec::new());
-        let mut timestamps = Vec::new();
+    // Create a future to process the log file.
+    let path = log_path.join(filename.as_ref());
+    let cancel = cancel.clone();
+    let future = async move {
+      let date = get_log_file_date(&path).unwrap();
+      let text = ok!(fs::read_to_string(&path), Vec::new());
+      let mut timestamps = Vec::new();
 
-        for line in text.lines() {
-          if cancel.is_canceled() {
-            return Vec::new();
-          }
-
-          if let Some((ts, _)) = get_stats_timestamp_and_text(line, date) {
-            timestamps.push(ts);
-          }
+      for line in text.lines() {
+        if cancel.is_canceled() {
+          return Vec::new();
         }
 
-        timestamps
-      });
-    }
+        if let Some((ts, _)) = get_stats_timestamp_and_text(line, date) {
+          timestamps.push(ts);
+        }
+      }
 
-    futures
-  };
+      timestamps
+    };
 
-  let results = if let Some(threads) = threads {
-    // Process each future on a pooled thread.
-    let (tx, rx) = mpsc::unbounded();
-    for future in futures {
-      let tx = tx.clone();
-      threads.spawn_ok(async move {
-        let result = future.await;
-        tx.unbounded_send(result).unwrap();
-      });
-    }
-    drop(tx);
-    rx.collect().await
-  } else {
-    // Collect the results directly.
-    future::join_all(futures).await
-  };
+    // Execute the future on a pooled thread.
+    let tx = tx.clone();
+    threads.spawn_ok(async move {
+      let result = future.await;
+      tx.unbounded_send(result).unwrap();
+    });
+  }
 
+  // Drop the sender to break the pipe when all futures are done.
+  drop(tx);
+
+  // Collect the results.
+  let results: Vec<Vec<i64>> = rx.collect().await;
   if cancel.is_canceled() {
     return Vec::new();
   }
@@ -172,7 +158,7 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, timestamp: i64, cancel
 
     // There will actually only be one file with the specific avatar name and date.
     for filename in filenames {
-      let path = log_path.join(filename.as_str());
+      let path = log_path.join(filename.as_ref());
       if let Some(date) = get_log_file_date(&path) {
         if let Ok(text) = fs::read_to_string(path) {
           // Find the line with the specific date/time.
@@ -213,7 +199,7 @@ pub async fn get_adv_exp(log_path: PathBuf, avatar: String, cancel: Cancel) -> O
       break;
     }
 
-    let path = log_path.join(filename);
+    let path = log_path.join(filename.as_ref());
     if let Ok(text) = fs::read_to_string(path) {
       if text.is_empty() {
         continue;
@@ -258,7 +244,7 @@ pub async fn find_log_entries(
       return LayoutJob::default();
     }
 
-    let path = log_path.join(filename);
+    let path = log_path.join(filename.as_ref());
     if let Ok(text) = fs::read_to_string(path) {
       if text.is_empty() || !verify_log_text(&text) {
         continue;
@@ -370,13 +356,13 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
     get_log_filenames(&log_path, Some(&avatar), None)
       .into_iter()
       .filter(|filename| {
-        let path = Path::new(filename);
+        let path = Path::new(filename.as_ref());
         if let Some(date) = get_log_file_date(path) {
           return date >= begin && date <= end;
         }
         false
       })
-      .collect::<Vec<String>>()
+      .collect::<Vec<Box<str>>>()
   };
 
   let mut dps_tally = DPSTally::new(span.clone());
@@ -409,7 +395,7 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
     }
 
     // Read the log file.
-    let path = log_path.join(filename);
+    let path = log_path.join(filename.as_ref());
     let file_date = get_log_file_date(&path).unwrap();
     if let Ok(text) = fs::read_to_string(path) {
       // Search for attack lines.
@@ -494,7 +480,7 @@ pub fn get_log_datetime_and_text(line: &str) -> (&str, &str) {
   (Default::default(), line)
 }
 
-fn get_sorted_log_filenames(log_path: &Path, avatar: Option<&str>) -> Vec<String> {
+fn get_sorted_log_filenames(log_path: &Path, avatar: Option<&str>) -> Vec<Box<str>> {
   let mut filenames = get_log_filenames(log_path, avatar, None);
 
   // Sort files from newest to oldest.
@@ -502,7 +488,7 @@ fn get_sorted_log_filenames(log_path: &Path, avatar: Option<&str>) -> Vec<String
   filenames
 }
 
-fn get_log_filenames(log_path: &Path, avatar: Option<&str>, timestamp: Option<i64>) -> Vec<String> {
+fn get_log_filenames(log_path: &Path, avatar: Option<&str>, timestamp: Option<i64>) -> Vec<Box<str>> {
   let mut filenames = Vec::new();
   let entries = ok!(log_path.read_dir(), filenames);
 
@@ -521,7 +507,7 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, timestamp: Option<i6
   for entry in entries.flatten() {
     if let Some(filename) = entry.file_name().to_str() {
       if regex.is_match(filename) {
-        filenames.push(filename.to_string());
+        filenames.push(filename.into());
       }
     }
   }
