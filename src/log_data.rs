@@ -159,31 +159,37 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, timestamp: i64, cancel
     // There will actually only be one file with the specific avatar name and date.
     for filename in filenames {
       let path = log_path.join(filename.as_ref());
-      if let Some(date) = get_log_file_date(&path) {
-        if let Ok(text) = fs::read_to_string(path) {
-          // Find the line with the specific date/time.
-          for line in text.lines() {
-            if cancel.is_canceled() {
-              return StatsData::default();
-            }
+      let Some(date) = get_log_file_date(&path) else {
+        continue;
+      };
 
-            if let Some(stats) = get_stats_text(line, timestamp, date) {
-              // Include subsequent lines that do not start with a square bracket.
-              let pos = util::offset(&text, stats).unwrap();
-              let sub = &text[pos + stats.len()..];
-              for line in sub.lines() {
-                if line.starts_with('[') {
-                  let stats = text[pos..util::offset(&text, line).unwrap()].trim();
-                  return StatsData::new(stats.into());
-                }
-              }
+      let Ok(text) = fs::read_to_string(path) else {
+        continue;
+      };
 
-              // EOF was reached.
-              let stats = text[pos..].trim();
-              return StatsData::new(stats.into());
-            }
+      // Find the line with the specific date/time.
+      for line in text.lines() {
+        if cancel.is_canceled() {
+          return StatsData::default();
+        }
+
+        let Some(stats) = get_stats_text(line, timestamp, date) else {
+          continue;
+        };
+
+        // Include subsequent lines that do not start with a square bracket.
+        let pos = util::offset(&text, stats).unwrap();
+        let sub = &text[pos + stats.len()..];
+        for line in sub.lines() {
+          if line.starts_with('[') {
+            let stats = text[pos..util::offset(&text, line).unwrap()].trim();
+            return StatsData::new(stats.into());
           }
         }
+
+        // EOF was reached.
+        let stats = text[pos..].trim();
+        return StatsData::new(stats.into());
       }
     }
   }
