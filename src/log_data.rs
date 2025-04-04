@@ -206,17 +206,19 @@ pub async fn get_adv_exp(log_path: PathBuf, avatar: String, cancel: Cancel) -> O
     }
 
     let path = log_path.join(filename.as_ref());
-    if let Ok(text) = fs::read_to_string(path) {
-      if text.is_empty() {
-        continue;
-      }
+    let Ok(text) = fs::read_to_string(path) else {
+      continue;
+    };
 
-      // Search from the latest entry.
-      for line in text.lines().rev() {
-        let exp = get_adv_xp(line);
-        if exp.is_some() {
-          return exp;
-        }
+    if text.is_empty() {
+      continue;
+    }
+
+    // Search from the latest entry.
+    for line in text.lines().rev() {
+      let exp = get_adv_xp(line);
+      if exp.is_some() {
+        return exp;
       }
     }
   }
