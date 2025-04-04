@@ -166,7 +166,7 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, timestamp: i64, cancel
       continue;
     };
 
-    // Find the line with the specific date/time.
+    // Find the stats line with the specific date/time.
     for line in text.lines() {
       if cancel.is_canceled() {
         return StatsData::default();
