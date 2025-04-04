@@ -99,23 +99,23 @@ pub async fn get_avatars(log_path: PathBuf, cancel: Cancel) -> Vec<String> {
 pub async fn get_stats_timestamps(log_path: PathBuf, avatar: String, cancel: Cancel, threads: ThreadPool) -> Vec<i64> {
   let filenames = get_log_filenames(&log_path, Some(&avatar), None);
   let (tx, rx) = mpsc::unbounded();
-
   for filename in filenames {
     if cancel.is_canceled() {
       break;
     }
 
-    // Create a future to process the log file.
+    // Process the log file on a pooled thread.
     let path = log_path.join(filename.as_ref());
     let cancel = cancel.clone();
-    let future = async move {
+    let tx = tx.clone();
+    threads.spawn_ok(async move {
       let date = get_log_file_date(&path).unwrap();
-      let text = ok!(fs::read_to_string(&path), Vec::new());
+      let text = ok!(fs::read_to_string(&path));
       let mut timestamps = Vec::new();
 
       for line in text.lines() {
         if cancel.is_canceled() {
-          return Vec::new();
+          return;
         }
 
         if let Some((ts, _)) = get_stats_timestamp_and_text(line, date) {
@@ -123,18 +123,11 @@ pub async fn get_stats_timestamps(log_path: PathBuf, avatar: String, cancel: Can
         }
       }
 
-      timestamps
-    };
-
-    // Execute the future on a pooled thread.
-    let tx = tx.clone();
-    threads.spawn_ok(async move {
-      let result = future.await;
-      tx.unbounded_send(result).unwrap();
+      tx.unbounded_send(timestamps).unwrap();
     });
   }
 
-  // Drop the sender to break the pipe when all futures are done.
+  // Drop the sender to break the pipe when all tasks are done.
   drop(tx);
 
   // Collect the results.
@@ -277,7 +270,7 @@ pub async fn find_log_entries(
 
       // Search the text portion.
       let mut find = search.find_in(text);
-      if !find.is_some() {
+      if find.is_none() {
         continue;
       };
 
