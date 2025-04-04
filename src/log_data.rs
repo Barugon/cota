@@ -482,19 +482,19 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
 /// Get separate date/time and text portions of a log entry.
 /// > **NOTE:** the date/time will still have the surrounding square brackets.
 pub fn get_log_datetime_and_text(line: &str) -> (&str, &str) {
-  if let Some(datetime) = get_log_datetime(line) {
-    let text = &line[datetime.len()..];
+  let Some(datetime) = get_log_datetime(line) else {
+    return (Default::default(), line);
+  };
 
-    // Check if a chat timestamp was output.
-    let trimmed = text.trim_start();
-    if let Some(time) = get_log_datetime(trimmed) {
-      return (datetime, &trimmed[time.len()..]);
-    }
+  let text = &line[datetime.len()..];
 
-    return (datetime, text);
+  // Check if a chat timestamp was output.
+  let trimmed = text.trim_start();
+  if let Some(time) = get_log_datetime(trimmed) {
+    return (datetime, &trimmed[time.len()..]);
   }
 
-  (Default::default(), line)
+  (datetime, text)
 }
 
 fn get_sorted_log_filenames(log_path: &Path, avatar: Option<&str>) -> Vec<Box<str>> {
