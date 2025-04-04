@@ -358,7 +358,7 @@ impl DPSTally {
 }
 
 pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Cancel) -> DPSTally {
-  let filenames = {
+  let filenames: Vec<Box<str>> = {
     let begin = span.begin.date();
     let end = span.end.date();
 
@@ -372,7 +372,7 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
         }
         false
       })
-      .collect::<Vec<Box<str>>>()
+      .collect()
   };
 
   let mut dps_tally = DPSTally::new(span.clone());
@@ -399,6 +399,12 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
   let mut dmg_start_timestamp = None;
   let mut dmg_end_timestamp = None;
 
+  fn parse_digits(text: &str) -> Option<u64> {
+    // Digits are at the end.
+    let digits = text.split_whitespace().next_back()?;
+    digits.parse::<u64>().ok()
+  }
+
   for filename in filenames {
     if cancel.is_canceled() {
       return DPSTally::new(span);
@@ -407,49 +413,48 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
     // Read the log file.
     let path = log_path.join(filename.as_ref());
     let file_date = get_log_file_date(&path).unwrap();
-    if let Ok(text) = fs::read_to_string(path) {
-      // Search for attack lines.
-      for line in text.lines() {
-        let (datetime, text) = get_log_datetime_and_text(line);
-        if datetime.is_empty() {
-          continue;
-        }
+    let Ok(text) = fs::read_to_string(path) else {
+      continue;
+    };
 
-        let Some(timestamp) = log_datetime_to_timestamp(datetime, file_date) else {
+    // Search for attack lines.
+    for line in text.lines() {
+      let (datetime, text) = get_log_datetime_and_text(line);
+      if datetime.is_empty() {
+        continue;
+      }
+
+      let Some(timestamp) = log_datetime_to_timestamp(datetime, file_date) else {
+        continue;
+      };
+
+      if !range.contains(&timestamp) {
+        continue;
+      }
+
+      if cancel.is_canceled() {
+        return DPSTally::new(span);
+      }
+
+      if let Some(found) = avatar_search.find(text) {
+        let Some(value) = parse_digits(&text[found.range()]) else {
           continue;
         };
-
-        if !range.contains(&timestamp) {
+        dps_tally.avatar += value;
+      } else if let Some(found) = pet_search.find(text) {
+        let Some(value) = parse_digits(&text[found.range()]) else {
           continue;
-        }
-
-        if cancel.is_canceled() {
-          return DPSTally::new(span);
-        }
-
-        if let Some(found) = avatar_search.find(text) {
-          // The search term ends just past the damage value.
-          if let Some(digits) = text[found.range()].split_whitespace().next_back() {
-            if let Ok(value) = digits.parse::<u64>() {
-              if dmg_start_timestamp.is_none() {
-                dmg_start_timestamp = Some(timestamp);
-              }
-              dmg_end_timestamp = Some(timestamp);
-              dps_tally.avatar += value;
-            }
-          }
-        } else if let Some(found) = pet_search.find(text) {
-          if let Some(digits) = text[found.range()].split_whitespace().next_back() {
-            if let Ok(value) = digits.parse::<u64>() {
-              if dmg_start_timestamp.is_none() {
-                dmg_start_timestamp = Some(timestamp);
-              }
-              dmg_end_timestamp = Some(timestamp);
-              dps_tally.pet += value;
-            }
-          }
-        }
+        };
+        dps_tally.pet += value;
+      } else {
+        continue;
       }
+
+      if dmg_start_timestamp.is_none() {
+        dmg_start_timestamp = Some(timestamp);
+      }
+
+      dmg_end_timestamp = Some(timestamp);
     }
   }
 
