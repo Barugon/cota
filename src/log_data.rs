@@ -156,44 +156,46 @@ pub async fn get_stats_timestamps(log_path: PathBuf, avatar: String, cancel: Can
 
 /// Get the stats for the specified avatar and timestamp.
 pub async fn get_stats(log_path: PathBuf, avatar: String, timestamp: i64, cancel: Cancel) -> StatsData {
-  if !avatar.is_empty() {
-    let filenames = get_log_filenames(&log_path, Some(&avatar), Some(timestamp));
+  if avatar.is_empty() {
+    return StatsData::default();
+  }
 
-    // There will actually only be one file with the specific avatar name and date.
-    for filename in filenames {
-      let path = log_path.join(filename.as_ref());
-      let Some(date) = get_log_file_date(&path) else {
-        continue;
-      };
+  let filenames = get_log_filenames(&log_path, Some(&avatar), Some(timestamp));
 
-      let Ok(text) = fs::read_to_string(path) else {
-        continue;
-      };
+  // There will actually only be one file with the specific avatar name and date.
+  for filename in filenames {
+    let path = log_path.join(filename.as_ref());
+    let Some(date) = get_log_file_date(&path) else {
+      continue;
+    };
 
-      // Find the line with the specific date/time.
-      for line in text.lines() {
-        if cancel.is_canceled() {
-          return StatsData::default();
-        }
+    let Ok(text) = fs::read_to_string(path) else {
+      continue;
+    };
 
-        let Some(stats) = get_stats_text(line, timestamp, date) else {
-          continue;
-        };
-
-        // Include subsequent lines that do not start with a square bracket.
-        let pos = util::offset(&text, stats).unwrap();
-        let sub = &text[pos + stats.len()..];
-        for line in sub.lines() {
-          if line.starts_with('[') {
-            let stats = text[pos..util::offset(&text, line).unwrap()].trim();
-            return StatsData::new(stats.into());
-          }
-        }
-
-        // EOF was reached.
-        let stats = text[pos..].trim();
-        return StatsData::new(stats.into());
+    // Find the line with the specific date/time.
+    for line in text.lines() {
+      if cancel.is_canceled() {
+        return StatsData::default();
       }
+
+      let Some(stats) = get_stats_text(line, timestamp, date) else {
+        continue;
+      };
+
+      // Include subsequent lines that do not start with a square bracket.
+      let pos = util::offset(&text, stats).unwrap();
+      let sub = &text[pos + stats.len()..];
+      for line in sub.lines() {
+        if line.starts_with('[') {
+          let stats = text[pos..util::offset(&text, line).unwrap()].trim();
+          return StatsData::new(stats.into());
+        }
+      }
+
+      // EOF was reached.
+      let stats = text[pos..].trim();
+      return StatsData::new(stats.into());
     }
   }
 
