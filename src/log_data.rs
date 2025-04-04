@@ -251,77 +251,81 @@ pub async fn find_log_entries(
     }
 
     let path = log_path.join(filename.as_ref());
-    if let Ok(text) = fs::read_to_string(path) {
-      if text.is_empty() || !verify_log_text(&text) {
-        continue;
+    let Ok(text) = fs::read_to_string(path) else {
+      continue;
+    };
+
+    if text.is_empty() || !verify_log_text(&text) {
+      continue;
+    }
+
+    // Iterate through the lines in reverse order (newest to oldest).
+    for line in text.lines().rev() {
+      if cancel.is_canceled() {
+        return LayoutJob::default();
       }
 
-      // Iterate through the lines in reverse order (newest to oldest).
-      for line in text.lines().rev() {
-        if cancel.is_canceled() {
-          return LayoutJob::default();
-        }
+      // Split the date and text.
+      let (datetime, mut text) = get_log_datetime_and_text(line);
 
-        // Split the date and text.
-        let (datetime, mut text) = get_log_datetime_and_text(line);
+      // Search the text portion.
+      let mut find = search.find_in(text);
+      if !find.is_some() {
+        continue;
+      };
 
-        // Search the text portion.
-        let mut find = search.find_in(text);
-        if find.is_some() {
-          let mut pos = layout.text.len();
+      let mut pos = layout.text.len();
 
-          if !datetime.is_empty() {
-            // Highlight the date/time.
-            layout.text.push_str(datetime);
-            layout.sections.push(LayoutSection {
-              leading_space: 0.0,
-              byte_range: pos..pos + datetime.len(),
-              format: format_datetime.clone(),
-            });
-            pos += datetime.len();
-          }
+      if !datetime.is_empty() {
+        // Highlight the date/time.
+        layout.text.push_str(datetime);
+        layout.sections.push(LayoutSection {
+          leading_space: 0.0,
+          byte_range: pos..pos + datetime.len(),
+          format: format_datetime.clone(),
+        });
+        pos += datetime.len();
+      }
 
-          layout.text.push_str(text);
-          layout.text.push('\n');
+      layout.text.push_str(text);
+      layout.text.push('\n');
 
-          while let Some(range) = find {
-            let start = pos + range.start;
-            let end = pos + range.end;
+      while let Some(range) = find {
+        let start = pos + range.start;
+        let end = pos + range.end;
 
-            if start > pos {
-              // Text before the match.
-              layout.sections.push(LayoutSection {
-                leading_space: 0.0,
-                byte_range: pos..start,
-                format: format_normal.clone(),
-              });
-            }
-
-            // Highlight the match
-            layout.sections.push(LayoutSection {
-              leading_space: 0.0,
-              byte_range: start..end,
-              format: format_match.clone(),
-            });
-
-            pos += range.end;
-            text = &text[range.end..];
-
-            // Search for another match.
-            find = search.find_in(text);
-          }
-
-          // The rest.
+        if start > pos {
+          // Text before the match.
           layout.sections.push(LayoutSection {
             leading_space: 0.0,
-            byte_range: pos..pos + text.len() + 1,
+            byte_range: pos..start,
             format: format_normal.clone(),
           });
-
-          if layout.text.len() >= LOG_SEARCH_LIMIT {
-            return layout;
-          }
         }
+
+        // Highlight the match
+        layout.sections.push(LayoutSection {
+          leading_space: 0.0,
+          byte_range: start..end,
+          format: format_match.clone(),
+        });
+
+        pos += range.end;
+        text = &text[range.end..];
+
+        // Search for another match.
+        find = search.find_in(text);
+      }
+
+      // The rest.
+      layout.sections.push(LayoutSection {
+        leading_space: 0.0,
+        byte_range: pos..pos + text.len() + 1,
+        format: format_normal.clone(),
+      });
+
+      if layout.text.len() >= LOG_SEARCH_LIMIT {
+        return layout;
       }
     }
   }
