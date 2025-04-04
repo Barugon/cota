@@ -12,7 +12,6 @@ use eframe::{
 use egui_extras::DatePickerButton;
 use std::{collections::BTreeSet, mem};
 
-// #[derive(Default)]
 pub struct PlantDlg {
   state: AppState,
   date: NaiveDate,
@@ -183,7 +182,7 @@ impl PlantDlg {
                     });
 
                     if response.clicked_by(PointerButton::Primary) {
-                      text.clone_into(&mut self.description);
+                      self.description = text.into();
                     }
                   }
 
