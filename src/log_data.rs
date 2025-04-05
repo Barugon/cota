@@ -120,7 +120,6 @@ pub async fn get_stats_timestamps(log_path: PathBuf, avatar: String, cancel: Can
         tx.unbounded_send(timestamps).unwrap();
       });
     }
-
     rx
   };
 
@@ -196,10 +195,6 @@ pub async fn get_adv_exp(log_path: PathBuf, avatar: String, cancel: Cancel) -> O
       continue;
     };
 
-    if text.is_empty() {
-      continue;
-    }
-
     // Search from the latest entry.
     for line in text.lines().rev() {
       let exp = get_adv_xp(line);
@@ -242,10 +237,6 @@ pub async fn find_log_entries(
     let Ok(text) = fs::read_to_string(path) else {
       continue;
     };
-
-    if text.is_empty() || !verify_log_text(&text) {
-      continue;
-    }
 
     // Iterate through the lines in reverse order (newest to oldest).
     for line in text.lines().rev() {
@@ -516,16 +507,6 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, timestamp: Option<i6
   }
 
   filenames
-}
-
-/// Make sure the text contains at least one date/time.
-fn verify_log_text(text: &str) -> bool {
-  for line in text.lines() {
-    if get_log_datetime(line).is_some() {
-      return true;
-    }
-  }
-  false
 }
 
 /// Convert a SotA log date & time into a timestamp. Since the dates are localized, we don't know
