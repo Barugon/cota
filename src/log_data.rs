@@ -97,38 +97,39 @@ pub async fn get_avatars(log_path: PathBuf, cancel: Cancel) -> Vec<String> {
 
 /// Get a vector of timestamps where `/stats` was used for the specified avatar.
 pub async fn get_stats_timestamps(log_path: PathBuf, avatar: String, cancel: Cancel, threads: ThreadPool) -> Vec<i64> {
-  let filenames = get_log_filenames(&log_path, Some(&avatar), None);
-  let (tx, rx) = mpsc::unbounded();
-  for filename in filenames {
-    if cancel.is_canceled() {
-      break;
-    }
-
-    // Process the log file on a pooled thread.
-    let path = log_path.join(filename.as_ref());
-    let cancel = cancel.clone();
-    let tx = tx.clone();
-    threads.spawn_ok(async move {
-      let date = get_log_file_date(&path).unwrap();
-      let text = ok!(fs::read_to_string(&path));
-      let mut timestamps = Vec::new();
-
-      for line in text.lines() {
-        if cancel.is_canceled() {
-          return;
-        }
-
-        if let Some((ts, _)) = get_stats_timestamp_and_text(line, date) {
-          timestamps.push(ts);
-        }
+  let rx = {
+    let filenames = get_log_filenames(&log_path, Some(&avatar), None);
+    let (tx, rx) = mpsc::unbounded();
+    for filename in filenames {
+      if cancel.is_canceled() {
+        break;
       }
 
-      tx.unbounded_send(timestamps).unwrap();
-    });
-  }
+      // Process the log file on a pooled thread.
+      let path = log_path.join(filename.as_ref());
+      let cancel = cancel.clone();
+      let tx = tx.clone();
+      threads.spawn_ok(async move {
+        let date = get_log_file_date(&path).unwrap();
+        let text = ok!(fs::read_to_string(&path));
+        let mut timestamps = Vec::new();
 
-  // Drop the sender to break the pipe when all tasks are done.
-  drop(tx);
+        for line in text.lines() {
+          if cancel.is_canceled() {
+            return;
+          }
+
+          if let Some((ts, _)) = get_stats_timestamp_and_text(line, date) {
+            timestamps.push(ts);
+          }
+        }
+
+        tx.unbounded_send(timestamps).unwrap();
+      });
+    }
+
+    rx
+  };
 
   // Collect the results.
   let results: Vec<Vec<i64>> = rx.collect().await;
