@@ -299,19 +299,21 @@ pub enum Search {
 
 impl Search {
   pub fn find_in(&self, text: &str) -> Option<Range<usize>> {
-    if !text.is_empty() {
-      match self {
-        Search::String { find, ignore_case } => {
-          if *ignore_case {
-            return find_ignore_case(text, find);
-          } else if let Some(pos) = text.find(find.as_ref()) {
-            return Some(pos..pos + find.len());
-          }
+    if text.is_empty() {
+      return None;
+    }
+
+    match self {
+      Search::String { find, ignore_case } => {
+        if *ignore_case {
+          return find_ignore_case(text, find);
+        } else if let Some(pos) = text.find(find.as_ref()) {
+          return Some(pos..pos + find.len());
         }
-        Search::Regex(regex) => {
-          if let Some(pos) = regex.find(text) {
-            return Some(pos.start()..pos.end());
-          }
+      }
+      Search::Regex(regex) => {
+        if let Some(pos) = regex.find(text) {
+          return Some(pos.start()..pos.end());
         }
       }
     }
