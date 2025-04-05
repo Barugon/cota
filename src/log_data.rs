@@ -71,28 +71,21 @@ pub async fn get_avatars(log_path: PathBuf, cancel: Cancel) -> Vec<String> {
       return Vec::new();
     }
 
-    let filename = &filename[FILENAME_START.len() + 1..];
-    if let Some(pos) = filename.rfind('_') {
-      name_set.insert(&filename[..pos]);
+    // Slice the avatar name from the filename.
+    let name = &filename[FILENAME_START.len() + 1..];
+    if let Some(pos) = name.rfind('_') {
+      name_set.insert(&name[..pos]);
     }
   }
 
-  let mut avatars = Vec::with_capacity(name_set.len());
-  for name in name_set {
-    if cancel.is_canceled() {
-      return Vec::new();
-    }
-
-    avatars.push(String::from(name));
-  }
-
+  let mut names: Vec<String> = name_set.into_iter().map(|s| s.to_owned()).collect();
   if cancel.is_canceled() {
     return Vec::new();
   }
 
-  // Sort the avatars.
-  avatars.sort_unstable();
-  avatars
+  // Ignore case when sorting.
+  names.sort_unstable_by(|a, b| util::compare_ignore_case(a, b));
+  names
 }
 
 /// Get a vector of timestamps where `/stats` was used for the specified avatar.
@@ -132,20 +125,14 @@ pub async fn get_stats_timestamps(log_path: PathBuf, avatar: String, cancel: Can
   };
 
   // Collect the results.
-  let results: Vec<Vec<i64>> = rx.collect().await;
+  let mut results = rx.concat().await;
   if cancel.is_canceled() {
     return Vec::new();
   }
 
-  // Flatten the results.
-  let mut timestamps: Vec<i64> = results.into_iter().flat_map(|v| v.into_iter()).collect();
-  if cancel.is_canceled() {
-    return Vec::new();
-  }
-
-  // Sort the timestamps so that the most recent is first.
-  timestamps.sort_unstable_by(|a, b| b.cmp(a));
-  timestamps
+  // Sort the results so that the most recent timestamp is first.
+  results.sort_unstable_by(|a, b| b.cmp(a));
+  results
 }
 
 /// Get the stats for the specified avatar and timestamp.
@@ -182,13 +169,13 @@ pub async fn get_stats(log_path: PathBuf, avatar: String, timestamp: i64, cancel
       let sub = &text[pos + stats.len()..];
       for line in sub.lines() {
         if line.starts_with('[') {
-          let stats = text[pos..util::offset(&text, line).unwrap()].trim();
+          let stats = &text[pos..util::offset(&text, line).unwrap()];
           return StatsData::new(stats.into());
         }
       }
 
       // EOF was reached.
-      let stats = text[pos..].trim();
+      let stats = &text[pos..];
       return StatsData::new(stats.into());
     }
   }
