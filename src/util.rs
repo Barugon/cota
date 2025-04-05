@@ -460,6 +460,17 @@ mod tests {
   }
 
   #[test]
+  fn test_compare_ignore_case() {
+    assert!(compare_ignore_case("Bob", "BOB") == cmp::Ordering::Equal);
+    assert!(compare_ignore_case("Boba", "BOB") == cmp::Ordering::Greater);
+    assert!(compare_ignore_case("tschüß", "TSCHÜSS") == cmp::Ordering::Equal);
+    assert!(compare_ignore_case("ghi", "ghi\u{307}j") == cmp::Ordering::Less);
+    assert!(compare_ignore_case("abc", "CBA") == cmp::Ordering::Less);
+    assert!(compare_ignore_case("ABC", "cba") == cmp::Ordering::Less);
+    assert!(compare_ignore_case("cBa", "AbC") == cmp::Ordering::Greater);
+  }
+
+  #[test]
   fn test_find_ignore_case() {
     let text = "Test for 'tschüß' in this text";
     let len = "tschüß".len();
