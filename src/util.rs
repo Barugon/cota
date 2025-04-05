@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::{
   borrow::Cow,
   cell::RefCell,
-  mem,
+  cmp, mem,
   ops::{Range, RangeInclusive},
   sync::{
     Arc,
@@ -228,6 +228,12 @@ impl Cancel {
   pub fn is_canceled(&self) -> bool {
     self.canceled.load(Ordering::Relaxed)
   }
+}
+
+pub fn compare_ignore_case(left: &str, right: &str) -> cmp::Ordering {
+  let li = left.chars().flat_map(|c| c.to_uppercase());
+  let ri = right.chars().flat_map(|c| c.to_uppercase());
+  li.cmp(ri)
 }
 
 fn find_ignore_case(text: &str, find: &str) -> Option<Range<usize>> {
