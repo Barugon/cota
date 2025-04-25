@@ -1,4 +1,7 @@
-use crate::util::{self, Cancel, Search};
+use crate::{
+  ok,
+  util::{self, Cancel, Search},
+};
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
 use eframe::egui::{
   Color32, FontId, TextFormat,

@@ -1,6 +1,7 @@
 use crate::{
   config::Config,
   dps_dlg::DPSDlg,
+  f64_to_string,
   log_data::{self, StatsData},
   log_dlg::LogDlg,
   notes_dlg::NotesDlg,

@@ -1,4 +1,5 @@
 use crate::{
+  f64_to_string,
   log_data::{self, DPSTally, Span},
   util::{AppState, Cancel},
 };

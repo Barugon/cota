@@ -1,3 +1,5 @@
+use crate::ok;
+
 use self::inner::{Items, PersistThread};
 use std::{
   path::PathBuf,
@@ -64,6 +66,8 @@ mod inner {
     },
     thread::{self, JoinHandle},
   };
+
+  use crate::{err, ok};
 
   pub struct Items {
     path: PathBuf,

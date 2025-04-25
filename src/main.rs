@@ -1,9 +1,6 @@
 // Don't show the console on Windows.
 #![windows_subsystem = "windows"]
 
-#[macro_use]
-mod util;
-
 mod about_dlg;
 mod app;
 mod chronometer;
@@ -26,6 +23,7 @@ mod skill_info;
 mod stats;
 mod storage;
 mod towns_dlg;
+mod util;
 
 use app::App;
 use config::Config;
