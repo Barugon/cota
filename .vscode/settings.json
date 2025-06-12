@@ -63,6 +63,10 @@
     120
   ],
   "editor.tabSize": 2,
+  "files.associations": {
+    "level_exp_values.rs": "plaintext",
+    "skill_exp_values.rs": "plaintext"
+  },
   "rainbow_csv.enable_auto_csv_lint": false,
   "rust-analyzer.showUnlinkedFileNotification": false,
   "task.autoDetect": "off"
