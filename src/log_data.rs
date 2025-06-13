@@ -81,7 +81,7 @@ pub async fn get_avatars(log_path: PathBuf, cancel: Cancel) -> Vec<String> {
     }
   }
 
-  let mut names: Vec<String> = name_set.into_iter().map(|s| s.to_owned()).collect();
+  let mut names: Vec<_> = name_set.into_iter().map(|s| s.to_owned()).collect();
   if cancel.is_canceled() {
     return Vec::new();
   }
@@ -342,7 +342,7 @@ impl DPSTally {
 }
 
 pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Cancel) -> DPSTally {
-  let filenames: Vec<Box<str>> = {
+  let filenames: Vec<_> = {
     let begin = span.begin.date();
     let end = span.end.date();
 
