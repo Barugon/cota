@@ -29,7 +29,7 @@ impl Storage {
   pub fn get_as<T: serde::de::DeserializeOwned>(&self, key: &str) -> Option<T> {
     let lock = self.items.read().unwrap();
     let text = lock.get(key)?;
-    ron::from_str(text).map_err(|e| println!("{e}")).ok()
+    ok!(ron::from_str(text))
   }
 
   // Set an item.
@@ -39,7 +39,9 @@ impl Storage {
 
   /// Set an item as a specific type.
   pub fn set_as<T: serde::Serialize>(&mut self, key: &str, item: &T) {
-    let text = ok!(ron::to_string(item));
+    let Some(text) = ok!(ron::to_string(item)) else {
+      return;
+    };
     self.set(key, text);
   }
 
@@ -55,6 +57,7 @@ impl Storage {
 }
 
 mod inner {
+  use crate::ok;
   use std::{
     collections::HashMap,
     fs,
@@ -66,8 +69,6 @@ mod inner {
     },
     thread::{self, JoinHandle},
   };
-
-  use crate::{err, ok};
 
   pub struct Items {
     path: PathBuf,
@@ -84,14 +85,18 @@ mod inner {
     }
 
     fn load_items(path: &Path) -> HashMap<String, String> {
-      let data = ok!(fs::read(path), HashMap::new());
-      ok!(ron::de::from_bytes(&data), HashMap::new())
+      let Some(data) = ok!(fs::read(path)) else {
+        return HashMap::new();
+      };
+      ok!(ron::de::from_bytes(&data)).unwrap_or_default()
     }
 
     fn persist(&self) {
       if self.changed.swap(false, Ordering::Relaxed) {
-        let text = ok!(ron::ser::to_string_pretty(&self.items, Default::default()));
-        err!(fs::write(&self.path, text));
+        let Some(text) = ok!(ron::ser::to_string_pretty(&self.items, Default::default())) else {
+          return;
+        };
+        ok!(fs::write(&self.path, text));
       }
     }
 

@@ -41,35 +41,16 @@ macro_rules! debugln {
   ($($arg:tt)*) => (#[cfg(debug_assertions)] println!($($arg)*));
 }
 
-/// Return from function (and print error) if `Result` is not `Ok`.
+/// Convert a `Result` to `Option` and print any error.
 #[macro_export]
 macro_rules! ok {
   ($res:expr) => {
     match $res {
-      Ok(val) => val,
+      Ok(val) => Some(val),
       Err(err) => {
-        println!("{err:?}");
-        return;
+        println!("{err}\n{}:{}:{}", file!(), line!(), column!());
+        None
       }
-    }
-  };
-  ($res:expr, $ret:expr) => {
-    match $res {
-      Ok(val) => val,
-      Err(err) => {
-        println!("{err:?}");
-        return $ret;
-      }
-    }
-  };
-}
-
-/// Print if `Err`.
-#[macro_export]
-macro_rules! err {
-  ($res:expr) => {
-    if let Err(err) = $res {
-      println!("{err:?}");
     }
   };
 }
@@ -156,8 +137,10 @@ pub fn floor_search<T: Ord>(value: T, values: &[T]) -> Option<usize> {
 }
 
 pub fn set_clipboard_contents(text: String) {
-  let mut ctx: ClipboardContext = ok!(ClipboardProvider::new());
-  err!(ctx.set_contents(text));
+  let Some(mut ctx) = ok!(ClipboardContext::new()) else {
+    return;
+  };
+  ok!(ctx.set_contents(text));
 }
 
 /// SotA epoch (date/time of lunar cataclysm).

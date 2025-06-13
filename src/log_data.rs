@@ -106,9 +106,11 @@ pub async fn get_stats_timestamps(log_path: PathBuf, avatar: String, cancel: Can
       let cancel = cancel.clone();
       let tx = tx.clone();
       threads.spawn_ok(async move {
-        let date = get_log_file_date(&path).unwrap();
-        let text = ok!(fs::read_to_string(&path));
         let mut timestamps = Vec::new();
+        let date = get_log_file_date(&path).unwrap();
+        let Some(text) = ok!(fs::read_to_string(&path)) else {
+          return;
+        };
 
         for line in text.lines() {
           if cancel.is_canceled() {
@@ -364,9 +366,14 @@ pub async fn tally_dps(log_path: PathBuf, avatar: String, span: Span, cancel: Ca
 
   // Use regular expressions for the searches.
   let avatar_search = format!("^ {avatar} attacks .+ and hits, dealing [0-9]+");
-  let avatar_search = ok!(Regex::new(&avatar_search), dps_tally);
+  let Some(avatar_search) = ok!(Regex::new(&avatar_search)) else {
+    return dps_tally;
+  };
+
   let pet_search = format!("<{avatar}> attacks .+ and hits, dealing [0-9]+");
-  let pet_search = ok!(Regex::new(&pet_search), dps_tally);
+  let Some(pet_search) = ok!(Regex::new(&pet_search)) else {
+    return dps_tally;
+  };
 
   // Range for checking log entry date/time.
   let begin_timestamp = span.begin.and_utc().timestamp();
@@ -487,7 +494,9 @@ fn get_sorted_log_filenames(log_path: &Path, avatar: Option<&str>) -> Vec<Box<st
 
 fn get_log_filenames(log_path: &Path, avatar: Option<&str>, timestamp: Option<i64>) -> Vec<Box<str>> {
   let mut filenames = Vec::new();
-  let entries = ok!(log_path.read_dir(), filenames);
+  let Some(entries) = ok!(log_path.read_dir()) else {
+    return filenames;
+  };
 
   // The name text is either a specific avatar or, if not specified, a regex wildcard.
   let name = avatar.unwrap_or(".+");
@@ -499,7 +508,9 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, timestamp: Option<i6
     String::from(r"\d{4}-\d{2}-\d{2}")
   };
 
-  let regex = ok!(Regex::new(&format!("^{FILENAME_START}_{name}_{date}.txt$")), filenames);
+  let Some(regex) = ok!(Regex::new(&format!("^{FILENAME_START}_{name}_{date}.txt$"))) else {
+    return filenames;
+  };
 
   for entry in entries.flatten() {
     if let Some(filename) = entry.file_name().to_str() {
