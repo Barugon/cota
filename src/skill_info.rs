@@ -1,16 +1,18 @@
+use serde::{Deserialize, Serialize};
+
 #[derive(Clone, Copy, Debug)]
 pub enum SkillCategory {
   Adventurer,
   Producer,
 }
 
-#[derive(Clone, Default, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Default, Deserialize, Serialize)]
 pub struct Requires {
   pub id: u32,
   pub lvl: i32,
 }
 
-#[derive(Clone, Default, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Default, Deserialize, Serialize)]
 pub struct SkillInfo {
   pub name: &'static str,
   pub mul: f64,
@@ -18,7 +20,7 @@ pub struct SkillInfo {
   pub reqs: Vec<Requires>,
 }
 
-#[derive(serde::Deserialize, serde::Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct SkillInfoGroup {
   pub name: &'static str,
   pub skills: Vec<SkillInfo>,
