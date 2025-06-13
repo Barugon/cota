@@ -38,56 +38,56 @@ pub struct GameData {
 
 impl GameData {
   pub fn load(path: PathBuf) -> Result<Self, util::Error> {
-    match std::fs::read_to_string(&path) {
-      Ok(text) => {
-        // Get the avatar ID.
-        let avatar = get_avatar_id(&text)?;
+    let text = match std::fs::read_to_string(&path) {
+      Ok(text) => text,
+      Err(err) => return Err(Cow::from(format!("Unable to load file: {err}"))),
+    };
 
-        // Get the avatar name.
-        let name = get_avatar_name(&text, &avatar)?;
+    // Get the avatar ID.
+    let avatar = get_avatar_id(&text)?;
 
-        // Get the backpack ID.
-        let backpack = get_backpack_id(&text, &avatar)?;
+    // Get the avatar name.
+    let name = get_avatar_name(&text, &avatar)?;
 
-        // Get the ItemStore JSON.
-        let inventory = get_json(&text, ITEM_STORE, &backpack)?;
+    // Get the backpack ID.
+    let backpack = get_backpack_id(&text, &avatar)?;
 
-        // Get the CharacterSheet JSON.
-        let character = get_json(&text, CHARACTER_SHEET, &avatar)?;
+    // Get the ItemStore JSON.
+    let inventory = get_json(&text, ITEM_STORE, &backpack)?;
 
-        // Make sure adventurer experience is there.
-        if character.get(AE).and_then(|exp| exp.to_i64()).is_none() {
-          return Err(Cow::from("Unable to parse adventurer experience"));
-        }
+    // Get the CharacterSheet JSON.
+    let character = get_json(&text, CHARACTER_SHEET, &avatar)?;
 
-        // Make sure producer experience is there.
-        if character.get(PE).and_then(|exp| exp.to_i64()).is_none() {
-          return Err(Cow::from("Unable to parse producer experience"));
-        }
-
-        // Find a save date.
-        let date = match character.get(SK2) {
-          Some(val) if val.is_object() => find_date(val)?,
-          _ => return Err(Cow::from("Error reading skills")),
-        };
-
-        // Get the UserGold JSON.
-        let gold = get_json(&text, USER_GOLD, USER_ID)?;
-
-        Ok(GameData {
-          path: RwLock::new(path),
-          text,
-          avatar,
-          name,
-          backpack,
-          character,
-          inventory,
-          gold,
-          date,
-        })
-      }
-      Err(err) => Err(Cow::from(format!("Unable to load file: {err}"))),
+    // Make sure adventurer experience is there.
+    if character.get(AE).and_then(|exp| exp.to_i64()).is_none() {
+      return Err(Cow::from("Unable to parse adventurer experience"));
     }
+
+    // Make sure producer experience is there.
+    if character.get(PE).and_then(|exp| exp.to_i64()).is_none() {
+      return Err(Cow::from("Unable to parse producer experience"));
+    }
+
+    // Find a save date.
+    let date = match character.get(SK2) {
+      Some(val) if val.is_object() => find_date(val)?,
+      _ => return Err(Cow::from("Error reading skills")),
+    };
+
+    // Get the UserGold JSON.
+    let gold = get_json(&text, USER_GOLD, USER_ID)?;
+
+    Ok(GameData {
+      path: RwLock::new(path),
+      text,
+      avatar,
+      name,
+      backpack,
+      character,
+      inventory,
+      gold,
+      date,
+    })
   }
 
   pub fn store(&self) -> Result<(), util::Error> {
@@ -105,17 +105,18 @@ impl GameData {
     let text = set_json(&text, USER_GOLD, USER_ID, &self.gold)?;
 
     // Create the save-game file and store the data.
-    match File::create(&path) {
-      Ok(mut file) => match file.write_all(text.as_bytes()) {
-        Ok(()) => {
-          // Change the path.
-          *self.path.write().unwrap() = path;
-          Ok(())
-        }
-        Err(err) => Err(Cow::from(err.to_string())),
-      },
-      Err(err) => Err(Cow::from(err.to_string())),
+    let mut file = match File::create(&path) {
+      Ok(file) => file,
+      Err(err) => return Err(Cow::from(err.to_string())),
+    };
+
+    if let Err(err) = file.write_all(text.as_bytes()) {
+      return Err(Cow::from(err.to_string()));
     }
+
+    // Change the path.
+    *self.path.write().unwrap() = path;
+    Ok(())
   }
 
   pub fn avatar_name(&self) -> &str {
@@ -383,22 +384,24 @@ fn get_skill_lvl(sk2: &Value, info: &SkillInfo) -> Option<i32> {
 fn set_skill_lvl(sk2: &mut Value, date: &Value, skill: &SkillLvl) {
   assert!((0..=200).contains(&skill.level));
   if skill.level == 0 {
-    remove_skill(sk2, skill.info.id)
-  } else {
-    let exp = (SKILL_EXP[skill.level as usize - 1] as f64 * skill.info.mul).ceil() as i64;
-    let key = format!("{}", skill.info.id);
-    if let Some(skill) = sk2.get_mut(&key) {
-      // Set the skill's experience.
-      skill[X] = exp.into();
-    } else {
-      // Skill doesn't exist, so add it.
-      sk2[key] = serde_json::json!({
-        M: 0,
-        T: date,
-        X: exp,
-      });
-    }
+    remove_skill(sk2, skill.info.id);
+    return;
   }
+
+  let exp = (SKILL_EXP[skill.level as usize - 1] as f64 * skill.info.mul).ceil() as i64;
+  let key = format!("{}", skill.info.id);
+  if let Some(skill) = sk2.get_mut(&key) {
+    // Set the skill's experience.
+    skill[X] = exp.into();
+    return;
+  }
+
+  // Skill doesn't exist, so add it.
+  sk2[key] = serde_json::json!({
+    M: 0,
+    T: date,
+    X: exp,
+  });
 }
 
 fn remove_skill(sk2: &mut Value, id: u32) {
