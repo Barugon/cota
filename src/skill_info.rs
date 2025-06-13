@@ -26,7 +26,7 @@ pub struct SkillInfoGroup {
   pub skills: Vec<SkillInfo>,
 }
 
-/// Parse the CSV for adventurer or producer skills.
+/// Parse the JSON for adventurer or producer skills.
 pub fn parse_skill_info_groups(category: SkillCategory) -> Vec<SkillInfoGroup> {
   serde_json::from_str(match category {
     SkillCategory::Adventurer => include_str!("../res/adventurer_skills.json"),
