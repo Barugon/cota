@@ -1,5 +1,4 @@
 .vscode/launch.json
-Cargo.lock
 CHANGES.md
-Dockerfile
-target
+**/Cargo.lock
+**/target/
