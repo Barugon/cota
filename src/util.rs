@@ -328,10 +328,10 @@ fn to_locale(name: Option<&str>) -> Locale {
 
     loop {
       // Look for a match.
-      if let Ok(pos) = names.binary_search_by(|n| n.to_uppercase().as_str().cmp(uname)) {
-        if let Ok(locale) = Locale::from_name(names[pos]) {
-          return locale;
-        }
+      if let Ok(pos) = names.binary_search_by(|n| n.to_uppercase().as_str().cmp(uname))
+        && let Ok(locale) = Locale::from_name(names[pos])
+      {
+        return locale;
       }
 
       // Chop off the end.

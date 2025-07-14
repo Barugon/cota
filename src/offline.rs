@@ -41,10 +41,10 @@ impl Offline {
   }
 
   pub fn show(&mut self, ui: &mut Ui) {
-    if let Some(game) = &mut self.game {
-      if self.items_dlg.show(game.items_mut(), ui.ctx()) {
-        self.changed = game.changed();
-      }
+    if let Some(game) = &mut self.game
+      && self.items_dlg.show(game.items_mut(), ui.ctx())
+    {
+      self.changed = game.changed();
     }
 
     // Tool bar.
@@ -125,10 +125,10 @@ impl Offline {
     ui.separator();
 
     // Skills.
-    if let Some(game) = &mut self.game {
-      if game.show_skills(ui) {
-        self.changed = game.changed();
-      }
+    if let Some(game) = &mut self.game
+      && game.show_skills(ui)
+    {
+      self.changed = game.changed();
     }
   }
 

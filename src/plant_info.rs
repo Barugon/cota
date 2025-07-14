@@ -112,14 +112,14 @@ impl CropTimer {
 
     for count in 1..=self.events.len() {
       let timeout = interval * count as i64;
-      if elapsed < timeout {
-        if let Some(seconds) = Duration::try_seconds(timeout) {
-          let date_time = self.date_time + seconds;
-          if count < 3 {
-            events.push((Event::Water, date_time));
-          } else {
-            events.push((Event::Harvest, date_time));
-          }
+      if elapsed < timeout
+        && let Some(seconds) = Duration::try_seconds(timeout)
+      {
+        let date_time = self.date_time + seconds;
+        if count < 3 {
+          events.push((Event::Water, date_time));
+        } else {
+          events.push((Event::Harvest, date_time));
         }
       }
     }

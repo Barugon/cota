@@ -228,12 +228,12 @@ impl App {
   }
 
   fn choose_load_path(&mut self, ctx: &Context) {
-    if self.offline.changed() {
-      // Current save-game is modified, deal with that first.
-      if let Some(file_name) = self.offline.file_name() {
-        self.confirm_dlg.open(file_name, Hence::Load);
-        return;
-      }
+    // If the current save-game is modified then deal with that first.
+    if self.offline.changed()
+      && let Some(file_name) = self.offline.file_name()
+    {
+      self.confirm_dlg.open(file_name, Hence::Load);
+      return;
     }
 
     let Some(path) = self.config.get_save_game_path() else {
@@ -399,29 +399,29 @@ impl eframe::App for App {
     });
 
     // Put the dialogs here so that they're anchored below the menu-bar.
-    if let Some(file_dlg) = &mut self.file_dlg {
-      if !file_dlg.show(ctx).visible() {
-        if file_dlg.selected() {
-          if let Some(path) = file_dlg.path() {
-            match file_dlg.dialog_type() {
-              egui_file::DialogType::SelectFolder => {
-                self.config.set_log_path(path);
-                self.experience.set_log_path(ctx, path.to_owned());
-                self.stats.set_log_path(ctx, path.to_owned());
-              }
-              egui_file::DialogType::OpenFile => {
-                let folder = path.with_file_name(String::default());
-                if self.offline.load(path.to_owned()) {
-                  self.config.set_save_game_path(&folder);
-                }
-              }
-              egui_file::DialogType::SaveFile => self.offline.store_as(path.to_owned()),
+    if let Some(file_dlg) = &mut self.file_dlg
+      && !file_dlg.show(ctx).visible()
+    {
+      if file_dlg.selected()
+        && let Some(path) = file_dlg.path()
+      {
+        match file_dlg.dialog_type() {
+          egui_file::DialogType::SelectFolder => {
+            self.config.set_log_path(path);
+            self.experience.set_log_path(ctx, path.to_owned());
+            self.stats.set_log_path(ctx, path.to_owned());
+          }
+          egui_file::DialogType::OpenFile => {
+            let folder = path.with_file_name(String::default());
+            if self.offline.load(path.to_owned()) {
+              self.config.set_save_game_path(&folder);
             }
           }
+          egui_file::DialogType::SaveFile => self.offline.store_as(path.to_owned()),
         }
-        self.state.set_disabled(false);
-        self.file_dlg = None;
       }
+      self.state.set_disabled(false);
+      self.file_dlg = None;
     }
 
     if !self.confirm_dlg.show(ctx) {

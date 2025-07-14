@@ -145,7 +145,7 @@ impl Experience {
           let text = exp.to_formatted_string(&self.locale);
           let response = Label::new(text).sense(Sense::click()).ui(ui);
           if response.on_hover_text("Click to copy").clicked() {
-            util::set_clipboard_contents(format!("{}", exp));
+            util::set_clipboard_contents(format!("{exp}"));
           }
         }
       });
@@ -260,7 +260,7 @@ impl Experience {
                                 // Half experience returned for un-training.
                                 let exp = exp / 2;
                                 let text = exp.abs().to_formatted_string(&self.locale);
-                                let text = format!("({})", text);
+                                let text = format!("({text})");
                                 (text, exp)
                               } else {
                                 let text = exp.to_formatted_string(&self.locale);

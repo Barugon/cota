@@ -513,10 +513,10 @@ fn get_log_filenames(log_path: &Path, avatar: Option<&str>, timestamp: Option<i6
   };
 
   for entry in entries.flatten() {
-    if let Some(filename) = entry.file_name().to_str() {
-      if regex.is_match(filename) {
-        filenames.push(filename.into());
-      }
+    if let Some(filename) = entry.file_name().to_str()
+      && regex.is_match(filename)
+    {
+      filenames.push(filename.into());
     }
   }
 
@@ -536,18 +536,18 @@ fn log_datetime_to_timestamp(text: &str, date: NaiveDate) -> Option<i64> {
   let mut iter = time.split(':');
   let hour = {
     let mut hour = iter.next()?.parse().ok()?;
-    if let Some(ap) = ap {
-      if let Some(ch) = ap.chars().next() {
-        if ch == 'P' || ch == 'p' {
-          // 12pm stays 12.
-          if hour < 12 {
-            // Add 12 to the hour.
-            hour += 12;
-          }
-        } else if hour == 12 {
-          // 12am becomes 0.
-          hour = 0;
+    if let Some(ap) = ap
+      && let Some(ch) = ap.chars().next()
+    {
+      if ch == 'P' || ch == 'p' {
+        // 12pm stays 12.
+        if hour < 12 {
+          // Add 12 to the hour.
+          hour += 12;
         }
+      } else if hour == 12 {
+        // 12am becomes 0.
+        hour = 0;
       }
     }
     hour

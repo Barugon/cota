@@ -68,12 +68,13 @@ impl Config {
   }
 
   pub fn set_log_path(&mut self, path: &Path) {
-    if let Some(path) = path.to_str() {
-      self.storage.set(Config::LOG_PATH_KEY, path.to_owned());
-      self.storage.persist();
-    } else {
+    let Some(path) = path.to_str() else {
       println!("Invalid unicode in path: {path:?}");
-    }
+      return;
+    };
+
+    self.storage.set(Config::LOG_PATH_KEY, path.to_owned());
+    self.storage.persist();
   }
 
   pub fn get_save_game_path(&self) -> Option<PathBuf> {
@@ -85,12 +86,13 @@ impl Config {
   }
 
   pub fn set_save_game_path(&mut self, path: &Path) {
-    if let Some(path) = path.to_str() {
-      self.storage.set(Config::SAVE_PATH_KEY, path.to_owned());
-      self.storage.persist();
-    } else {
+    let Some(path) = path.to_str() else {
       println!("Invalid unicode in path: {path:?}");
-    }
+      return;
+    };
+
+    self.storage.set(Config::SAVE_PATH_KEY, path.to_owned());
+    self.storage.persist();
   }
 
   pub fn get_stats_avatar(&self) -> Option<String> {

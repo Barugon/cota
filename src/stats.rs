@@ -140,24 +140,23 @@ impl Stats {
       self.request_avatars(ui.ctx());
     }
 
-    if !self.filter_dlg.show(ui.ctx()) {
-      if let Some(search) = self.filter_dlg.take_search_term() {
-        self.filter = StatsFilter::Search { search };
-      }
+    if !self.filter_dlg.show(ui.ctx())
+      && let Some(search) = self.filter_dlg.take_search_term()
+    {
+      self.filter = StatsFilter::Search { search };
     }
 
-    if !self.search_dlg.show(ui.ctx()) {
-      if let Some(search) = self.search_dlg.take_search_term() {
-        self.search_logs(ui.ctx(), search);
-      }
+    if !self.search_dlg.show(ui.ctx())
+      && let Some(search) = self.search_dlg.take_search_term()
+    {
+      self.search_logs(ui.ctx(), search);
     }
 
-    if !self.notes_dlg.show(ui.ctx()) {
-      if let Some(text) = self.notes_dlg.take_text() {
-        if !self.avatar.is_empty() {
-          self.config.set_notes(&self.avatar, text);
-        }
-      }
+    if !self.notes_dlg.show(ui.ctx())
+      && let Some(text) = self.notes_dlg.take_text()
+      && !self.avatar.is_empty()
+    {
+      self.config.set_notes(&self.avatar, text);
     }
 
     self.log_dlg.show(ui.ctx());
@@ -173,10 +172,10 @@ impl Stats {
           // Determine the current avatar.
           if let Some(first) = self.avatars.first() {
             // Check if the avatar is in the configuration.
-            if let Some(avatar) = self.config.get_stats_avatar() {
-              if self.avatars.binary_search(&avatar).is_ok() {
-                self.avatar = avatar;
-              }
+            if let Some(avatar) = self.config.get_stats_avatar()
+              && self.avatars.binary_search(&avatar).is_ok()
+            {
+              self.avatar = avatar;
             }
 
             // If the avatar wasn't set then use the first avatar.
@@ -519,28 +518,28 @@ impl Stats {
       cancel.cancel();
     }
 
-    if let Some(date) = self.date {
-      if !self.avatar.is_empty() {
-        let cancel = Cancel::default();
-        self.channel.cancel_stats = Some(cancel.clone());
+    if let Some(date) = self.date
+      && !self.avatar.is_empty()
+    {
+      let cancel = Cancel::default();
+      self.channel.cancel_stats = Some(cancel.clone());
 
-        // Show the busy cursor.
-        self.state.set_busy(true);
+      // Show the busy cursor.
+      self.state.set_busy(true);
 
-        // Setup the future.
-        let tx = self.channel.tx.clone();
-        let ctx = ctx.clone();
-        let future = log_data::get_stats(self.log_path.clone(), self.avatar.clone(), date, cancel);
-        let future = async move {
-          let msg = Message::Stats(future.await);
-          tx.unbounded_send(msg).unwrap();
-          ctx.request_repaint();
-        };
+      // Setup the future.
+      let tx = self.channel.tx.clone();
+      let ctx = ctx.clone();
+      let future = log_data::get_stats(self.log_path.clone(), self.avatar.clone(), date, cancel);
+      let future = async move {
+        let msg = Message::Stats(future.await);
+        tx.unbounded_send(msg).unwrap();
+        ctx.request_repaint();
+      };
 
-        // Execute the future on a pooled thread.
-        self.threads.spawn_ok(future);
-        return;
-      }
+      // Execute the future on a pooled thread.
+      self.threads.spawn_ok(future);
+      return;
     }
 
     self.state.set_busy(false);

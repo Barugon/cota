@@ -42,38 +42,40 @@ impl Farming {
       move || loop {
         let mut lock = timers.lock().unwrap();
         for plant in lock.iter_mut() {
-          if plant.check() {
-            // Popup a desktop notification.
-            let summary = match plant.current_event() {
-              Event::None => Default::default(),
-              Event::Water => "Water Plants",
-              Event::Harvest => "Harvest Plants",
-            };
-            if !summary.is_empty() {
-              let name = plant.seed_name();
-              let env = plant.environment();
-              let desc = plant.description();
-              let body = if desc.is_empty() {
-                format!("{name} | {env:?}")
-              } else {
-                format!("{name} | {env:?} | {desc}")
-              };
-
-              match Notification::new().summary(summary).body(&body).show() {
-                Ok(handle) => {
-                  // Discarding the handle closes the notification on Wayland, so keep it around until the next notification.
-                  _notification = Some(handle);
-                }
-                Err(err) => println!("{err:?}"),
-              };
-            }
-
-            // Flag that the timers need to be persisted.
-            persist.store(true, Ordering::Relaxed);
-
-            // Repaint.
-            ctx.request_repaint();
+          if !plant.check() {
+            continue;
           }
+
+          // Popup a desktop notification.
+          let summary = match plant.current_event() {
+            Event::None => Default::default(),
+            Event::Water => "Water Plants",
+            Event::Harvest => "Harvest Plants",
+          };
+          if !summary.is_empty() {
+            let name = plant.seed_name();
+            let env = plant.environment();
+            let desc = plant.description();
+            let body = if desc.is_empty() {
+              format!("{name} | {env:?}")
+            } else {
+              format!("{name} | {env:?} | {desc}")
+            };
+
+            match Notification::new().summary(summary).body(&body).show() {
+              Ok(handle) => {
+                // Discarding the handle closes the notification on Wayland, so keep it around until the next notification.
+                _notification = Some(handle);
+              }
+              Err(err) => println!("{err:?}"),
+            };
+          }
+
+          // Flag that the timers need to be persisted.
+          persist.store(true, Ordering::Relaxed);
+
+          // Repaint.
+          ctx.request_repaint();
         }
 
         // Unlock the mutex.
@@ -104,11 +106,11 @@ impl Farming {
   }
 
   pub fn show(&mut self, ui: &mut Ui) {
-    if !self.plant_dlg.show(ui.ctx()) {
-      if let Some(plant_info) = self.plant_dlg.take_result() {
-        self.timers.lock().unwrap().push(plant_info);
-        self.persist.store(true, Ordering::Relaxed);
-      }
+    if !self.plant_dlg.show(ui.ctx())
+      && let Some(plant_info) = self.plant_dlg.take_result()
+    {
+      self.timers.lock().unwrap().push(plant_info);
+      self.persist.store(true, Ordering::Relaxed);
     }
 
     // Tool bar.
