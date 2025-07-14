@@ -43,13 +43,14 @@ fn main() {
   };
 
   let viewport = ViewportBuilder::default()
-    .with_resizable(false)
-    .with_maximize_button(false)
+    .with_app_id(APP_NAME)
+    .with_icon(icon)
     .with_inner_size(App::inner_window_size())
     .with_max_inner_size(App::inner_window_size())
+    .with_maximize_button(false)
     .with_min_inner_size(App::inner_window_size())
-    .with_title(APP_TITLE)
-    .with_icon(icon);
+    .with_resizable(false)
+    .with_title(APP_TITLE);
 
   let options = eframe::NativeOptions {
     viewport,
