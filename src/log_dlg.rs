@@ -1,6 +1,6 @@
 use crate::util::{AppState, Cancel};
 use eframe::{
-  egui::{Context, Key, RichText, ScrollArea, TextEdit, Ui, Window, scroll_area::ScrollBarVisibility},
+  egui::{Context, Key, RichText, ScrollArea, TextBuffer, TextEdit, Ui, Window, scroll_area::ScrollBarVisibility},
   emath::Align2,
   epaint::{Color32, text::LayoutJob},
 };
@@ -64,7 +64,7 @@ impl LogDlg {
             .show(ui, |ui| {
               ui.add_sized(
                 ui.available_size(),
-                TextEdit::multiline(&mut text).layouter(&mut |ui: &Ui, _text: &str, wrap: f32| {
+                TextEdit::multiline(&mut text).layouter(&mut |ui: &Ui, _text: &dyn TextBuffer, wrap: f32| {
                   let mut layout_job = layout_job.clone();
                   layout_job.wrap.max_width = wrap;
                   ui.fonts(|fonts| fonts.layout_job(layout_job))

@@ -5,7 +5,7 @@ use crate::{
 };
 use chrono::{Local, NaiveDate, NaiveTime, Timelike};
 use eframe::{
-  egui::{ComboBox, Context, DragValue, Key, PointerButton, RichText, ScrollArea, TextEdit, Window},
+  egui::{ComboBox, Context, DragValue, Key, PointerButton, RichText, ScrollArea, TextEdit, UiKind, Window},
   emath::Align2,
   epaint::Color32,
 };
@@ -177,7 +177,7 @@ impl PlantDlg {
                     response.context_menu(|ui| {
                       if ui.button("Remove").clicked() {
                         remove = Some(text.to_owned());
-                        ui.close_menu();
+                        ui.close_kind(UiKind::Menu);
                       }
                     });
 
