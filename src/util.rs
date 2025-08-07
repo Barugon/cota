@@ -108,7 +108,7 @@ impl Picture {
     texture.as_ref().unwrap().id()
   }
 
-  pub fn image(&self, ctx: &Context) -> Image {
+  pub fn image(&self, ctx: &Context) -> Image<'_> {
     Image::new((self.texture_id(ctx), self.size))
   }
 }

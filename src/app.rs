@@ -142,48 +142,49 @@ impl App {
           repeat,
           modifiers,
         } = event
+          && *pressed
+          && !*repeat
+          && !self.state.is_disabled()
         {
-          if *pressed && !*repeat && !self.state.is_disabled() {
-            match key {
-              Key::Escape if self.page == Page::Stats && !self.stats.filter().is_none() => {
-                self.stats.set_filter(StatsFilter::None);
-                handled = true;
-              }
-              Key::D if modifiers.command_only() && self.page == Page::Stats && !self.stats.avatar().is_empty() => {
-                self.stats.show_dps_dlg();
-                handled = true;
-              }
-              Key::F if modifiers.command_only() && self.page == Page::Stats && !self.stats.stats().is_empty() => {
-                self.stats.show_filter_dlg();
-                handled = true;
-              }
-              Key::L if modifiers.command_only() && self.page == Page::Stats && !self.stats.avatar().is_empty() => {
-                self.stats.show_search_dlg();
-                handled = true;
-              }
-              Key::Q if modifiers.command_only() => {
-                close_status = CloseStatus::Close;
-                handled = true;
-              }
-              Key::R
-                if modifiers.command_only()
-                  && self.page == Page::Stats
-                  && !self.stats.stats().is_empty()
-                  && !self.stats.filter().is_resists() =>
-              {
-                self.stats.set_filter(StatsFilter::Resists);
-                handled = true;
-              }
-              Key::S if modifiers.command_only() && self.offline.changed() => {
-                self.offline.store();
-                handled = true;
-              }
-              Key::F5 if self.page == Page::Stats => {
-                self.stats.reload(ctx);
-                handled = true;
-              }
-              _ => (),
+          match key {
+            Key::Escape if self.page == Page::Stats && !self.stats.filter().is_none() => {
+              self.stats.set_filter(StatsFilter::None);
+              handled = true;
             }
+            Key::D if modifiers.command_only() && self.page == Page::Stats && !self.stats.avatar().is_empty() => {
+              self.stats.show_dps_dlg();
+              handled = true;
+            }
+            Key::F if modifiers.command_only() && self.page == Page::Stats && !self.stats.stats().is_empty() => {
+              self.stats.show_filter_dlg();
+              handled = true;
+            }
+            Key::L if modifiers.command_only() && self.page == Page::Stats && !self.stats.avatar().is_empty() => {
+              self.stats.show_search_dlg();
+              handled = true;
+            }
+            Key::Q if modifiers.command_only() => {
+              close_status = CloseStatus::Close;
+              handled = true;
+            }
+            Key::R
+              if modifiers.command_only()
+                && self.page == Page::Stats
+                && !self.stats.stats().is_empty()
+                && !self.stats.filter().is_resists() =>
+            {
+              self.stats.set_filter(StatsFilter::Resists);
+              handled = true;
+            }
+            Key::S if modifiers.command_only() && self.offline.changed() => {
+              self.offline.store();
+              handled = true;
+            }
+            Key::F5 if self.page == Page::Stats => {
+              self.stats.reload(ctx);
+              handled = true;
+            }
+            _ => (),
           }
         }
       }

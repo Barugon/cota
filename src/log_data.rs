@@ -22,7 +22,7 @@ pub struct StatsIter<'a> {
 }
 
 impl StatsIter<'_> {
-  fn new(text: &str) -> StatsIter {
+  fn new(text: &str) -> StatsIter<'_> {
     StatsIter {
       iter: text.split_whitespace(),
     }
